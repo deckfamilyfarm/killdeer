@@ -2,7 +2,7 @@
 
 The Killdeer symbolizes resilience, adaptability, and steady growth — traits we believe are essential for successful farm management. Like the bird, this system is built to thrive across changing landscapes while staying deeply connected to the land.
 
-This repository maintains code for managing local line and square connections, member subscriptions, as well as inventory management.
+This repository maintains code for managing localline and square connections, member subscriptions, as well as inventory management.
 
 ```
 npm install
