@@ -4,6 +4,8 @@ The Killdeer symbolizes resilience, adaptability, and steady growth — traits w
 
 This repository maintains code for managing localline and square connections, member subscriptions, as well as inventory management.
 
+Be sure you have `.env.production` files installed
+
 ```
 npm install
 npm start
