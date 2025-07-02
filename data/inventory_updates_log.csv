@@ -97,3 +97,103 @@ id,productName,packageName,visible,track_inventory,stock_inventory,timestamp
 76,Lamb Stew,0.90 - 1.10 lbs,true,true,16,2025-05-22T23:06:54.497Z
 133,"CRX Roaster, Extra Large","Extra Large, 5.00 - 6.00 lbs",true,true,15,2025-05-22T23:18:35.075Z108,"Rendered Beef Tallow, 16 oz",16 oz,false,false,0,2025-05-22T23:18:35.077Z
 
+23,Beef Oxtail,1.40 - 1.90 lbs,true,true,3,2025-05-29T23:34:33.408Z34,Beef Tongue,2.50 - 3.00 lbs,true,true,4,2025-05-29T23:34:33.424Z15,Beef Flat Iron Steak,0.70 - 1.10 lbs,false,false,0,2025-05-29T23:34:33.426Z12,"Brisket, Large","Large, 4.00 - 5.00 lbs",false,false,0,2025-05-29T23:34:33.428Z11,"Brisket, Medium","Medium, 3.00 - 3.99 lbs",true,true,11,2025-05-29T23:34:33.430Z7,Beef Back Ribs,3.00 - 3.80 lbs,true,true,6,2025-05-29T23:34:33.432Z
+
+
+
+
+
+10,"Brisket, Small","Small, 2.30 - 2.99 lbs",true,true,3,2025-05-29T23:34:33.907Z
+26,Korean Style Beef Ribs,1.20 - 1.40 lbs,true,true,2,2025-05-29T23:34:33.912Z
+13,Chuck roast,2.30 - 2.90 lbs,true,true,12,2025-05-29T23:34:33.934Z25,Ribeye Steak,0.80 - 1.10 lbs,true,true,12,2025-05-29T23:34:33.937Z
+
+117,Bulk Thai Curry Sausage,12 oz,true,true,2,2025-05-29T23:34:33.941Z35,Top Sirloin Steak,1.30 - 1.60 lbs,true,true,17,2025-05-29T23:34:33.943Z
+
+128,Chorizo Verde,4 links/ pack 14 oz pack,true,true,6,2025-05-29T23:34:34.406Z
+112,Farm Made Chorizo Sausage Links,4 links/ pack 14 oz pack,true,true,2,2025-05-29T23:34:34.434Z
+115,Hot Italian Sausage Links,4 links/ pack 14 oz pack,true,true,10,2025-05-29T23:34:34.438Z
+123,"Rendered Pork Leaf Lard, 16 oz",16 oz,true,false,0,2025-05-29T23:34:34.441Z
+124,"Rendered Pork Leaf Lard, 8 oz",8 oz,true,false,0,2025-05-29T23:34:34.485Z
+0,"Pork Chop, Bone-in",1.20 - 1.50 lbs,true,true,7,2025-05-29T23:34:34.489Z
+57,"Chicken Part, Wings",1.50 - 2.00,true,false,0,2025-05-29T23:34:34.886Z47,Pork Spare Ribs,2.00 - 3.00 lbs,false,false,0,2025-05-29T23:34:34.888Z
+
+56,"Chicken Part, Hindquarter",1.00 - 1.50 lbs,true,false,0,2025-05-29T23:34:34.973Z
+54,"Chicken Part, Breast, Bone-In",1.00 - 2.00 lbs,true,false,0,2025-05-29T23:34:35.024Z70,Lamb Kabob,1.1 - 1.35,false,false,0,2025-05-29T23:34:35.026Z
+
+131,Lamb Heart,"2 pack, 0.8 - 1.1 lbs	",false,false,0,2025-05-29T23:34:35.061Z
+76,Lamb Stew,0.90 - 1.10 lbs,true,false,0,2025-05-29T23:34:35.397Z
+34,Beef Tongue,2.50 - 3.00 lbs,true,true,4,2025-05-29T23:39:05.561Z1,"Raw Honey, 1/2 pint",1/2 pint,true,false,0,2025-05-29T23:39:05.564Z2,"Raw Honey, 1 pint",1 pint,true,false,0,2025-05-29T23:39:05.566Z
+
+
+13,Chuck roast,2.30 - 2.90 lbs,false,false,0,2025-06-05T23:47:26.576Z34,Beef Tongue,2.50 - 3.00 lbs,true,true,3,2025-06-05T23:47:26.577Z23,Beef Oxtail,1.40 - 1.90 lbs,true,true,1,2025-06-05T23:47:26.579Z
+
+
+7,Beef Back Ribs,3.00 - 3.80 lbs,true,true,4,2025-06-05T23:47:26.656Z
+11,"Brisket, Medium","Medium, 3.00 - 3.99 lbs",true,true,10,2025-06-05T23:47:26.675Z
+10,"Brisket, Small","Small, 2.30 - 2.99 lbs",true,true,2,2025-06-05T23:47:26.704Z
+26,Korean Style Beef Ribs,1.20 - 1.40 lbs,false,false,0,2025-06-05T23:47:27.149Z
+25,Ribeye Steak,0.80 - 1.10 lbs,true,true,4,2025-06-05T23:47:27.156Z22,New York Steak,0.50 - 0.90 lbs,true,true,4,2025-06-05T23:47:27.160Z
+
+35,Top Sirloin Steak,1.30 - 1.60 lbs,true,true,11,2025-06-05T23:47:27.214Z
+128,Chorizo Verde,4 links/ pack 14 oz pack,true,true,5,2025-06-05T23:47:27.259Z
+117,Bulk Thai Curry Sausage,12 oz,true,true,5,2025-06-05T23:47:27.332Z
+112,Farm Made Chorizo Sausage Links,4 links/ pack 14 oz pack,true,true,4,2025-06-05T23:47:27.712Z
+115,Hot Italian Sausage Links,4 links/ pack 14 oz pack,true,false,0,2025-06-05T23:47:27.737Z
+108,"Rendered Beef Tallow, 16 oz",16 oz,true,false,0,2025-06-05T23:47:27.743Z
+107,"Rendered Beef Tallow, 8 oz",8 oz,true,false,0,2025-06-05T23:47:27.928Z
+39,Baby Back Ribs,0.90 - 1.50 lbs,true,true,6,2025-06-05T23:47:27.931Z
+116,Thai Curry Sausage Links,4 links/ pack 14 oz pack,true,true,12,2025-06-05T23:47:28.041Z
+0,"Pork Chop, Bone-in",1.20 - 1.50 lbs,true,true,6,2025-06-05T23:47:28.164Z
+131,Lamb Heart,"2 pack, 0.8 - 1.1 lbs	",true,false,5,2025-06-05T23:47:28.231Z
+19,Beef Heart,2.50 - 3.5 lbs,true,true,2,2025-06-13T00:32:37.209Z23,Beef Oxtail,1.40 - 1.90 lbs,false,false,0,2025-06-13T00:32:37.212Z7,Beef Back Ribs,3.00 - 3.80 lbs,true,true,3,2025-06-13T00:32:37.214Z27,Beef Short Rib,1.30 - 2.10 lbs,true,true,10,2025-06-13T00:32:37.217Z
+
+
+
+13,Chuck roast,2.30 - 2.90 lbs,true,true,14,2025-06-13T00:32:37.264Z
+22,New York Steak,0.50 - 0.90 lbs,true,true,4,2025-06-13T00:32:37.293Z
+112,Farm Made Chorizo Sausage Links,4 links/ pack 14 oz pack,false,false,0,2025-06-13T00:32:37.741Z
+128,Chorizo Verde,4 links/ pack 14 oz pack,true,true,4,2025-06-13T00:32:37.799Z
+116,Thai Curry Sausage Links,4 links/ pack 14 oz pack,true,false,0,2025-06-13T00:32:37.822Z
+117,Bulk Thai Curry Sausage,12 oz,true,false,0,2025-06-13T00:32:37.873Z
+35,Top Sirloin Steak,1.30 - 1.60 lbs,true,true,10,2025-06-13T00:32:37.919Z
+39,Baby Back Ribs,0.90 - 1.50 lbs,true,true,9,2025-06-13T00:32:38.130Z
+0,"Pork Chop, Bone-in",1.20 - 1.50 lbs,false,false,0,2025-06-13T00:32:38.317Z133,"CRX Roaster, Extra Large","Extra Large, 5.00 - 6.00 lbs",true,true,9,2025-06-13T00:32:38.319Z
+
+70,Lamb Kabob,1.1 - 1.35,true,true,7,2025-06-13T00:32:38.321Z
+59,"CRX Roaster, Medium","Medium, 3.20 - 4.20 lbs",false,false,0,2025-06-13T00:32:38.424Z
+60,"CRX Roaster, Large","Large, 4.21 - 4.99 lbs",true,true,18,2025-06-13T00:32:38.438Z
+76,Lamb Stew,0.90 - 1.10 lbs,true,false,0,2025-06-13T00:32:38.651Z
+131,Lamb Heart,"2 pack, 0.8 - 1.1 lbs	",true,true,5,2025-06-13T00:37:38.921Z
+64,Turkey Feet,2 lb bag,false,false,0,2025-06-13T00:37:38.926Z
+11,"Brisket, Medium","Medium, 3.00 - 3.99 lbs",false,false,0,2025-06-13T00:46:34.296Z
+35,Top Sirloin Steak,1.30 - 1.60 lbs,false,false,0,2025-06-19T15:34:08.183Z
+70,Lamb Kabob,1.1 - 1.35,true,true,1,2025-06-19T21:51:13.017Z128,Chorizo Verde,4 links/ pack 14 oz pack,true,true,3,2025-06-19T21:51:13.020Z131,Lamb Heart,"2 pack, 0.8 - 1.1 lbs	",true,true,3,2025-06-19T21:51:13.021Z133,"CRX Roaster, Extra Large","Extra Large, 5.00 - 6.00 lbs",false,false,0,2025-06-19T21:51:13.023Z11,"Brisket, Medium","Medium, 3.00 - 3.99 lbs",true,true,5,2025-06-19T21:51:13.024Z39,Baby Back Ribs,0.90 - 1.50 lbs,true,true,7,2025-06-19T21:51:13.025Z
+
+
+
+
+
+7,Beef Back Ribs,3.00 - 3.80 lbs,true,true,1,2025-06-19T21:51:13.508Z
+22,New York Steak,0.50 - 0.90 lbs,false,false,0,2025-06-19T21:51:13.554Z
+60,"CRX Roaster, Large","Large, 4.21 - 4.99 lbs",false,false,0,2025-06-19T21:51:13.558Z
+13,Chuck roast,2.30 - 2.90 lbs,true,true,9,2025-06-19T21:51:13.602Z
+34,Beef Tongue,2.50 - 3.00 lbs,true,true,2,2025-06-19T21:51:13.623Z
+19,Beef Heart,2.50 - 3.5 lbs,false,false,2,2025-06-27T04:20:08.699Z27,Beef Short Rib,1.30 - 2.10 lbs,true,true,2,2025-06-27T04:20:08.701Z32,Beef Tenderloin,0.40 - 0.70 lbs,false,false,0,2025-06-27T04:20:08.703Z11,"Brisket, Medium","Medium, 3.00 - 3.99 lbs",true,true,1,2025-06-27T04:20:08.704Z
+
+
+
+13,Chuck roast,2.30 - 2.90 lbs,true,false,9,2025-06-27T04:20:08.782Z10,"Brisket, Small","Small, 2.30 - 2.99 lbs",true,true,1,2025-06-27T04:20:08.784Z
+
+25,Ribeye Steak,0.80 - 1.10 lbs,true,false,4,2025-06-27T04:20:09.257Z26,Korean Style Beef Ribs,1.20 - 1.40 lbs,true,false,0,2025-06-27T04:20:09.259Z
+
+22,New York Steak,0.50 - 0.90 lbs,true,false,0,2025-06-27T04:20:09.261Z
+35,Top Sirloin Steak,1.30 - 1.60 lbs,true,false,0,2025-06-27T04:20:09.430Z
+128,Chorizo Verde,4 links/ pack 14 oz pack,false,false,3,2025-06-27T04:20:09.571Z
+39,Baby Back Ribs,0.90 - 1.50 lbs,true,true,5,2025-06-27T04:20:09.609Z
+60,"CRX Roaster, Large","Large, 4.21 - 4.99 lbs",true,false,0,2025-06-27T04:20:09.664Z
+59,"CRX Roaster, Medium","Medium, 3.20 - 4.20 lbs",true,false,0,2025-06-27T04:20:09.927Z
+70,Lamb Kabob,1.1 - 1.35,false,false,1,2025-06-27T04:20:10.084Z
+76,Lamb Stew,0.90 - 1.10 lbs,true,true,5,2025-06-27T04:20:10.126Z
+32,Beef Tenderloin,0.40 - 0.70 lbs,true,false,0,2025-06-27T04:25:21.039Z11,"Brisket, Medium","Medium, 3.00 - 3.99 lbs",true,true,5,2025-06-27T04:25:21.041Z10,"Brisket, Small","Small, 2.30 - 2.99 lbs",true,true,5,2025-06-27T04:25:21.042Z
+
+

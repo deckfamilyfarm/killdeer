@@ -13,7 +13,7 @@ const tokenManager = require("../src/utils/tokenManager");
 (async () => {
 	try {
 		// TODO: obtain modification date in pricelist table and just select those that have been modified
-		const sql = "SELECT * FROM pricelist where available_on_ll is true and dateModified > '2025-05-20'"
+		const sql = "SELECT * FROM pricelist where available_on_ll is true and dateModified > '2025-05-30'"
 		const [rows] = await utilities.db.query(sql);
 		const accessToken = await tokenManager.getValidAccessToken();
 
