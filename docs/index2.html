@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Inventory</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="script.js"></script>
+    <style src="style.css"></style>
+</head>
+
+<body>
+    <form onsubmit="event.preventDefault(); login();" style="float: right;">
+        <input type="text" id="username" placeholder="Username" required>
+        <input type="password" id="password" placeholder="Password" required>
+        <button type="submit">Login</button>
+        <button type="button" onclick="logout()">Logout</button>
+    </form>
+
+    <h2>Deck Family Farm Product Inventory</h2>
+    <label for="categoryFilter">Filter by Category: </label>
+    <select id="categoryFilter" onchange="filterCategory()">
+        <option value="all">All Categories</option>
+    </select>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Category</th>
+                <th>Product Name</th>
+                <th>Package Name</th>
+                <th>Description</th>
+                <th>Visible</th>
+                <th>Track Inventory</th>
+                <th>Stock Inventory</th>
+                <th>
+                    <button class="apply-button" id="applyChanges" onclick="applyChanges()" disabled>Apply
+                        Changes</button>
+                </th>
+            </tr>
+        </thead>
+        <tbody id="tableBody">
+            <!-- Data will be populated dynamically here -->
+        </tbody>
+    </table>
+</body>
+</html>

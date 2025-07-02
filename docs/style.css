@@ -1,0 +1,127 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+    /* Ensures columns respect their widths */
+}
+
+th,
+td {
+    padding: 8px;
+    text-align: left;
+    border: 1px solid #ddd;
+}
+
+th:nth-child(4),
+td:nth-child(4) {
+    /* 4th column is Description */
+    width: 30%;
+    /* Makes Description wider */
+}
+
+th {
+    background-color: #f4f4f4;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+button {
+    cursor: pointer;
+    padding: 8px 12px;
+    margin: 5px;
+}
+
+.toggle-switch {
+    cursor: pointer;
+    display: inline-block;
+    width: 40px;
+    height: 20px;
+    background-color: #ccc;
+    border-radius: 10px;
+    position: relative;
+}
+
+.toggle-switch::before {
+    content: "";
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background-color: white;
+    top: 1px;
+    left: 1px;
+    transition: 0.3s;
+}
+
+.toggle-switch.active {
+    background-color: #4CAF50;
+}
+
+.toggle-switch.active::before {
+    left: 20px;
+}
+
+.stock-input {
+    width: 60px;
+    text-align: center;
+    border: none;
+    background: transparent;
+}
+
+.editable {
+    background: white;
+    border: 1px solid #ddd;
+}
+
+/* Highlight edited rows */
+tr.edited {
+    background-color: #fffbe6;
+    /* Light yellow */
+}
+
+/* Apply Changes button in header */
+.apply-button {
+    font-size: 14px;
+    font-weight: bold;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    float: right;
+}
+
+.apply-button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+.editable-input,
+.editable-textarea {
+    width: 100%;
+    border: 1px solid #ddd;
+    background: #fff;
+    padding: 5px;
+    font-size: 14px;
+    resize: none;
+}
+
+.editable-textarea {
+    width: 100%;
+    min-height: 40px;
+    max-height: 150px;
+    resize: none;
+    line-height: 1.5;
+}
+
+
+.editable-input:focus {
+    background: #f9f9f9;
+    outline: none;
+    border-bottom: 2px solid #4CAF50;
+}

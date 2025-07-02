@@ -4,8 +4,8 @@
 # and then execute particular node scripts
 
 # use NVM to get latest node
-export NVM_DIR=$HOME/.nvm;
-source $NVM_DIR/nvm.sh;
+#export NVM_DIR=$HOME/.nvm;
+#source $NVM_DIR/nvm.sh;
 
 # Change to the current location
 cd "$(dirname "$0")"
@@ -30,8 +30,8 @@ node "$node_script" >> output.log 2>&1
 
 # Run github push when subscriptions file is run...
 echo $1
-if [ "$1" == "exportPricelistForViewing.js" ]; then
-  if [[ -n $(git status -s docs/masterPriceList.xlsx) ]]; then
+if [ "$1" == "export_master_pricelist.js" ]; then
+  if [[ -n $(git status -s ../docs/masterPriceList.xlsx) ]]; then
     git add ../docs/masterPriceList.xlsx
     git commit -m "Updating masterPriceList"
     git push

@@ -1,0 +1,294 @@
+id,productName,packageName,visible,track_inventory,stock_inventory,timestamp
+7,Beef Back Ribs,3.00 - 3.80 lbs,false,true,0,2025-02-18T00:05:28.075Z
+35,Top Sirloin Steak,1.30 - 1.60 lbs,true,true,0,2025-02-18T00:05:28.094Z
+30,"Skirt Steak, Large","Large, .80 - 1.40 lbs",false,true,0,2025-02-18T00:05:28.104Z
+22,New York Steak,0.50 - 0.90 lbs,true,true,0,2025-02-18T00:05:28.273Z
+26,Korean Style Beef Ribs,1.20 - 1.40 lbs,true,false,0,2025-02-18T00:05:28.386Z
+25,Ribeye Steak,0.80 - 1.10 lbs,true,true,0,2025-02-18T00:05:28.459Z
+116,Thai Curry Sausage Links,4 links/ pack 14 oz pack,true,true,12,2025-02-18T00:05:29.184Z
+67,"Lamb Chops, 2 pack","2 pack, 0.70 - 1.10 lbs",false,true,0,2025-02-18T00:05:29.242Z
+48,Pork Tenderloin,0.80 - 1.30 lbs,true,false,8,2025-02-18T00:05:29.308Z
+15,Beef Flat Iron Steak,0.70 - 1.10 lbs,true,true,3,2025-02-18T00:05:29.638Z
+20,Beef Kidney,0.80 - 1.00 lbs,true,true,10,2025-02-18T00:05:29.686Z
+9,Beef Marrow Bones,3.00 - 5.00 lbs,false,false,0,2025-02-18T00:05:29.782Z
+23,Beef Oxtail,1.40 - 1.90 lbs,false,true,0,2025-02-18T00:05:30.324Z
+36,Beef Tri-Tip,1.90 - 2.20 lbs,false,true,0,2025-02-18T00:05:30.411Z
+12,"Brisket, Large","Large, 4.30 - 4.90 lbs",true,false,4,2025-02-18T00:05:30.913Z
+14,Flank Steak,1.10 - 1.40 lbs,false,true,0,2025-02-18T00:05:30.916Z
+10,"Brisket, Small","Small, 2.30 - 2.99 lbs",true,false,6,2025-02-18T00:05:30.972Z
+24,Hamburger Patties,1.00 lbs,false,true,0,2025-02-18T00:05:31.000Z
+18,Hanger Steak,0.40 - 0.50 lbs,false,true,2,2025-02-18T00:05:31.271Z
+9,Beef Marrow Bones,3.00 - 5.00 lbs,false,false,0,2025-02-18T02:33:53.209Z
+35,Top Sirloin Steak,1.30 - 1.60 lbs,true,false,0,2025-02-18T03:01:11.247Z
+22,New York Steak,0.50 - 0.90 lbs,true,false,0,2025-02-18T03:01:11.288Z
+12,"Brisket, Large","Large, 4.30 - 4.90 lbs",true,true,4,2025-02-18T03:01:11.324Z
+25,Ribeye Steak,0.80 - 1.10 lbs,true,false,0,2025-02-18T03:01:11.340Z
+10,"Brisket, Small","Small, 2.30 - 2.99 lbs",true,true,6,2025-02-18T03:01:11.349Z
+48,Pork Tenderloin,0.80 - 1.30 lbs,true,true,8,2025-02-18T03:01:11.359Z
+7,Beef Back Ribs,3.00 - 3.80 lbs,false,true,0,2025-02-18T14:42:54.765Z
+9,Beef Marrow Bones,3.00 - 5.00 lbs,true,true,8,2025-02-21T01:24:38.772Z
+20,Beef Kidney,0.80 - 1.00 lbs,false,true,10,2025-02-21T01:24:38.837Z
+15,Beef Flat Iron Steak,0.70 - 1.10 lbs,false,true,3,2025-02-21T01:24:38.844Z
+19,Beef Heart,2.50 - 3.5 lbs,true,true,4,2025-02-21T01:24:38.893Z
+27,Beef Short Rib,1.30 - 2.10 lbs,true,true,5,2025-02-21T01:24:39.107Z
+31,Beef Stew Meat,0.90 - 1.10 lbs,true,false,20,2025-02-21T01:24:39.130Z
+12,"Brisket, Large","Large, 4.30 - 4.90 lbs",true,true,8,2025-02-21T01:24:40.001Z
+36,Beef Tri-Tip,1.90 - 2.20 lbs,true,true,1,2025-02-21T01:24:40.070Z
+34,Beef Tongue,2.50 - 3.00 lbs,true,false,0,2025-02-21T01:24:40.082Z
+11,"Brisket, Medium","Medium, 3.00 - 3.90 lbs",true,false,0,2025-02-21T01:24:40.127Z
+10,"Brisket, Small","Small, 2.30 - 2.99 lbs",true,true,12,2025-02-21T01:24:40.553Z
+13,Chuck roast,2.30 - 2.90 lbs,false,false,0,2025-02-21T01:24:41.283Z
+33,Teres Major Steak,0.40 - 0.70 lbs,false,true,4,2025-02-21T01:24:41.354Z
+25,Ribeye Steak,0.80 - 1.10 lbs,true,true,17,2025-02-21T01:24:41.380Z
+109,Blueberry Maple Sausage Links,4 links/ pack 14 oz pack,true,false,8,2025-02-21T01:24:41.498Z
+17,Organic Ground Beef,1 lbs,true,false,0,2025-02-21T01:24:41.548Z
+22,New York Steak,0.50 - 0.90 lbs,true,true,12,2025-02-21T01:24:41.742Z
+35,Top Sirloin Steak,1.30 - 1.60 lbs,true,true,3,2025-02-21T01:24:42.523Z
+116,Thai Curry Sausage Links,4 links/ pack 14 oz pack,true,true,5,2025-02-21T01:24:42.550Z
+70,Lamb Kabob,0.90 - 1.10 lbs,true,true,8,2025-02-21T01:24:42.652Z
+76,Lamb Stew,0.90 - 1.10 lbs,true,true,4,2025-02-21T01:24:42.725Z
+48,Pork Tenderloin,0.80 - 1.30 lbs,true,true,5,2025-02-21T01:24:42.820Z
+15,Beef Flat Iron Steak,0.70 - 1.10 lbs,false,true,3,2025-02-21T01:24:43.262Z
+20,Beef Kidney,0.80 - 1.00 lbs,false,true,10,2025-02-21T01:24:43.602Z
+9,Beef Marrow Bones,3.00 - 5.00 lbs,true,true,8,2025-02-21T01:24:43.607Z
+19,Beef Heart,2.50 - 3.5 lbs,true,true,4,2025-02-21T01:24:43.609Z
+31,Beef Stew Meat,0.90 - 1.10 lbs,true,false,20,2025-02-21T01:24:43.995Z
+27,Beef Short Rib,1.30 - 2.10 lbs,true,true,5,2025-02-21T01:24:44.325Z
+34,Beef Tongue,2.50 - 3.00 lbs,true,false,0,2025-02-21T01:24:44.614Z
+12,"Brisket, Large","Large, 4.30 - 4.90 lbs",true,true,8,2025-02-21T01:24:44.836Z
+11,"Brisket, Medium","Medium, 3.00 - 3.90 lbs",true,false,0,2025-02-21T01:24:44.921Z
+36,Beef Tri-Tip,1.90 - 2.20 lbs,true,true,1,2025-02-21T01:24:44.946Z
+10,"Brisket, Small","Small, 2.30 - 2.99 lbs",true,true,12,2025-02-21T01:24:45.578Z
+17,Organic Ground Beef,1 lbs,true,false,0,2025-02-21T01:24:45.791Z
+13,Chuck roast,2.30 - 2.90 lbs,false,false,0,2025-02-21T01:24:45.868Z
+22,New York Steak,0.50 - 0.90 lbs,true,true,12,2025-02-21T01:24:46.158Z
+25,Ribeye Steak,0.80 - 1.10 lbs,true,true,17,2025-02-21T01:24:46.210Z
+33,Teres Major Steak,0.40 - 0.70 lbs,false,true,4,2025-02-21T01:24:46.408Z
+35,Top Sirloin Steak,1.30 - 1.60 lbs,true,true,3,2025-02-21T01:24:46.553Z
+109,Blueberry Maple Sausage Links,4 links/ pack 14 oz pack,true,false,8,2025-02-21T01:24:46.847Z
+116,Thai Curry Sausage Links,4 links/ pack 14 oz pack,true,true,5,2025-02-21T01:24:47.063Z
+70,Lamb Kabob,0.90 - 1.10 lbs,true,true,8,2025-02-21T01:24:47.270Z
+48,Pork Tenderloin,0.80 - 1.30 lbs,true,true,5,2025-02-21T01:24:47.532Z
+76,Lamb Stew,0.90 - 1.10 lbs,true,true,4,2025-02-21T01:24:47.542Z
+7,Beef Back Ribs,3.00 - 3.80 lbs,false,false,0,2025-02-22T16:58:02.390Z
+7,Beef Back Ribs,3.00 - 3.80 lbs,false,false,0,2025-02-22T18:26:25.263Z
+7,Beef Back Ribs,3.00 - 3.80 lbs,false,false,0,2025-02-22T18:30:26.650Z
+7,,3.00 - 3.80 lbs,false,false,0,2025-02-22T18:30:26.904Z
+20,Beef Kidney,0.80 - 1.00 lbs,false,true,10,2025-02-22T18:35:58.050Z
+8,Beef Bones,3.00 - 5.00 lbs,true,false,0,2025-02-22T18:35:58.134Z
+8,,3.00 - 5.00 lbs,true,false,0,2025-02-22T18:38:55.077Z
+7,Beef Back Ribs,3.00 - 3.80 lbs,false,false,0,2025-02-23T07:53:25.913Z
+7,Beef Back Ribs,3.00 - 3.80 lbs,false,false,0,2025-02-23T07:53:48.580Z
+19,Beef Heart,2.50 - 3.5 lbs,false,false,4,2025-02-28T00:28:16.178Z7,Beef Back Ribs,3.00 - 3.80 lbs,true,true,5,2025-02-28T00:28:16.178Z22,New York Steak,0.50 - 0.90 lbs,true,true,10,2025-02-28T00:28:16.223Z9,Beef Marrow Bones,3.00 - 5.00 lbs,false,false,8,2025-02-28T00:28:16.209Z
+
+
+
+27,Beef Short Rib,1.30 - 2.10 lbs,false,false,5,2025-02-28T00:28:16.262Z
+36,Beef Tri-Tip,1.90 - 2.20 lbs,false,false,0,2025-02-28T00:28:16.367Z
+124,"Rendered Pork Leaf Lard, 8 oz",8 oz,true,false,0,2025-02-28T00:28:17.285Z
+35,Top Sirloin Steak,1.30 - 1.60 lbs,false,false,0,2025-02-28T00:28:17.345Z
+68,"Lamb Chops, 4 pack","4 pack, 1.1 - 1.50 lbs",true,true,10,2025-02-28T00:28:17.380Z
+109,Blueberry Maple Sausage Links,4 links/ pack 14 oz pack,false,false,8,2025-02-28T00:28:17.413Z
+112,Farm Made Chorizo Sausage Links,4 links/ pack 14 oz pack,true,true,12,2025-02-28T00:28:17.417Z
+116,Thai Curry Sausage Links,4 links/ pack 14 oz pack,true,true,6,2025-02-28T00:28:17.457Z
+70,Lamb Kabob,0.90 - 1.10 lbs,true,true,2,2025-02-28T00:28:18.242Z76,Lamb Stew,0.90 - 1.10 lbs,false,false,0,2025-02-28T00:28:18.245Z
+
+79,"Bacon, Pork",8 oz,false,false,0,2025-02-28T00:28:18.301Z
+56,"Chicken Part, Hindquarter",1.00 - 1.50 lbs,false,false,0,2025-02-28T00:28:18.488Z
+48,Pork Tenderloin,0.80 - 1.30 lbs,true,true,3,2025-02-28T00:28:18.523Z
+14,Flank Steak,1.10 - 1.40 lbs,false,false,0,2025-03-07T00:21:03.267Z25,Ribeye Steak,0.80 - 1.10 lbs,true,true,15,2025-03-07T00:21:03.265Z18,Hanger Steak,0.40 - 0.50 lbs,true,true,1,2025-03-07T00:21:03.316Z
+
+
+22,New York Steak,0.50 - 0.90 lbs,false,false,0,2025-03-07T00:21:03.476Z
+24,Hamburger Patties,1.00 lbs,false,false,0,2025-03-07T00:21:03.500Z
+30,"Skirt Steak, Large","Large, .80 - 1.40 lbs",false,false,0,2025-03-07T00:21:03.518Z
+109,Blueberry Maple Sausage Links,4 links/ pack 14 oz pack,true,false,5,2025-03-07T00:21:04.554Z
+29,"Skirt Steak, Small","Small, 0.40 - 0.79 lbs",false,false,0,2025-03-07T00:21:04.574Z
+33,Teres Major Steak,0.40 - 0.70 lbs,true,true,2,2025-03-07T00:21:04.634Z116,Thai Curry Sausage Links,4 links/ pack 14 oz pack,true,true,12,2025-03-07T00:21:04.636Z
+
+68,"Lamb Chops, 4 pack","4 pack, 1.1 - 1.50 lbs",true,true,15,2025-03-07T00:21:04.713Z
+70,Lamb Kabob,0.90 - 1.10 lbs,true,true,11,2025-03-07T00:21:04.985Z
+54,"Chicken Part, Breast, Bone-In",1.00 - 2.00 lbs,true,true,4,2025-03-07T00:21:05.541Z
+48,Pork Tenderloin,0.80 - 1.30 lbs,false,false,0,2025-03-07T00:21:05.649Z
+79,"Bacon, Pork",8 oz,true,false,0,2025-03-07T00:21:05.918Z
+7,Beef Back Ribs,3.00 - 3.80 lbs,true,true,7,2025-03-07T00:21:05.979Z
+56,"Chicken Part, Hindquarter",1.00 - 1.50 lbs,true,true,2,2025-03-07T00:21:06.118Z
+15,Beef Flat Iron Steak,0.70 - 1.10 lbs,false,false,0,2025-03-07T00:21:06.424Z
+20,Beef Kidney,0.80 - 1.00 lbs,true,true,6,2025-03-07T00:21:06.575Z
+32,Beef Tenderloin,0.40 - 0.70 lbs,false,false,0,2025-03-07T00:21:06.619Z
+19,Beef Heart,2.50 - 3.5 lbs,true,true,4,2025-03-07T00:21:07.146Z
+12,"Brisket, Large","Large, 4.30 - 4.90 lbs",false,true,8,2025-03-07T00:21:07.334Z
+10,"Brisket, Small","Small, 2.30 - 2.99 lbs",false,true,12,2025-03-07T00:21:07.365Z
+13,Chuck roast,2.30 - 2.90 lbs,true,true,3,2025-03-07T00:21:07.481Z
+11,"Brisket, Medium","Medium, 3.00 - 3.90 lbs",false,false,0,2025-03-07T00:21:07.572Z
+23,Beef Oxtail,1.40 - 1.90 lbs,false,false,0,2025-03-07T00:41:26.954Z
+8,Beef Bones,3.00 - 5.00 lbs,true,false,0,2025-03-13T15:07:53.113Z
+69,Ground Lamb,1.00 lbs,true,true,3,2025-03-13T23:00:33.435Z
+68,"Lamb Chops, 4 pack","4 pack, 1.1 - 1.50 lbs",true,true,8,2025-03-13T23:00:33.633Z
+19,Beef Heart,2.50 - 3.5 lbs,false,true,4,2025-03-13T23:00:33.543Z
+67,"Lamb Chops, 2 pack","2 pack, 0.70 - 1.10 lbs",true,false,0,2025-03-13T23:00:33.526Z
+7,Beef Back Ribs,3.00 - 3.80 lbs,true,true,6,2025-03-13T23:00:33.704Z
+70,Lamb Kabob,0.90 - 1.10 lbs,true,false,11,2025-03-13T23:00:33.614Z
+56,"Chicken Part, Hindquarter",1.00 - 1.50 lbs,true,true,1,2025-03-13T23:00:34.797Z
+39,Baby Back Ribs,0.90 - 1.50 lbs,true,false,0,2025-03-13T23:00:35.673Z
+76,Lamb Stew,0.90 - 1.10 lbs,true,false,0,2025-03-13T23:00:35.698Z
+27,Beef Short Rib,1.30 - 2.10 lbs,true,true,4,2025-03-13T23:00:35.792Z
+54,"Chicken Part, Breast, Bone-In",1.00 - 2.00 lbs,true,true,1,2025-03-13T23:00:35.886Z
+48,Pork Tenderloin,0.80 - 1.30 lbs,true,false,0,2025-03-13T23:00:36.239Z
+64,Turkey Feet,2 lb bag,true,true,4,2025-03-13T23:00:36.406Z
+18,Hanger Steak,0.40 - 0.50 lbs,false,true,1,2025-03-13T23:00:36.672Z
+20,Beef Kidney,0.80 - 1.00 lbs,true,false,10,2025-03-13T23:00:36.932Z
+12,"Brisket, Large","Large, 4.30 - 4.90 lbs",true,true,3,2025-03-13T23:00:37.067Z
+13,Chuck roast,2.30 - 2.90 lbs,true,true,1,2025-03-13T23:00:37.142Z
+117,Bulk Thai Curry Sausage,12 oz,true,true,8,2025-03-13T23:00:37.521Z
+25,Ribeye Steak,0.80 - 1.10 lbs,true,true,6,2025-03-13T23:00:37.607Z
+109,Blueberry Maple Sausage Links,4 links/ pack 14 oz pack,true,true,1,2025-03-13T23:00:37.764Z
+125,Summer Herb Lamb Sausage Links,4 links/ pack 14 oz pack,false,false,0,2025-03-13T23:00:37.891Z
+18,Hanger Steak,0.40 - 0.50 lbs,false,false,1,2025-03-13T23:22:08.670Z
+19,Beef Heart,2.50 - 3.5 lbs,false,false,4,2025-03-13T23:22:08.691Z
+10,"Brisket, Small","Small, 2.30 - 2.99 lbs",false,false,12,2025-03-13T23:22:08.695Z
+27,Beef Short Rib,1.30 - 2.10 lbs,true,true,2,2025-03-20T23:48:05.129Z
+18,Hanger Steak,0.40 - 0.50 lbs,false,false,0,2025-03-20T23:48:05.162Z25,Ribeye Steak,0.80 - 1.10 lbs,false,false,0,2025-03-20T23:48:05.147Z
+
+109,Blueberry Maple Sausage Links,4 links/ pack 14 oz pack,false,false,0,2025-03-20T23:48:05.247Z
+13,Chuck roast,2.30 - 2.90 lbs,false,false,0,2025-03-20T23:48:05.262Z
+12,"Brisket, Large","Large, 4.00 - 5.00 lbs",false,false,0,2025-03-20T23:48:05.371Z
+122,"Rendered Pork Back Fat, 16 oz",16 oz,false,false,0,2025-03-20T23:48:06.192Z
+112,Farm Made Chorizo Sausage Links,4 links/ pack 14 oz pack,false,false,0,2025-03-20T23:48:06.245Z
+69,Ground Lamb,1.00 lbs,true,false,0,2025-03-20T23:48:06.357Z
+116,Thai Curry Sausage Links,4 links/ pack 14 oz pack,true,false,0,2025-03-20T23:48:06.364Z
+48,Pork Tenderloin,0.80 - 1.30 lbs,true,true,4,2025-03-20T23:48:06.383Z
+68,"Lamb Chops, 4 pack","4 pack, 1.1 - 1.50 lbs",false,false,0,2025-03-20T23:48:06.494Z
+54,"Chicken Part, Breast, Bone-In",1.00 - 2.00 lbs,false,false,0,2025-03-20T23:48:07.152Z
+56,"Chicken Part, Hindquarter",1.00 - 1.50 lbs,false,false,0,2025-03-20T23:48:07.250Z
+64,Turkey Feet,2 lb bag,true,true,2,2025-03-20T23:48:07.297Z
+20,Beef Kidney,0.80 - 1.00 lbs,true,false,0,2025-03-20T23:53:14.697Z
+117,Bulk Thai Curry Sausage,12 oz,true,false,0,2025-03-20T23:53:14.716Z
+31,Beef Stew Meat,0.90 - 1.10 lbs,true,false,0,2025-03-20T23:53:14.757Z
+27,Beef Short Rib,1.30 - 2.10 lbs,true,false,2,2025-03-27T22:23:39.820Z15,Beef Flat Iron Steak,0.70 - 1.10 lbs,true,true,17,2025-03-27T22:23:39.762Z12,"Brisket, Large","Large, 4.00 - 5.00 lbs",true,true,1,2025-03-27T22:23:39.791Z23,Beef Oxtail,1.40 - 1.90 lbs,true,true,4,2025-03-27T22:23:39.777Z36,Beef Tri-Tip,1.90 - 2.20 lbs,true,true,10,2025-03-27T22:23:39.741Z
+
+
+
+
+32,Beef Tenderloin,0.40 - 0.70 lbs,true,false,0,2025-03-27T22:23:39.876Z
+11,"Brisket, Medium","Medium, 3.00 - 3.99 lbs",true,true,11,2025-03-27T22:23:40.920Z
+18,Hanger Steak,0.40 - 0.50 lbs,true,true,2,2025-03-27T22:23:40.927Z
+10,"Brisket, Small","Small, 2.30 - 2.99 lbs",true,true,4,2025-03-27T22:23:40.930Z
+14,Flank Steak,1.10 - 1.40 lbs,true,true,5,2025-03-27T22:23:40.976Z
+13,Chuck roast,2.30 - 2.90 lbs,true,false,0,2025-03-27T22:23:41.067Z
+22,New York Steak,0.50 - 0.90 lbs,true,false,0,2025-03-27T22:23:41.348Z
+30,"Skirt Steak, Large","Large, .80 - 1.40 lbs",true,true,11,2025-03-27T22:23:41.909Z
+29,"Skirt Steak, Small","Small, 0.40 - 0.79 lbs",true,true,7,2025-03-27T22:23:41.953Z
+25,Ribeye Steak,0.80 - 1.10 lbs,true,false,0,2025-03-27T22:23:41.998Z
+112,Farm Made Chorizo Sausage Links,4 links/ pack 14 oz pack,true,true,8,2025-03-27T22:23:42.022Z
+33,Teres Major Steak,0.40 - 0.70 lbs,true,true,7,2025-03-27T22:23:42.111Z
+35,Top Sirloin Steak,1.30 - 1.60 lbs,true,false,0,2025-03-27T22:23:42.350Z
+64,Turkey Feet,2 lb bag,false,false,2,2025-03-27T22:23:42.952Z39,Baby Back Ribs,0.90 - 1.50 lbs,false,false,0,2025-03-27T22:23:42.956Z
+
+48,Pork Tenderloin,0.80 - 1.30 lbs,false,false,4,2025-03-27T22:23:42.973Z
+9,Beef Marrow Bones,3.00 - 5.00 lbs,true,true,4,2025-03-27T22:26:19.163Z
+7,Beef Back Ribs,3.00 - 3.80 lbs,true,false,6,2025-03-27T22:30:12.472Z
+112,Farm Made Chorizo Sausage Links,4 links/ pack 14 oz pack,true,true,8,2025-04-02T22:28:46.842Z111,Bulk Cajun Chaurice Sausage,12 oz,true,false,0,2025-04-02T22:28:46.758Z117,Bulk Thai Curry Sausage,12 oz,true,false,0,2025-04-02T22:28:46.754Z113,Bulk Farm Made Chorizo Sausage,12 oz,true,false,0,2025-04-02T22:28:46.777Z
+
+
+
+83,Fresh Garlic Sausage Links,12 oz,true,false,0,2025-04-02T23:13:02.552Z87,"Landjaeger Jerky, 3 pack ",3 oz,true,false,0,2025-04-02T23:13:02.556Z
+
+100,Tamari Pressed Beef Jerky,3 oz,true,false,0,2025-04-02T23:13:02.569Z
+93,Peppered Knife Cut Beef Jerky,3 oz,true,false,0,2025-04-02T23:13:02.596Z
+99,Sweet Italian Sausage Links,12 oz,true,false,0,2025-04-02T23:28:26.679Z
+88,Olympia Provisions Frankfurter,12 oz,true,false,0,2025-04-02T23:28:26.685Z
+96,"Roast Beef, Sliced",8 oz,true,false,0,2025-04-02T23:28:26.692Z
+92,"Pastrami, Sliced",8 oz,true,false,0,2025-04-02T23:28:26.699Z
+82,"Country Sausage, Bulk",12 oz,true,false,0,2025-04-02T23:28:26.752Z
+95,Polish Kielbasa,12 oz,true,false,0,2025-04-02T23:28:26.718Z
+97,Sage & Sea Salt Sausage,8 oz,true,false,0,2025-04-02T23:28:27.495Z
+112,Farm Made Chorizo Sausage Links,4 links/ pack 14 oz pack,true,true,11,2025-04-03T21:47:55.060Z131,Lamb Heart,"2 pack, 0.8 - 1.1 lbs	",true,true,6,2025-04-03T21:47:55.193Z33,Teres Major Steak,0.40 - 0.70 lbs,false,false,0,2025-04-03T21:47:55.040Z9,Beef Marrow Bones,3.00 - 5.00 lbs,false,false,0,2025-04-03T21:47:55.167Z76,Lamb Stew,0.90 - 1.10 lbs,true,true,5,2025-04-03T21:47:55.047Z29,"Skirt Steak, Small","Small, 0.40 - 0.79 lbs",true,true,1,2025-04-03T21:47:55.046Z
+
+
+
+
+
+36,Beef Tri-Tip,1.90 - 2.20 lbs,true,true,2,2025-04-03T21:47:56.216Z
+32,Beef Tenderloin,0.40 - 0.70 lbs,true,true,15,2025-04-03T21:47:56.271Z
+12,"Brisket, Large","Large, 4.00 - 5.00 lbs",true,true,7,2025-04-03T21:47:56.285Z
+14,Flank Steak,1.10 - 1.40 lbs,true,true,2,2025-04-03T21:47:56.394Z
+23,Beef Oxtail,1.40 - 1.90 lbs,false,false,0,2025-04-03T21:47:56.401Z
+11,"Brisket, Medium","Medium, 3.00 - 3.99 lbs",true,true,2,2025-04-03T21:47:56.450Z
+18,Hanger Steak,0.40 - 0.70 lbs,true,true,1,2025-04-03T21:47:57.149Z
+30,"Skirt Steak, Large","Large, .80 - 1.40 lbs",false,false,0,2025-04-03T21:47:57.247Z
+15,Beef Flat Iron Steak,0.70 - 1.10 lbs,true,true,7,2025-04-03T21:47:57.287Z
+7,Beef Back Ribs,3.00 - 3.80 lbs,true,false,0,2025-04-03T21:56:59.996Z14,Flank Steak,1.10 - 1.40 lbs,true,true,2,2025-04-03T21:56:59.999Z
+
+27,Beef Short Rib,1.30 - 2.10 lbs,true,false,0,2025-04-03T21:57:00.008Z
+11,"Brisket, Medium","Medium, 3.00 - 3.99 lbs",false,false,0,2025-04-10T22:07:10.069Z32,Beef Tenderloin,0.40 - 0.70 lbs,true,true,7,2025-04-10T22:07:10.011Z7,Beef Back Ribs,3.00 - 3.80 lbs,true,true,6,2025-04-10T22:07:10.097Z12,"Brisket, Large","Large, 4.00 - 5.00 lbs",true,true,6,2025-04-10T22:07:10.032Z36,Beef Tri-Tip,1.90 - 2.20 lbs,false,false,0,2025-04-10T22:07:10.029Z15,Beef Flat Iron Steak,0.70 - 1.10 lbs,false,false,0,2025-04-10T22:07:10.018Z
+
+
+
+
+
+18,Hanger Steak,0.40 - 0.70 lbs,false,false,0,2025-04-10T22:07:11.209Z
+112,Farm Made Chorizo Sausage Links,4 links/ pack 14 oz pack,false,false,0,2025-04-10T22:07:11.214Z
+14,Flank Steak,1.10 - 1.40 lbs,false,false,0,2025-04-10T22:07:11.220Z
+10,"Brisket, Small","Small, 2.30 - 2.99 lbs",false,false,0,2025-04-10T22:07:11.245Z
+29,"Skirt Steak, Small","Small, 0.40 - 0.79 lbs",false,false,0,2025-04-10T22:07:11.279Z
+108,"Rendered Beef Tallow, 16 oz",16 oz,false,false,0,2025-04-10T22:07:11.611Z
+76,Lamb Stew,0.90 - 1.10 lbs,true,true,6,2025-04-10T22:07:12.118Z
+105,Stewing Hen,2 - 3 lbs,true,true,15,2025-04-10T22:07:12.239Z
+43,"Pet Food, Organ Blend",1.00 lbs,true,false,0,2025-04-10T23:27:20.718Z
+57,"Chicken Part, Wings",1.00 - 1.50 lbs,true,true,12,2025-04-10T23:30:54.805Z
+134,Bavette Steak,0.9 - 1.6 lbs,true,false,15,2025-04-13T22:19:14.025Z
+134,Bavette Steak,0.9 - 1.6 lbs,true,true,15,2025-04-13T22:19:18.688Z
+134,Bavette Steak,0.9 - 1.6 lbs,true,true,15,2025-04-13T22:19:19.608Z
+134,Bavette Steak,0.9 - 1.6 lbs,true,true,15,2025-04-15T17:09:12.456Z
+108,"Rendered Beef Tallow, 16 oz",16 oz,false,false,0,2025-04-16T22:17:01.035Z
+37,Unrendered Beef Tallow,2.00 - 3.70 lbs,true,false,0,2025-04-16T22:17:01.022Z
+128,Chorizo Verde,4 links/ pack 14 oz pack,true,true,2,2025-04-17T20:39:18.920Z35,Top Sirloin Steak,1.30 - 1.60 lbs,true,true,8,2025-04-17T20:39:18.681Z108,"Rendered Beef Tallow, 16 oz",16 oz,true,false,0,2025-04-17T20:39:18.790Z9,Beef Marrow Bones,3.00 - 5.00 lbs,true,true,1,2025-04-17T20:39:18.634Z
+
+
+
+112,Farm Made Chorizo Sausage Links,4 links/ pack 14 oz pack,true,true,6,2025-04-17T20:39:19.012Z
+134,Bavette Steak,0.9 - 1.6 lbs,true,true,8,2025-04-17T20:39:19.044Z
+57,"Chicken Part, Wings",1.00 - 1.50 lbs,true,true,10,2025-04-17T20:39:20.141Z
+70,Lamb Kabob,0.90 - 1.10 lbs,true,true,2,2025-04-17T20:39:20.261Z
+32,Beef Tenderloin,0.40 - 0.70 lbs,false,false,0,2025-04-17T20:39:20.369Z
+76,Lamb Stew,0.90 - 1.10 lbs,true,true,4,2025-04-17T20:39:20.420Z
+105,Stewing Hen,2 - 3 lbs,false,false,0,2025-04-17T20:39:20.584Z
+12,"Brisket, Large","Large, 4.00 - 5.00 lbs",true,true,2,2025-04-17T20:39:20.863Z
+90,"Olympia Provisions, Dog Treats",5 oz,true,false,0,2025-04-17T20:44:52.814Z
+48,Pork Tenderloin,0.80 - 1.30 lbs,false,false,0,2025-04-17T20:44:52.852Z
+35,Top Sirloin Steak,1.30 - 1.60 lbs,false,false,0,2025-04-24T23:05:35.992Z9,Beef Marrow Bones,3.00 - 5.00 lbs,false,false,0,2025-04-24T23:05:35.978Z10,"Brisket, Small","Small, 2.30 - 2.99 lbs",true,true,3,2025-04-24T23:05:36.000Z11,"Brisket, Medium","Medium, 3.00 - 3.99 lbs",true,true,2,2025-04-24T23:05:36.003Z134,Bavette Steak,0.9 - 1.6 lbs,false,false,0,2025-04-24T23:05:36.072Z12,"Brisket, Large","Large, 4.00 - 5.00 lbs",true,true,1,2025-04-24T23:05:35.914Z
+
+
+
+
+
+131,Lamb Heart,"2 pack, 0.8 - 1.1 lbs	",true,true,2,2025-04-24T23:05:37.099Z
+4,"Raw Walnuts, 1/2 lb",1/2 lb,true,false,0,2025-04-24T23:05:37.112Z
+5,"Raw Walnuts, 1 lb",1 lb,true,false,0,2025-04-24T23:05:37.123Z
+128,Chorizo Verde,4 links/ pack 14 oz pack,false,false,0,2025-04-24T23:05:37.150Z
+70,Lamb Kabob,0.90 - 1.10 lbs,true,false,0,2025-04-24T23:05:37.435Z
+112,Farm Made Chorizo Sausage Links,4 links/ pack 14 oz pack,true,true,4,2025-04-24T23:05:37.496Z
+74,Lamb Shank Osso Buco,1.10 - 1.40 lbs,true,false,0,2025-04-24T23:05:38.002Z
+57,"Chicken Part, Wings",1.00 - 1.50 lbs,true,false,0,2025-04-24T23:05:38.035Z
+76,Lamb Stew,0.90 - 1.10 lbs,true,false,0,2025-04-24T23:05:38.047Z84,"Honey Maple Ham, Sliced",8 oz,true,false,0,2025-04-24T23:05:38.049Z
+
+134,Bavette Steak,0.9 - 1.6 lbs,false,false,0,2025-04-24T23:05:38.395Z
+98,Summer Sausage,8 oz,true,false,0,2025-04-24T23:05:38.405Z
+9,Beef Marrow Bones,3.00 - 5.00 lbs,false,false,0,2025-04-24T23:05:38.920Z
+11,"Brisket, Medium","Medium, 3.00 - 3.99 lbs",true,true,2,2025-04-24T23:05:38.950Z
+12,"Brisket, Large","Large, 4.00 - 5.00 lbs",true,true,1,2025-04-24T23:05:38.965Z
+10,"Brisket, Small","Small, 2.30 - 2.99 lbs",true,true,3,2025-04-24T23:05:38.989Z
+35,Top Sirloin Steak,1.30 - 1.60 lbs,false,false,0,2025-04-24T23:05:39.203Z
+5,"Raw Walnuts, 1 lb",1 lb,true,false,0,2025-04-24T23:05:39.221Z
+4,"Raw Walnuts, 1/2 lb",1/2 lb,true,false,0,2025-04-24T23:05:39.702Z
+112,Farm Made Chorizo Sausage Links,4 links/ pack 14 oz pack,true,true,4,2025-04-24T23:05:39.772Z
+128,Chorizo Verde,4 links/ pack 14 oz pack,false,false,0,2025-04-24T23:05:39.783Z
+131,Lamb Heart,"2 pack, 0.8 - 1.1 lbs	",true,true,2,2025-04-24T23:05:39.823Z
+70,Lamb Kabob,0.90 - 1.10 lbs,true,false,0,2025-04-24T23:05:40.075Z
+74,Lamb Shank Osso Buco,1.10 - 1.40 lbs,true,false,0,2025-04-24T23:05:40.088Z
+57,"Chicken Part, Wings",1.00 - 1.50 lbs,true,false,0,2025-04-24T23:05:40.576Z
+84,"Honey Maple Ham, Sliced",8 oz,true,false,0,2025-04-24T23:05:40.583Z
+98,Summer Sausage,8 oz,true,false,0,2025-04-24T23:05:40.617Z
+76,Lamb Stew,0.90 - 1.10 lbs,true,false,0,2025-04-24T23:05:40.632Z
+19,Beef Heart,2.50 - 3.5 lbs,false,false,0,2025-04-24T23:14:28.619Z

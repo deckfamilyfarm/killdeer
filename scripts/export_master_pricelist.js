@@ -40,7 +40,7 @@ async function exportPricelistToExcel() {
     const worksheet = workbook.addWorksheet('Pricelist');
     worksheet.addRow(orderedColumnNames);
 
-    const [rows] = await utilities.db.execute('SELECT id FROM pricelist ORDER BY category, productName');
+    const [rows] = await utilities.db.execute('SELECT id FROM pricelist ORDER BY category_id, productName');
 
     for (const row of rows) {
       const product = new Product(row.id);
