@@ -13,3 +13,5 @@ Testing:
 ```
 http://localhost:3402/killdeer/v2/get-product-data
 ```
+
+Now running digital ocean droplet ffcsa-server
