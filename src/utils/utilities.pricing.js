@@ -3,13 +3,14 @@ var request = require('request');
 const nodemailer = require("nodemailer");
 const mysql = require("mysql2/promise");
 
-// Validate and parse environment variables
-const MEMBER_MARKUP = parseFloat(process.env.MEMBER_MARKUP);
-const GUEST_MARKUP = parseFloat(process.env.GUEST_MARKUP);
-const DISCOUNT = parseFloat(process.env.DISCOUNT);
+// Set global vailables
+DISCOUNT=0.5412
+MEMBER_MARKUP=0.6574
+GUEST_MARKUP=0.8496
 const LL_BASEURL = "https://localline.ca/api/backoffice/v2/"
-const LL_TEST_COMPANY_BASEURL = "https://deck-test.localline.ca";
 
+// For TESTING
+const LL_TEST_COMPANY_BASEURL = "https://deck-test.localline.ca";
 const LL_TEST_PRICE_LISTS = {
   test1: { id: 5332, markup: MEMBER_MARKUP },
   test2: { id: 5333, markup: MEMBER_MARKUP },

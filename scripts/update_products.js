@@ -13,14 +13,15 @@ const tokenManager = require("../src/utils/tokenManager");
 (async () => {
 	try {
 		// TODO: obtain modification date in pricelist table and just select those that have been modified
-		const sql = "SELECT * FROM pricelist where available_on_ll is true and dateModified > '2025-05-30'"
+		//const sql = "SELECT * FROM pricelist where available_on_ll is true and dateModified > '2025-07-04'"
+		const sql = "SELECT * FROM pricelist where available_on_ll is true";
 		const [rows] = await utilities.db.query(sql);
 		const accessToken = await tokenManager.getValidAccessToken();
 
 		console.log(`🔎 Retrieved ${rows.length} product IDs from database.`);
 		for (const row of rows) {
 			try {
-        const product = await Product.create(row.id);
+				const product = await Product.create(row.id);
 				await product.updatePricelists(accessToken);
 			} catch (err) {
 				console.error(`❌ Failed to initialize product ID ${row.id}:`, err.message);

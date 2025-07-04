@@ -13,8 +13,10 @@ class Product {
 		// Replace placeholder strings with actual values
 		for (const key in this.LL_PRICE_LISTS) {
 			const entry = this.LL_PRICE_LISTS[key];
-			if (entry.markup === 'MEMBER_MARKUP') entry.markup = parseFloat(process.env.MEMBER_MARKUP);
-			if (entry.markup === 'GUEST_MARKUP') entry.markup = parseFloat(process.env.GUEST_MARKUP);
+			//if (entry.markup === 'MEMBER_MARKUP') entry.markup = parseFloat(process.env.MEMBER_MARKUP);
+			//if (entry.markup === 'GUEST_MARKUP') entry.markup = parseFloat(process.env.GUEST_MARKUP);
+			if (entry.markup === 'MEMBER_MARKUP') entry.markup = parseFloat(utilities.MEMBER_MARKUP);
+			if (entry.markup === 'GUEST_MARKUP') entry.markup = parseFloat(utilities.GUEST_MARKUP);
 		}
 
 	}
@@ -29,8 +31,8 @@ class Product {
 		// Now that data is loaded, calculate pricing
 		this.pricing = this.#calculatePrices();
 	}
-  
-  static async create(productId) {
+
+	static async create(productId) {
 		const product = new Product(productId);
 		await product.init();
 		return product;
@@ -220,9 +222,9 @@ class Product {
 			const priceListEntry = this.generateSinglePriceListEntry(newBasePrice, entry, markupDecimal);
 			if (!priceListEntry) return;
 			const payload = {
-        name: this.data.productName,
-        description: this.data.description,
-        package_codes_enabled: true,
+				name: this.data.productName,
+				description: this.data.description,
+				package_codes_enabled: true,
 				packages: [
 					{
 						id: packageId,
@@ -232,7 +234,7 @@ class Product {
 						package_unit_price: parseFloat(newBasePrice).toFixed(2),
 						inventory_per_unit: 1,
 						price_list_entries: [priceListEntry],
-            package_code: this.data.upc,
+						package_code: this.data.upc,
 					}
 				]
 			};
@@ -251,7 +253,7 @@ class Product {
 			);
 
 			//console.log(`✅ Updated ${product.name} (${productId}) on price list ${priceListID} to base price of $${newBasePrice} with ${(priceListEntry.adjustment_value).toFixed(2)}% markup`);
-      console.log(`✅ Updated ${product.name} (${productId}) on price list ${priceListID} to base price of $${newBasePrice} with ${(priceListEntry.adjustment_value).toFixed(2)}% markup${this.data.sale ? ' (Sale!)' : ''}`);
+			console.log(`✅ Updated ${product.name} (${productId}) on price list ${priceListID} to base price of $${newBasePrice} with ${(priceListEntry.adjustment_value).toFixed(2)}% markup${this.data.sale ? ' (Sale!)' : ''}`);
 
 
 		} catch (err) {
@@ -266,12 +268,12 @@ class Product {
 		let adjustment_value = Number((markupDecimal * 100).toFixed(2));
 		let strikethrough_display_value = null;
 
-    //const sale = true;
+		//const sale = true;
 		let on_sale_toggle = false;
 		let saleDeductValue = 0
 
-    if (this.data.sale) {
-      saleDeductValue = this.data.sale_discount;
+		if (this.data.sale) {
+			saleDeductValue = this.data.sale_discount;
 			let saleMarkup = markupDecimal - saleDeductValue;
 			console.log("Sale! Applying markup of " + saleMarkup.toFixed(2) + "% instead of " + markupDecimal.toFixed(2) + "%")      
 			on_sale_toggle = true;
@@ -300,9 +302,12 @@ class Product {
 
 
 	#calculatePrices() {
-		const DISCOUNT = parseFloat(process.env.DISCOUNT);
-		const MEMBER_MARKUP = parseFloat(process.env.MEMBER_MARKUP);
-		const GUEST_MARKUP = parseFloat(process.env.GUEST_MARKUP);
+		//const DISCOUNT = parseFloat(process.env.DISCOUNT);
+		//const MEMBER_MARKUP = parseFloat(process.env.MEMBER_MARKUP);
+		//const GUEST_MARKUP = parseFloat(process.env.GUEST_MARKUP);
+		const DISCOUNT = parseFloat(utilities.DISCOUNT);
+		const MEMBER_MARKUP = parseFloat(utilities.MEMBER_MARKUP);
+		const GUEST_MARKUP = parseFloat(utilities.GUEST_MARKUP);
 
 		let ffcsaPurchasePrice = 0;
 
