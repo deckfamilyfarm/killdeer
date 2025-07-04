@@ -4,6 +4,7 @@ const nodemailer = require("nodemailer");
 const mysql = require("mysql2/promise");
 
 // Set global vailables
+WHOLESAL_DISCOUNT=0.65
 DISCOUNT=0.5412
 MEMBER_MARKUP=0.6574
 GUEST_MARKUP=0.8496

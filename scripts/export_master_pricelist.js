@@ -19,8 +19,7 @@ async function exportPricelistToExcel() {
     const orderedColumnNames = [
       "id", "localLineProductID", "category", "productName", "packageName",
       "retailSalesPrice", "lowest_weight", "highest_weight", "dff_unit_of_measure",
-      "ffcsaPurchasePrice", "ffcsaMemberSalesPrice", "ffcsaGuestSalesPrice",
-      "ffcsaMemberMarkup", "ffcsaGuestMarkup",
+      "wholesalePricePerLb", "ffcsaPurchasePrice", "ffcsaMemberSalesPrice", "ffcsaGuestSalesPrice",
       "num_of_items", "available_on_ll", "description",
       "track_inventory", "stock_inventory", "visible"
     ];
@@ -29,10 +28,9 @@ async function exportPricelistToExcel() {
       "retailSalesPrice": "$#,##0.00",
       "lowest_weight": "0.00",
       "highest_weight": "0.00",
+      "wholesalePricePerLb": "$#,##0.00",
       "ffcsaPurchasePrice": "$#,##0.00",
-      "ffcsaMemberMarkup": "0%",
       "ffcsaMemberSalesPrice": "$#,##0.00",
-      "ffcsaGuestMarkup": "0%",
       "ffcsaGuestSalesPrice": "$#,##0.00"
     };
 
@@ -50,10 +48,9 @@ async function exportPricelistToExcel() {
       const pricing = product.pricing;
 
       const rowData = orderedColumnNames.map(column => {
+        if (column === 'wholesalePricePerLb') return pricing.wholesalePrice;
         if (column === 'ffcsaPurchasePrice') return pricing.purchasePrice;
-        if (column === 'ffcsaMemberMarkup') return utilities.MEMBER_MARKUP;
         if (column === 'ffcsaMemberSalesPrice') return pricing.memberSalesPrice;
-        if (column === 'ffcsaGuestMarkup') return utilities.GUEST_MARKUP;
         if (column === 'ffcsaGuestSalesPrice') return pricing.guestSalesPrice;
         if (column === 'retailSalesPrice') return Number(data[column]);
         if (column === 'lowest_weight') return Number(data[column]);

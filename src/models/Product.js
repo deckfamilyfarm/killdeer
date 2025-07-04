@@ -306,11 +306,13 @@ class Product {
 		//const MEMBER_MARKUP = parseFloat(process.env.MEMBER_MARKUP);
 		//const GUEST_MARKUP = parseFloat(process.env.GUEST_MARKUP);
 		const DISCOUNT = parseFloat(utilities.DISCOUNT);
+		const WHOLESALE_DISCOUNT = parseFloat(utilities.WHOLESALE_DISCOUNT);
 		const MEMBER_MARKUP = parseFloat(utilities.MEMBER_MARKUP);
 		const GUEST_MARKUP = parseFloat(utilities.GUEST_MARKUP);
 
 		let ffcsaPurchasePrice = 0;
 
+		let wholesalePrice = this.data.retailSalesPrice * WHOLESALE_DISCOUNT;
 		if (this.data.dff_unit_of_measure === 'lbs') {
 			const avgWeight = (Number(this.data.highest_weight) + Number(this.data.lowest_weight)) / 2;
 			ffcsaPurchasePrice = avgWeight * this.data.retailSalesPrice * DISCOUNT;
@@ -321,6 +323,7 @@ class Product {
 		}
 
 		return {
+			wholesalePrice: Number(wholesalePrice.toFixed(2)),
 			purchasePrice: Number(ffcsaPurchasePrice.toFixed(2)),
 			memberSalesPrice: Number((ffcsaPurchasePrice * (1 + MEMBER_MARKUP)).toFixed(2)),
 			guestSalesPrice: Number((ffcsaPurchasePrice * (1 + GUEST_MARKUP)).toFixed(2)),
