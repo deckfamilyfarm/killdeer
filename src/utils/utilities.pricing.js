@@ -4,7 +4,7 @@ const nodemailer = require("nodemailer");
 const mysql = require("mysql2/promise");
 
 // Set global vailables
-WHOLESAL_DISCOUNT=0.65
+WHOLESALE_DISCOUNT=0.65
 DISCOUNT=0.5412
 MEMBER_MARKUP=0.6574
 GUEST_MARKUP=0.8496
@@ -19,7 +19,7 @@ const LL_TEST_PRICE_LISTS = {
 };
 
 // Validation
-if (isNaN(MEMBER_MARKUP) || isNaN(GUEST_MARKUP) || isNaN(DISCOUNT)) {
+if (isNaN(MEMBER_MARKUP) || isNaN(GUEST_MARKUP) || isNaN(DISCOUNT) || isNaN(WHOLESALE_DISCOUNT)) {
   throw new Error('One or more FFCSA pricing environment variables are missing or invalid. Please check your .env file.');
 }
 
@@ -95,6 +95,7 @@ module.exports = {
   GUEST_MARKUP,
   MEMBER_MARKUP,
   DISCOUNT,
+  WHOLESALE_DISCOUNT,
   LL_BASEURL,
   LL_TEST_PRICE_LISTS
 };

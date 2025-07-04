@@ -48,7 +48,7 @@ async function exportPricelistToExcel() {
       const pricing = product.pricing;
 
       const rowData = orderedColumnNames.map(column => {
-        if (column === 'wholesalePricePerLb') return pricing.wholesalePrice;
+        if (column === 'wholesalePricePerLb') {return pricing.wholesalePrice;}
         if (column === 'ffcsaPurchasePrice') return pricing.purchasePrice;
         if (column === 'ffcsaMemberSalesPrice') return pricing.memberSalesPrice;
         if (column === 'ffcsaGuestSalesPrice') return pricing.guestSalesPrice;
