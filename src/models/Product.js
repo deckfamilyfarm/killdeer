@@ -318,6 +318,7 @@ adjustment: true,
     const WHOLESALE_DISCOUNT = parseFloat(utilities.WHOLESALE_DISCOUNT);
     const MEMBER_MARKUP = parseFloat(utilities.MEMBER_MARKUP);
     const GUEST_MARKUP = parseFloat(utilities.GUEST_MARKUP);
+    const DAIRY_MARKUP = parseFloat(utilities.DAIRY_MARKUP);
 
     let ffcsaPurchasePrice = 0;
 
