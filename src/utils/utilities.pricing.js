@@ -8,6 +8,7 @@ WHOLESALE_DISCOUNT=0.65
 DISCOUNT=0.5412
 MEMBER_MARKUP=0.6574
 GUEST_MARKUP=0.8496
+DAIRY_MARKUP=0.6
 const LL_BASEURL = "https://localline.ca/api/backoffice/v2/"
 
 // For TESTING
@@ -94,6 +95,7 @@ module.exports = {
   sendEmail,
   GUEST_MARKUP,
   MEMBER_MARKUP,
+  DAIRY_MARKUP,
   DISCOUNT,
   WHOLESALE_DISCOUNT,
   LL_BASEURL,
