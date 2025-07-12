@@ -45,17 +45,41 @@
             <p>View detailed weekly Key Performance Indicators including total sales, number of orders, and more.</p>
         </a>
 
-        <!--
-        <a href="BarGraphs.html" class="data-link">
-            <h2>Graphs</h2>
-            <p>Explore sales metrics visually.</p>
-        </a>
-        -->
+    
+        <div class="data-link" style="display: flex; align-items: center; gap: 8px;">
+  <h2>Data Tables:</h2>
+  <select id="yearSelect" style="font: inherit; padding: 4px;">
+    <option value="" disabled selected>Year</option>
+    <option value="2023">2023</option>
+    <option value="2024">2024</option>
+    <option value="2025">2025</option>
+  </select>
+  <button onclick="goToDataTables()" style="font: inherit; background: none; border: none; color: inherit; text-decoration: underline; cursor: pointer;">Go</button>
+<p>Filtered data by sales category, vendor, dropsite, and product</p>
+</div>
 
-        <a href="DataTables.html" class="data-link">
-            <h2>Data Tables</h2>
-            <p>View sales numbers in tabular form by vendor, category, products and dropsites.</p>
-        </a>
+<script>
+  function goToDataTables() {
+    const year = document.getElementById('yearSelect').value;
+    if (year) {
+      window.location.href = `DataTables.html?year=${year}`;
+    } else {
+      alert('Please select a year.');
+    }
+  }
+</script>
+
+
+<script>
+  function goToDataTables() {
+    const year = document.getElementById('yearSelect').value;
+    if (year) {
+      window.location.href = `year_select_data_tables.html?year=${year}`;
+    } else {
+      alert('Please select a year.');
+    }
+  }
+</script>
 
         <a href="https://reports.deckfamilyfarm.com/product_inventory.html" class="data-link">
             <h2>Deck Family Farm Update Inventory</h2>
