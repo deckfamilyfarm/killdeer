@@ -52,15 +52,28 @@
         </a>
         -->
 
-        <div style="display: flex; align-items: center; gap: 10px;">
-  <a class="nav-link" href="#" onclick="goToDataTables()">Data Tables</a>
-  <select id="yearSelect" style="padding: 4px;">
+        <div class="nav-link" style="display: flex; align-items: center; gap: 8px;">
+  <span>Data Tables:</span>
+  <select id="yearSelect" style="font: inherit; padding: 4px;">
     <option value="" disabled selected>Year</option>
     <option value="2023">2023</option>
     <option value="2024">2024</option>
     <option value="2025">2025</option>
   </select>
+  <button onclick="goToDataTables()" style="font: inherit; background: none; border: none; color: inherit; text-decoration: underline; cursor: pointer;">Go</button>
 </div>
+
+<script>
+  function goToDataTables() {
+    const year = document.getElementById('yearSelect').value;
+    if (year) {
+      window.location.href = `year_select_data_tables.html?year=${year}`;
+    } else {
+      alert('Please select a year.');
+    }
+  }
+</script>
+
 
 <script>
   function goToDataTables() {
