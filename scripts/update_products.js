@@ -12,16 +12,20 @@ const tokenManager = require("../src/utils/tokenManager");
 
 (async () => {
   try {
-    const sql = "SELECT * FROM pricelist WHERE id = 165";
+    const sql = "SELECT * FROM pricelist WHERE id = 43";
     const [rows] = await utilities.db.query(sql);
     const accessToken = await tokenManager.getValidAccessToken();
 
     console.log(`🔎 Retrieved ${rows.length} product IDs from database.`);
     for (const row of rows) {
       try {
-        const product = await Product.create(row.id);
-          await product.updatePricelists(accessToken,IS_TESTING);
+        const product = await Product.create(row.id, IS_TESTING);
+        await product.updatePricelists(accessToken, IS_TESTING);
+        if (IS_TESTING) {
+          console.log(`[TEST MODE] Would update price lists for product ID ${row.id}`);
+        } else {
           console.log(`✅ Updated price lists for product ID ${row.id}`);
+        }
       } catch (err) {
         console.error(`❌ Failed to initialize product ID ${row.id}:`, err.message);
         console.log(err);
