@@ -27,16 +27,39 @@ if (isNaN(MEMBER_MARKUP) || isNaN(GUEST_MARKUP) || isNaN(DISCOUNT) || isNaN(WHOL
   throw new Error('One or more FFCSA pricing environment variables are missing or invalid. Please check your .env file.');
 }
 
-// get access token
 async function getAccessToken(p_username, p_password) {
-  console.log(LL_BASEURL + "token")
-  const { data: auth } = await axios.post(LL_BASEURL + "token", {
-    username: p_username,
-    password: p_password
-  });
-  return auth.access;
-}
+  const url = LL_BASEURL + "token";
 
+  try {
+    const response = await axios({
+      method: 'post',
+      url,
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      data: {
+        username: p_username,
+        password: p_password
+      },
+      timeout: 10000 // 10 seconds
+    });
+
+    return response.data.access;
+  } catch (error) {
+    console.error('❌ Error getting token');
+
+    if (error.response) {
+      console.error('Status:', error.response.status);
+      console.error('Data:', error.response.data);
+    } else if (error.request) {
+      console.error('No response received:', error.request);
+    } else {
+      console.error('Error message:', error.message);
+    }
+
+    throw error;
+  }
+}
 async function sendErrorEmail(error) {
     const callerScript = path.basename(require.main.filename);
 
