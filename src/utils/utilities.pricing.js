@@ -7,7 +7,7 @@ const mysql = require("mysql2/promise");
 WHOLESALE_DISCOUNT=0.65
 DISCOUNT=0.5412
 MEMBER_MARKUP=0.6574
-GUEST_MARKUP=0.8496
+GUEST_MARKUP=0.9
 DAIRY_MARKUP=0.6
 const LL_BASEURL = "https://localline.ca/api/backoffice/v2/"
 

@@ -12,7 +12,8 @@ const tokenManager = require("../src/utils/tokenManager");
 
 (async () => {
   try {
-    const sql = "SELECT * FROM pricelist WHERE id = 43";
+    //const sql = "SELECT * FROM pricelist WHERE id = 39";
+    const sql = "SELECT * FROM pricelist WHERE available_on_ll = 1"
     const [rows] = await utilities.db.query(sql);
     const accessToken = await tokenManager.getValidAccessToken();
 

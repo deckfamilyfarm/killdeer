@@ -252,3 +252,19 @@ id,productName,packageName,visible,track_inventory,stock_inventory,timestamp
 131,Lamb Heart,"2 pack, 0.8 - 1.1 lbs	",true,true,5,2025-07-11T01:39:36.744Z
 128,Chorizo Verde,4 links/ pack 14 oz pack,false,false,0,2025-07-11T01:39:36.936Z
 66,Lamb Bones,3.00 - 5.00 lbs,false,false,0,2025-07-11T01:39:36.939Z
+74,Lamb Shank Osso Buco,1.10 - 1.40 lbs,false,false,0,2025-07-16T17:29:15.459Z
+32,Beef Tenderloin,0.40 - 0.70 lbs,false,false,0,2025-07-17T23:44:32.305Z
+9,Beef Marrow Bones,3.00 - 5.00 lbs,true,true,7,2025-07-17T23:44:32.460Z
+134,Bavette Steak,0.9 - 1.6 lbs,true,true,1,2025-07-17T23:44:32.614Z
+11,"Brisket, Medium","Medium, 3.00 - 3.99 lbs",true,true,1,2025-07-17T23:44:32.697Z
+7,Beef Back Ribs,3.00 - 3.80 lbs,true,true,2,2025-07-17T23:44:32.732Z
+31,Beef Stew Meat,0.90 - 1.10 lbs,true,true,18,2025-07-17T23:44:32.743Z
+13,Chuck roast,2.30 - 2.90 lbs,true,true,17,2025-07-17T23:44:32.911Z
+25,Ribeye Steak,0.80 - 1.10 lbs,true,true,15,2025-07-17T23:44:33.143Z
+35,Top Sirloin Steak,1.30 - 1.60 lbs,true,true,1,2025-07-17T23:44:33.293Z
+66,Lamb Bones,3.00 - 5.00 lbs,true,false,0,2025-07-17T23:44:33.436Z
+39,Baby Back Ribs,0.90 - 1.50 lbs,false,false,0,2025-07-17T23:44:33.521Z
+47,Pork Spare Ribs,2.00 - 3.00 lbs,true,false,0,2025-07-17T23:44:33.564Z
+70,Lamb Kabob,1.1 - 1.35,true,true,15,2025-07-17T23:44:33.569Z
+71,Lamb Neck Slices,1.10 - 1.50 lbs,true,false,0,2025-07-17T23:44:33.772Z
+76,Lamb Stew,0.90 - 1.10 lbs,true,false,0,2025-07-17T23:44:33.921Z
