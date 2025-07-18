@@ -68,6 +68,25 @@ async function exportPricelistToExcel() {
       }
     });
 
+const variableSheet = workbook.addWorksheet('Variables');
+variableSheet.getCell('A1').value = 'values';
+variableSheet.getCell('B1').value = 'keys';
+
+const variableMap = {
+  DISCOUNT,
+  WHOLESALE_DISCOUNT,
+  MEMBER_MARKUP,
+  GUEST_MARKUP,
+  //utilities.DAIRY_MARKUP,
+};
+
+let rowIndex = 2;
+for (const [key, value] of Object.entries(variableMap)) {
+  variableSheet.getCell(`A${rowIndex}`).value = value;
+  variableSheet.getCell(`B${rowIndex}`).value = key;
+  rowIndex++;
+}
+
     const outputFile = '../docs/masterPriceList.xlsx';
     await workbook.xlsx.writeFile(outputFile);
     console.log(`✅ Excel file created: ${outputFile}`);
