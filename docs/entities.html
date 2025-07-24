@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Farm Entity Graph</title>
+  <script src="https://unpkg.com/cytoscape@3.26.0/dist/cytoscape.min.js"></script>
+  <style>
+    body { font-family: sans-serif; margin: 0; padding: 0; }
+    h2 { text-align: center; padding: 1em 0; }
+    #cy { width: 100%; height: 90vh; border-top: 1px solid #ccc; }
+  </style>
+</head>
+<body>
+  <h2>Farm Entity Relationship Diagram</h2>
+  <div id="cy"></div>
+  <script>const embeddedData = {
+  "entities": [
+    "wholesale",
+    "farmers_market",
+    "ffcsa",
+    "hyland_processing",
+    "layers",
+    "poultry",
+    "grazers",
+    "pork",
+    "creamy_cow",
+    "garden",
+    "olympia_provisions",
+    "farmers_market_customers",
+    "csa_members",
+    "wholesale_customers"	
+  ],
+  "relationships": [
+    { "to": "hyland_processing", "from": "wholesale" },
+    { "from": "hyland_processing", "to": "wholesale" },
+    { "from": "layers", "to": "wholesale" },
+    { "from": "poultry", "to": "wholesale" },
+    { "from": "grazers", "to": "wholesale" },
+    { "from": "pork", "to": "wholesale" },
+    { "from": "wholesale", "to": "farmers_market" },
+    { "from": "wholesale", "to": "ffcsa" },
+    { "from": "pork", "to": "olympia_provisions" },
+    { "from": "creamy_cow", "to": "ffcsa" },
+    { "from": "garden", "to": "ffcsa" },
+ 	{ "from": "farmers_market", "to": "farmers_market_customers" },
+    { "from": "ffcsa", "to": "csa_members" },
+    { "from": "wholesale", "to": "wholesale_customers" }
+  ]
+}
+;</script>
+<script>
+const data = embeddedData;
+
+const entities = data.entities;
+const relationships = data.relationships;
+
+const elements = [];
+
+// Final layout with 3 tiers:
+// Y = 0   → customers (top)
+// Y = 100 → sales (middle)
+// Y = 250 → processing + production (bottom)
+const nodePositions = {
+  // Top: Customers
+  olympia_provisions:        { x: -300, y: 0 },
+  wholesale_customers:       { x: -100, y: 0 },  // between olympia and FM customers
+  farmers_market_customers:  { x: 100, y: 0 },
+  csa_members:               { x: 300, y: 0 },
+
+  // Middle: Sales (shifted right)
+  wholesale:          { x: -100, y: 100 },
+  farmers_market:     { x: 100,  y: 100 },
+  ffcsa:              { x: 300,  y: 100 },
+
+  // Bottom: Combined Processing + Production
+  pork:               { x: -300, y: 250 },
+  hyland_processing:  { x: -150, y: 250 },
+  layers:             { x: 0,    y: 250 },
+  poultry:            { x: 150,  y: 250 },
+  grazers:            { x: 300,  y: 250 },
+  creamy_cow:         { x: 450,  y: 250 },
+  garden:             { x: 600,  y: 250 }
+};
+
+// Add positioned nodes
+for (const [id, position] of Object.entries(nodePositions)) {
+  elements.push({
+    data: {
+      id,
+      label: id.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase())
+    },
+    position
+  });
+}
+
+// Handle any extra entities not placed manually
+const placed = new Set(Object.keys(nodePositions));
+for (const entity of entities) {
+  if (!placed.has(entity)) {
+    elements.push({
+      data: {
+        id: entity,
+        label: entity.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase())
+      }
+    });
+  }
+}
+
+// Add edges
+relationships.forEach(rel => {
+  elements.push({
+    data: {
+      id: `${rel.from}_${rel.to}`,
+      source: rel.from,
+      target: rel.to
+    }
+  });
+});
+
+// Initialize Cytoscape
+cytoscape({
+  container: document.getElementById('cy'),
+  elements,
+  style: [
+    {
+      selector: 'node',
+      style: {
+        'background-color': '#2E86AB',
+        'label': 'data(label)',
+        'color': '#fff',
+        'text-valign': 'center',
+        'text-halign': 'center',
+        'font-size': 12,
+        'shape': 'roundrectangle',
+        'width': 'label',
+        'padding': '10px'
+      }
+    },
+    {
+      selector: 'edge',
+      style: {
+        'width': 2,
+        'line-color': '#aaa',
+        'target-arrow-color': '#aaa',
+        'target-arrow-shape': 'triangle',
+        'curve-style': 'bezier'
+      }
+    }
+  ],
+  layout: {
+    name: 'preset'
+  }
+});
+
+
+</script>
+</body>
+</html>
+
