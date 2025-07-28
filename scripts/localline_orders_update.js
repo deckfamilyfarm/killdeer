@@ -10,7 +10,7 @@ const axios = require('axios');
 const utilities = require('../src/utils/utilities.pricing.js');
 require('dotenv').config();
 
-async function getProducts(start, end) {
+async function getOrders(start, end) {
   try {
     const accessToken = await utilities.getAccessToken(process.env.LL_USERNAME, process.env.LL_PASSWORD);
 
@@ -78,7 +78,8 @@ async function getProducts(start, end) {
       const batchPlaceholders = new Array(values.length).fill(placeholders).join(', ');
 
       try {
-        await utilities.db.query(sql + batchPlaceholders, flatValues);
+        //await utilities.db.query(sql + batchPlaceholders, flatValues);
+        console.log(sql)
       } catch (err) {
         console.error(`❌ Failed to insert batch ${i / batchSize + 1}:`, err.message);
         await utilities.sendErrorEmail(err);
@@ -99,4 +100,4 @@ const commandLineArgs = process.argv.slice(2);
 const dateArg = commandLineArgs.length > 0 ? commandLineArgs[0] : utilities.getToday();
 const priorWeek = utilities.getPreviousWeek(dateArg);
 console.log(priorWeek.start + " to " +priorWeek.end)
-getProducts(priorWeek.start, priorWeek.end);
+getOrders(priorWeek.start, priorWeek.end);

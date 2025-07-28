@@ -1,78 +1,139 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CSA and Deck Family Farm Reports</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            padding: 0;
-        }
-        .container {
-            max-width: 800px;
-            margin: auto;
-        }
-        h1 {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        .data-link {
-            display: block;
-            margin-bottom: 10px;
-            padding: 10px;
-            background-color: #f0f0f0;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            text-decoration: none;
-            color: #333;
-            transition: background-color 0.3s ease;
-        }
-        .data-link:hover {
-            background-color: #e0e0e0;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Deck Family Farm Reports</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background: #f9f9f9;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 10px;
+    }
+
+    .sort-bar {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .card-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      justify-content: center;
+    }
+
+    .card {
+      background: white;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      padding: 15px;
+      width: 300px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+      transition: transform 0.2s ease;
+    }
+
+    .card:hover {
+      transform: scale(1.02);
+    }
+
+    .card h2 {
+      margin-top: 0;
+      font-size: 18px;
+    }
+
+    .card p {
+      margin: 10px 0 0;
+      font-size: 14px;
+      color: #555;
+    }
+
+    .card a {
+      text-decoration: none;
+      color: #2E86AB;
+    }
+
+    .category {
+      font-size: 12px;
+      font-weight: bold;
+      color: #888;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h1>FFCSA and Deck Family Farm Reports!</h1>
 
-        <p>Here you can view weekly sales KPIs, fulfillment data, and access product update scripts as well as our master pricelist.</p>
+  <h1>Deck Family Farm Reports</h1>
+  <p style="text-align: center; max-width: 700px; margin: 10px auto 30px; font-size: 16px; color: #555;">
+    Access key reports and tools that help monitor farm performance, update inventory, manage pricing, and track labor across all Deck Family Farm enterprises. Use this dashboard to stay aligned with operations, make data-informed decisions, and support the CSA and broader farm business.
+	</p>
 
-        <a href="weekly.html" class="data-link">
-            <h2>Weekly Sales KPIs</h2>
-            <p>View detailed weekly Key Performance Indicators including total sales, number of orders, and more.</p>
-        </a>
+  <div class="card-container" id="cardContainer">
 
-        <!--
-        <a href="BarGraphs.html" class="data-link">
-            <h2>Graphs</h2>
-            <p>Explore sales metrics visually.</p>
-        </a>
-        -->
+    <!-- Cards (data-title and data-category used for sorting) -->
 
-        <a href="DataTables.html" class="data-link">
-            <h2>Data Tables</h2>
-            <p>View sales numbers in tabular form by vendor, category, products and dropsites.</p>
-        </a>
-
-        <a href="https://reports.deckfamilyfarm.com/product_inventory.html" class="data-link">
-            <h2>Deck Family Farm Update Inventory</h2>
-            <p>This tool updates inventory quanitities for Deck Family Farm products. Ask john for password</p>
-        </a>
-
-        <a href="https://reports.deckfamilyfarm.com/masterPriceList.xlsx" class="data-link">
-            <h2>Deck Family Farm Master PriceList</h2>
-            <p>An excel spreadsheet representation of the master pricelist</p>
-        </a>
-
-        <a href="https://timesheets.deckfamilyfarm.com/" class="data-link">
-            <h2>Deck Family Farm Timesheet System</h2>
-	    <p>Log time, track hours, and see who worked where—across all enterprises.</p>
-        </a>
-
+    <div class="card" data-title="Data Tables" data-category="Reports">
+      <div class="category">Reports</div>
+      <h2><a href="DataTables.html">FFCSA Data Tables</a></h2>
+      <p>View sales numbers in tabular form by vendor, category, products and dropsites.</p>
     </div>
+
+    <div class="card" data-title="Weekly Sales KPIs" data-category="Reports">
+      <div class="category">Reports</div>
+      <h2><a href="weekly.html">FFCSA Weekly Sales KPIs</a></h2>
+      <p>View detailed weekly KPIs including total sales, number of orders, and more.</p>
+    </div>
+
+    <div class="card" data-title="Entities" data-category="Visualizations">
+      <div class="category">Visualizations</div>
+      <h2><a href="entities.html">Farm Overview</a></h2>
+      <p>Visualize entities and enterprises in a graph layout.</p>
+    </div>
+
+    <div class="card" data-title="Master Price List" data-category="Tools">
+      <div class="category">Tools</div>
+      <h2><a href="https://reports.deckfamilyfarm.com/masterPriceList.xlsx">DFF Master Price List</a></h2>
+      <p>An Excel spreadsheet representation of the current master price list.</p>
+    </div>
+
+    <div class="card" data-title="Inventory Tool" data-category="Tools">
+      <div class="category">Tools</div>
+      <h2><a href="https://reports.deckfamilyfarm.com/product_inventory.html">DFF Inventory Update Tool</a></h2>
+      <p>Update inventory quantities for DFF products. Ask John for password.</p>
+    </div>
+
+    <div class="card" data-title="Timesheet System" data-category="Tools">
+      <div class="category">Tools</div>
+      <h2><a href="https://timesheets.deckfamilyfarm.com/">Timesheet System</a></h2>
+      <p>Log time, track hours, and see who worked where—across all enterprises.</p>
+    </div>
+
+  </div>
+
+  <script>
+    function sortCards() {
+      const sortBy = document.getElementById('sort-select').value;
+      const container = document.getElementById('cardContainer');
+      const cards = Array.from(container.getElementsByClassName('card'));
+
+      cards.sort((a, b) => {
+        const aVal = a.getAttribute('data-' + sortBy).toLowerCase();
+        const bVal = b.getAttribute('data-' + sortBy).toLowerCase();
+        return aVal.localeCompare(bVal);
+      });
+
+      // Reattach sorted cards
+      cards.forEach(card => container.appendChild(card));
+    }
+  </script>
+
 </body>
 </html>
 

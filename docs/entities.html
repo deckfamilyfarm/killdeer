@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Farm Enterprise Relationships</title>
+
+  <!-- Cytoscape library -->
+  <script src="https://unpkg.com/cytoscape@3.26.0/dist/cytoscape.min.js"></script>
+
+<style>
+  html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    font-family: sans-serif;
+    background: #f9f9f9;
+    overflow: hidden;
+  }
+
+  h2 {
+    text-align: center;
+    margin: 1rem 0 0;
+    font-size: 1.5rem;
+  }
+
+  #cy {
+    position: absolute;
+    top: 4rem;
+    bottom: 1rem;
+    left: 1rem;
+    right: 1rem;
+    background: #fff;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+  }
+</style>
+
+</head>
+
+<body>
+  <h2>Farm Enterprise Relationships</h2>
+  <div id="cy"></div>
+
+  <!-- Your main script -->
+  <script>const embeddedData = {
+  "entities": [
+    "wholesale",
+    "farmers_market",
+    "ffcsa",
+    "hyland_processing",
+    "layers",
+    "roasters",
+    "grazers",
+    "pork",
+    "creamy_cow",
+    "garden",
+    "olympia_provisions",
+    "farmers_market_customers",
+    "ffcsa_members",
+    "wholesale_customers"	
+  ],
+  "relationships": [
+    { "to": "hyland_processing", "from": "wholesale" },
+    { "from": "hyland_processing", "to": "wholesale" },
+    { "from": "layers", "to": "wholesale" },
+    { "from": "roasters", "to": "wholesale" },
+    { "from": "grazers", "to": "wholesale" },
+    { "from": "pork", "to": "wholesale" },
+    { "from": "wholesale", "to": "farmers_market" },
+    { "from": "wholesale", "to": "ffcsa" },
+    { "from": "pork", "to": "olympia_provisions" },
+    { "from": "creamy_cow", "to": "ffcsa" },
+    { "from": "garden", "to": "ffcsa" },
+ 	{ "from": "farmers_market", "to": "farmers_market_customers" },
+    { "from": "ffcsa", "to": "ffcsa_members" },
+    { "from": "wholesale", "to": "wholesale_customers" }
+  ]
+}
+;</script>
+<script>
+const data = embeddedData;
+
+const entities = data.entities;
+const relationships = data.relationships;
+
+const elements = [];
+
+// Y positions
+const yTop = 0;
+const yMiddle = 200;
+const yBottom = 400;
+
+// X positions (equal spacing for all rows)
+const nodePositions = {
+  // Top: Customers (wide spacing)
+  olympia_provisions:        { x: -500, y: yTop },
+  farmers_market_customers:  { x: -200, y: yTop },
+  wholesale_customers:       { x: 200,  y: yTop },
+  ffcsa_members:               { x: 500,  y: yTop },
+
+  // Middle: Sales (now spaced out more)
+  farmers_market:            { x: -300, y: yMiddle },
+  wholesale:                 { x: 0,    y: yMiddle },
+  ffcsa:                     { x: 300,  y: yMiddle },
+
+  // Bottom: Production + Processing (already wide)
+  pork:               { x: -500, y: yBottom },
+  hyland_processing:  { x: -300, y: yBottom },
+  layers:             { x: -100, y: yBottom },
+  roasters:           { x: 100,  y: yBottom },
+  grazers:            { x: 300,  y: yBottom },
+  creamy_cow:         { x: 500,  y: yBottom },
+  garden:             { x: 700,  y: yBottom }
+};
+
+// Add positioned nodes
+for (const [id, position] of Object.entries(nodePositions)) {
+  elements.push({
+    data: {
+      id,
+      label: id.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase())
+    },
+    position
+  });
+}
+
+// Add any unplaced entities
+const placed = new Set(Object.keys(nodePositions));
+for (const entity of entities) {
+  if (!placed.has(entity)) {
+    elements.push({
+      data: {
+        id: entity,
+        label: entity.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase())
+      }
+    });
+  }
+}
+
+// Add edges
+relationships.forEach(rel => {
+  elements.push({
+    data: {
+      id: `${rel.from}_${rel.to}`,
+      source: rel.from,
+      target: rel.to
+    }
+  });
+});
+
+// Initialize Cytoscape
+const cy = cytoscape({
+  container: document.getElementById('cy'),
+  elements,
+
+style: [
+  {
+    selector: 'node',
+    style: {
+      'background-color': '#2E86AB',
+      'label': 'data(label)',
+      'color': '#fff',
+      'text-valign': 'center',
+      'text-halign': 'center',
+      'font-size': '20px',
+      'shape': 'roundrectangle',
+      'text-wrap': 'wrap',
+      'text-max-width': '140px',
+      'padding': '15px',
+      'width': '140px',
+      'height': '60px'
+    }
+  },
+  {
+    selector: 'edge',
+    style: {
+      'width': 3,
+      'line-color': '#888',
+      'target-arrow-color': '#888',
+      'target-arrow-shape': 'triangle',
+      'arrow-scale': 1.5,
+      'curve-style': 'bezier'
+    }
+  }
+],
+
+
+  layout: {
+    name: 'preset'
+  },
+  userZoomingEnabled: true,
+  userPanningEnabled: true,
+  wheelSensitivity: 0.2
+});
+
+// Fit nicely to screen
+cy.ready(() => {
+  const fitGraph = () => cy.fit(null, 80);
+
+  fitGraph(); // Initial fit
+  window.addEventListener('resize', fitGraph);
+});
+
+
+</script>
+</body>
+</html>
+
