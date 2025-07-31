@@ -28,7 +28,13 @@ $(document).ready(async function () {
         );
 
         // ✅ Add New KPI Labels for Computed Columns
-        kpiLabels.push("activeSubscriberOrderRate", "salesComparedToYearlyAvg");
+// ✅ Add New KPI Labels for Computed Columns
+kpiLabels.push(
+    "activeSubscriberOrderRate",
+    "salesComparedToYearlyAvg",
+    "skippedSubscribers",
+    "feedAFriendSubscribers"
+);
 
         // ✅ Populate Table Headers with Date Ranges
         const headerRow = document.getElementById("headerRow");
@@ -102,7 +108,9 @@ $(document).ready(async function () {
 function formatKpiLabel(kpi) {
     const labels = {
         activeSubscriberOrderRate: "% of Active Subscribers Ordered",
-        salesComparedToYearlyAvg: "Sales Compared to Yearly Avg"
+        salesComparedToYearlyAvg: "Sales Compared to Yearly Avg",
+        skippedSubscribers: "Skipped Subscribers",
+        feedAFriendSubscribers: "Feed-a-Friend Subscribers"
     };
     return labels[kpi] || kpi.replace(/([A-Z])/g, " $1").replace(/^./, str => str.toUpperCase());
 }
