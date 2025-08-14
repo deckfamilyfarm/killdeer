@@ -8,355 +8,361 @@
   <!-- Cytoscape library -->
   <script src="https://unpkg.com/cytoscape@3.26.0/dist/cytoscape.min.js"></script>
 
-  <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      height: 100%;
-      font-family: sans-serif;
-      background: #f9f9f9;
-      overflow: hidden;
-    }
+<style>
+  html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    font-family: sans-serif;
+    background: #f9f9f9;
+    overflow: hidden;
+  }
 
-    h2 {
-      text-align: center;
-      margin: 1rem 0 0;
-      font-size: 1.5rem;
-    }
+  h2 {
+    text-align: center;
+    margin: 1rem 0 0;
+    font-size: 1.5rem;
+  }
 
-    #cy {
-      position: absolute;
-      top: 4rem;
-      bottom: 1rem;
-      left: 1rem;
-      right: 1rem;
-      background: #fff;
-      border: 1px solid #ccc;
-      border-radius: 10px;
-    }
-  </style>
+  #cy {
+    position: absolute;
+    top: 4rem;
+    bottom: 1rem;
+    left: 1rem;
+    right: 1rem;
+    background: #fff;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+  }
+</style>
+
 </head>
 
 <body>
   <h2>Farm Enterprise Relationships</h2>
   <div id="cy"></div>
 
-  <!-- Embedded data -->
-  <script>
-    const embeddedData = {
-      "entities": [
-        "friends_marketing",
-        "ffcsa",
-        "hyland_processing",
-        "layers",
-        "roasters",
-        "grazers",
-        "pork",
-        "creamy_cow",
-        "garden",
-        "olympia_provisions",
-        "garden_wholesale",
-        "farmers_market_customers",
-        "ffcsa_members",
-        "wholesale_customers",
-        "deck_family_trust"
-      ],
-      "relationships": [
-        { "to": "hyland_processing", "from": "friends_marketing", "percentage": "23" },
-        { "from": "hyland_processing", "to": "friends_marketing", "percentage": "23" },
-        { "from": "layers", "to": "friends_marketing", "percentage": "23", "note": "discuss" },
-        { "from": "roasters", "to": "friends_marketing", "percentage": "23" },
-        { "from": "grazers", "to": "friends_marketing", "percentage": "23" },
-        { "from": "pork", "to": "friends_marketing", "percentage": "23" },
-        { "from": "friends_marketing", "to": "ffcsa", "percentage": "23" },
-        { "from": "pork", "to": "olympia_provisions", "percentage": "23", "note": "whole hogs" },
-        { "from": "creamy_cow", "to": "ffcsa", "percentage": "23" },
-        { "from": "garden", "to": "ffcsa", "percentage": "23" },
-        { "from": "garden", "to": "garden_wholesale", "percentage": "23" },
-        { "from": "friends_marketing", "to": "farmers_market_customers", "percentage": "23" },
-        { "from": "ffcsa", "to": "ffcsa_members", "percentage": "23" },
-        { "from": "friends_marketing", "to": "wholesale_customers", "percentage": "23" },
+  <!-- Your main script -->
+  <script>const embeddedData = {
+  "entities": [
+    "friends_marketing",
+    "ffcsa",
+    "hyland_processing",
+    "layers",
+    "roasters",
+    "grazers",
+    "pork",
+    "creamy_cow",
+    "garden",
+    "olympia_provisions",
+    "garden_wholesale",
+    "farmers_market_customers",
+    "ffcsa_members",
+    "wholesale_customers",
+    "deck_family_trust"
+  ],
+  "relationships": [
+    { "to": "hyland_processing", "from": "friends_marketing", "percentage": "23" },
+    { "from": "hyland_processing", "to": "friends_marketing", "percentage": "23" },
+    { "from": "layers", "to": "friends_marketing", "percentage": "23", "note": "discuss" },
+    { "from": "roasters", "to": "friends_marketing", "percentage": "23" },
+    { "from": "grazers", "to": "friends_marketing", "percentage": "23" },
+    { "from": "pork", "to": "friends_marketing", "percentage": "23" },
+    { "from": "friends_marketing", "to": "ffcsa", "percentage": "XX" },
+    { "from": "pork", "to": "olympia_provisions", "percentage": "23", "note": "whole hogs" },
+    { "from": "creamy_cow", "to": "ffcsa", "percentage": "23" },
+    { "from": "garden", "to": "ffcsa", "percentage": "23" },
+    { "from": "garden", "to": "garden_wholesale", "percentage": "23" },
+    { "from": "friends_marketing", "to": "farmers_market_customers", "percentage": "XX" },
+    { "from": "ffcsa", "to": "ffcsa_members", "percentage": "XX" },
+    { "from": "friends_marketing", "to": "wholesale_customers", "percentage": "XX" },
 
-        { "from": "ffcsa", "to": "deck_family_trust", "note": "lease" },
-        { "from": "friends_marketing", "to": "deck_family_trust", "note": "lease" },
-        { "from": "garden", "to": "deck_family_trust", "note": "lease" },
-        { "from": "pork", "to": "deck_family_trust", "note": "lease" },
-        { "from": "layers", "to": "deck_family_trust", "note": "lease" },
-        { "from": "roasters", "to": "deck_family_trust", "note": "lease" },
-        { "from": "grazers", "to": "deck_family_trust", "note": "lease" },
-        { "from": "creamy_cow", "to": "deck_family_trust", "note": "lease" },
-        { "from": "hyland_processing", "to": "deck_family_trust", "note": "lease" }
-      ]
-    };
-  </script>
+    { "from": "ffcsa", "to": "deck_family_trust", "note": "lease" },
+    { "from": "friends_marketing", "to": "deck_family_trust", "note": "lease" },
+    { "from": "garden", "to": "deck_family_trust", "note": "lease" },
+    { "from": "pork", "to": "deck_family_trust", "note": "lease" },
+    { "from": "layers", "to": "deck_family_trust", "note": "lease" },
+    { "from": "roasters", "to": "deck_family_trust", "note": "lease" },
+    { "from": "grazers", "to": "deck_family_trust", "note": "lease" },
+    { "from": "creamy_cow", "to": "deck_family_trust", "note": "lease" },
+    { "from": "hyland_processing", "to": "deck_family_trust", "note": "lease" }
+  ]
+}
 
-  <script>
-    const data = embeddedData;
+;</script>
+<script>
+const data = embeddedData;
 
-    const entities = data.entities;
-    const relationships = data.relationships;
+const entities = data.entities;
+const relationships = data.relationships;
 
-    // Keep this list for stretching the trust node; we no longer auto-add lease edges here
-    const productionEntities = [
-      "ffcsa",
-      "friends_marketing",
-      "garden",
-      "pork",
-      "layers",
-      "roasters",
-      "grazers",
-      "creamy_cow",
-      "hyland_processing"
-    ];
+// Add lease relationships to deck_family_trust
+const productionEntities = [
+  "ffcsa",
+  "friends_marketing",
+  "garden",
+  "pork",
+  "layers",
+  "roasters",
+  "grazers",
+  "creamy_cow",
+  "hyland_processing"
+];
 
-    const elements = [];
+productionEntities.forEach(prod => {
+  relationships.push({
+    from: prod,
+    to: "deck_family_trust",
+    note: "lease"
+  });
+});
 
-    // Y positions
-    const yTop = 0;
-    const yMiddle = 200;
-    const yBottom = 400;
-    const yBottom2 = 600;
+const elements = [];
 
-    // X positions
-    const nodePositions = {
-      olympia_provisions:        { x: -500, y: yTop },
-      garden_wholesale:          { x: 700,  y: yTop },
-      farmers_market_customers:  { x: -200, y: yTop },
-      wholesale_customers:       { x: 200,  y: yTop },
-      ffcsa_members:             { x: 500,  y: yTop },
+// Y positions
+const yTop = 0;
+const yMiddle = 200;
+const yBottom = 400;
+const yBottom2 = 600;
 
-      friends_marketing:         { x: -200, y: yMiddle },
-      ffcsa:                     { x: 300,  y: yMiddle },
+// X positions
+const nodePositions = {
+  olympia_provisions:        { x: -500, y: yTop },
+  garden_wholesale:          { x: 700,  y: yTop },
+  farmers_market_customers:  { x: -200, y: yTop },
+  wholesale_customers:       { x: 200,  y: yTop },
+  ffcsa_members:             { x: 500,  y: yTop },
 
-      pork:                      { x: -500, y: yBottom },
-      hyland_processing:         { x: -300, y: yBottom },
-      layers:                    { x: -100, y: yBottom },
-      roasters:                  { x: 100,  y: yBottom },
-      grazers:                   { x: 300,  y: yBottom },
-      creamy_cow:                { x: 500,  y: yBottom },
-      garden:                    { x: 700,  y: yBottom },
+  friends_marketing:         { x: -200, y: yMiddle },
+  ffcsa:                     { x: 300,  y: yMiddle },
 
-      deck_family_trust:         { x: 100,  y: yBottom2 } // temporary, will update later
-    };
+  pork:                      { x: -500, y: yBottom },
+  hyland_processing:         { x: -300, y: yBottom },
+  layers:                    { x: -100, y: yBottom },
+  roasters:                  { x: 100,  y: yBottom },
+  grazers:                   { x: 300,  y: yBottom },
+  creamy_cow:                { x: 500,  y: yBottom },
+  garden:                    { x: 700,  y: yBottom },
 
-    // Add nodes
-    for (const [id, position] of Object.entries(nodePositions)) {
-      elements.push({
-        data: {
-          id,
-          label: id.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase())
-        },
-        position
-      });
+  deck_family_trust:         { x: 100,  y: yBottom2 } // temporary, will update later
+};
+
+// Add nodes
+for (const [id, position] of Object.entries(nodePositions)) {
+  elements.push({
+    data: {
+      id,
+      label: id.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase())
+    },
+    position
+  });
+}
+
+// Add unplaced nodes
+const placed = new Set(Object.keys(nodePositions));
+for (const entity of entities) {
+  if (!placed.has(entity)) {
+    elements.push({
+      data: {
+        id: entity,
+        label: entity.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase())
+      }
+    });
+  }
+}
+
+// Add edges and tag lease or percent
+relationships.forEach(rel => {
+  const id = `${rel.from}_${rel.to}`;
+  const isLease = rel.to === "deck_family_trust" && rel.note === "lease";
+  const isPercent = rel.percentage && !isLease;
+
+  elements.push({
+    data: {
+      id,
+      source: rel.from,
+      target: rel.to,
+      label: isLease ? "lease" : (rel.percentage ? `${rel.percentage}%` : ''),
+      note: rel.note || '',
+      ...(isLease && { lease: true }),
+      ...(isPercent && { percent: true })
     }
+  });
+});
 
-    // Add unplaced nodes
-    const placed = new Set(Object.keys(nodePositions));
-    for (const entity of entities) {
-      if (!placed.has(entity)) {
-        elements.push({
-          data: {
-            id: entity,
-            label: entity.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase())
-          }
-        });
+// Init Cytoscape
+const cy = cytoscape({
+  container: document.getElementById('cy'),
+  elements,
+
+  style: [
+    {
+      selector: 'node',
+      style: {
+        'background-color': '#2E86AB',
+        'label': 'data(label)',
+        'color': '#fff',
+        'text-valign': 'center',
+        'text-halign': 'center',
+        'font-size': '20px',
+        'shape': 'roundrectangle',
+        'text-wrap': 'wrap',
+        'text-max-width': '140px',
+        'padding': '15px',
+        'width': '140px',
+        'height': '60px'
+      }
+    },
+    {
+      selector: 'node#deck_family_trust',
+      style: {
+        'background-color': '#4CAF50',
+        'shape': 'roundrectangle',
+        'label': 'data(label)',
+        'color': '#fff',
+        'font-size': '22px',
+        'text-valign': 'center',
+        'text-halign': 'center',
+        'text-wrap': 'wrap',
+        'text-max-width': '10000px',
+        'padding': '15px'
+      }
+    },
+    {
+      selector: 'edge[percent]',
+      style: {
+        'line-color': '#FFA500',
+        'target-arrow-color': '#FFA500',
+        'line-style': 'solid',
+        'target-arrow-shape': 'triangle',
+        'arrow-scale': 1.5,
+        'curve-style': 'bezier',
+        'label': 'data(label)',
+        'font-size': '14px',
+        'text-background-color': '#fff',
+        'text-background-opacity': 1,
+        'text-background-padding': '2px',
+        'text-margin-y': -10,
+        'text-rotation': 'horizontal'
+      }
+    },
+    {
+      selector: 'edge[lease]',
+      style: {
+        'line-color': '#4CAF50',
+        'target-arrow-color': '#4CAF50',
+        'line-style': 'dashed',
+        'target-arrow-shape': 'triangle',
+        'arrow-scale': 1.5,
+        'curve-style': 'straight',
+        'label': 'data(label)',
+        'font-size': '14px',
+        'text-background-color': '#fff',
+        'text-background-opacity': 1,
+        'text-background-padding': '2px',
+        'text-margin-y': -10,
+        'text-rotation': 'horizontal'
       }
     }
+  ],
 
-    // Add edges and tag lease or percent
-    relationships.forEach(rel => {
-      const id = `${rel.from}_${rel.to}`;
-      const isLease = rel.to === "deck_family_trust" && rel.note === "lease";
-      const isPercent = rel.percentage && !isLease;
+  layout: { name: 'preset' },
+  userZoomingEnabled: true,
+  userPanningEnabled: true,
+  wheelSensitivity: 0.2
+});
 
-      elements.push({
-        data: {
-          id,
-          source: rel.from,
-          target: rel.to,
-          label: isLease ? "lease" : (rel.percentage ? `${rel.percentage}%` : ''),
-          note: rel.note || '',
-          ...(isLease && { lease: true }),
-          ...(isPercent && { percent: true })
-        }
-      });
-    });
+// Tooltip for edge note + hide leases by default
+cy.ready(() => {
+  const tooltip = document.createElement('div');
+  tooltip.style.position = 'absolute';
+  tooltip.style.padding = '6px 10px';
+  tooltip.style.background = '#fff';
+  tooltip.style.border = '1px solid #ccc';
+  tooltip.style.borderRadius = '5px';
+  tooltip.style.fontSize = '14px';
+  tooltip.style.pointerEvents = 'none';
+  tooltip.style.display = 'none';
+  tooltip.style.zIndex = 9999;
+  document.body.appendChild(tooltip);
 
-    // Init Cytoscape
-    const cy = cytoscape({
-      container: document.getElementById('cy'),
-      elements,
+  cy.on('mouseover', 'edge', e => {
+    const note = e.target.data('note');
+    if (note) {
+      tooltip.textContent = note;
+      tooltip.style.display = 'block';
+    }
+  });
 
-      style: [
-        {
-          selector: 'node',
-          style: {
-            'background-color': '#2E86AB',
-            'label': 'data(label)',
-            'color': '#fff',
-            'text-valign': 'center',
-            'text-halign': 'center',
-            'font-size': '20px',
-            'shape': 'roundrectangle',
-            'text-wrap': 'wrap',
-            'text-max-width': '140px',
-            'padding': '15px',
-            'width': '140px',
-            'height': '60px'
-          }
-        },
-        {
-          selector: 'node#deck_family_trust',
-          style: {
-            'background-color': '#4CAF50',
-            'shape': 'roundrectangle',
-            'label': 'data(label)',
-            'color': '#fff',
-            'font-size': '22px',
-            'text-valign': 'center',
-            'text-halign': 'center',
-            'text-wrap': 'wrap',
-            'text-max-width': '10000px',
-            'padding': '15px'
-          }
-        },
-        {
-          selector: 'edge[percent]',
-          style: {
-            'line-color': '#FFA500',
-            'target-arrow-color': '#FFA500',
-            'line-style': 'solid',
-            'target-arrow-shape': 'triangle',
-            'arrow-scale': 1.5,
-            'curve-style': 'bezier',
-            'label': 'data(label)',
-            'font-size': '14px',
-            'text-background-color': '#fff',
-            'text-background-opacity': 1,
-            'text-background-padding': '2px',
-            'text-margin-y': -10,
-            'text-rotation': 'autorotate'
-          }
-        },
-        {
-          selector: 'edge[lease]',
-          style: {
-            'line-color': '#4CAF50',
-            'target-arrow-color': '#4CAF50',
-            'line-style': 'dashed',
-            'target-arrow-shape': 'triangle',
-            'arrow-scale': 1.5,
-            'curve-style': 'straight',
-            'label': 'data(label)',
-            'font-size': '14px',
-            'text-background-color': '#fff',
-            'text-background-opacity': 1,
-            'text-background-padding': '2px',
-            'text-margin-y': -10,
-            'text-rotation': 'autorotate'
-          }
-        },
-        {
-          selector: 'edge:hover',
-          style: { }
-        }
-      ],
+  cy.on('mouseout', 'edge', () => {
+    tooltip.style.display = 'none';
+  });
 
-      layout: { name: 'preset' },
-      userZoomingEnabled: true,
-      userPanningEnabled: true,
-      wheelSensitivity: 0.2
-    });
+  cy.on('mousemove', e => {
+    tooltip.style.left = `${e.originalEvent.pageX + 10}px`;
+    tooltip.style.top = `${e.originalEvent.pageY + 10}px`;
+  });
 
-    // When ready...
-    cy.ready(() => {
-      // Tooltip for edge note
-      const tooltip = document.createElement('div');
-      tooltip.style.position = 'absolute';
-      tooltip.style.padding = '6px 10px';
-      tooltip.style.background = '#fff';
-      tooltip.style.border = '1px solid #ccc';
-      tooltip.style.borderRadius = '5px';
-      tooltip.style.fontSize = '14px';
-      tooltip.style.pointerEvents = 'none';
-      tooltip.style.display = 'none';
-      tooltip.style.zIndex = 9999;
-      document.body.appendChild(tooltip);
+  // Stretch and center deck_family_trust
+  const productionXs = productionEntities
+    .map(id => cy.getElementById(id).position().x)
+    .sort((a, b) => a - b);
 
-      cy.on('mouseover', 'edge', e => {
-        const note = e.target.data('note');
-        if (note) {
-          tooltip.textContent = note;
-          tooltip.style.display = 'block';
-        }
-      });
+  if (productionXs.length > 1) {
+    const left = productionXs[0];
+    const right = productionXs[productionXs.length - 1];
+    const width = right - left + 200;
+    const centerX = (left + right) / 2;
 
-      cy.on('mouseout', 'edge', () => {
-        tooltip.style.display = 'none';
-      });
+    const trustNode = cy.getElementById('deck_family_trust');
+    trustNode.position({ x: centerX, y: yBottom2 });
+    trustNode.style('width', `${width}px`);
+  }
 
-      cy.on('mousemove', e => {
-        tooltip.style.left = `${e.originalEvent.pageX + 10}px`;
-        tooltip.style.top = `${e.originalEvent.pageY + 10}px`;
-      });
+  const fitGraph = () => cy.fit(null, 80);
+  window.addEventListener('resize', fitGraph);
 
-      // Stretch and center deck_family_trust
-      const productionXs = productionEntities
-        .map(id => cy.getElementById(id).position().x)
-        .sort((a, b) => a - b);
+  // Legend
+  const legend = document.createElement('div');
+  legend.style.position = 'absolute';
+  legend.style.bottom = '20px';
+  legend.style.left = '20px';
+  legend.style.background = '#f9f9f9';
+  legend.style.border = '1px solid #ccc';
+  legend.style.padding = '10px 15px';
+  legend.style.fontSize = '14px';
+  legend.style.borderRadius = '5px';
+  legend.style.boxShadow = '0 2px 5px rgba(0,0,0,0.1)';
+  legend.innerHTML = `
+    <strong>Legend:</strong><br>
+    <svg height="10" width="40"><line x1="0" y1="5" x2="40" y2="5" stroke="#4CAF50" stroke-width="2" stroke-dasharray="5,5"/></svg> Lease<br>
+    <svg height="10" width="40"><line x1="0" y1="5" x2="40" y2="5" stroke="#FFA500" stroke-width="2"/></svg> Percentage<br><br>
+    <label style="font-weight:normal;">
+      <input type="checkbox" id="toggleLease">
+      Show Leases
+    </label>
+  `;
+  document.body.appendChild(legend);
 
-      if (productionXs.length > 1) {
-        const left = productionXs[0];
-        const right = productionXs[productionXs.length - 1];
-        const width = right - left + 200;
-        const centerX = (left + right) / 2;
+  // Toggle leases from checkbox
+  const toggleCheckbox = document.getElementById('toggleLease');
+  toggleCheckbox.addEventListener('change', () => {
+    const show = toggleCheckbox.checked;
+    cy.edges('[lease]').style('display', show ? 'element' : 'none');
+    cy.getElementById('deck_family_trust').style('display', show ? 'element' : 'none');
+    fitGraph();
+  });
 
-        const trustNode = cy.getElementById('deck_family_trust');
-        trustNode.position({ x: centerX, y: yBottom2 });
-        trustNode.style('width', `${width}px`);
-      }
+  // Default state: leases hidden, checkbox off
+  cy.edges('[lease]').style('display', 'none');
+  cy.getElementById('deck_family_trust').style('display', 'none');
+  toggleCheckbox.checked = false;
 
-      // Add Legend (always visible)
-      const legend = document.createElement('div');
-      legend.style.position = 'absolute';
-      legend.style.bottom = '20px';
-      legend.style.left = '20px';
-      legend.style.background = '#f9f9f9';
-      legend.style.border = '1px solid #ccc';
-      legend.style.padding = '10px 15px';
-      legend.style.fontSize = '14px';
-      legend.style.borderRadius = '5px';
-      legend.style.boxShadow = '0 2px 5px rgba(0,0,0,0.1)';
-      legend.innerHTML = `
-        <strong>Legend:</strong><br>
-        <svg height="10" width="60"><line x1="0" y1="5" x2="60" y2="5" stroke="#4CAF50" stroke-width="2" stroke-dasharray="5,5"/></svg> Lease<br>
-        <svg height="10" width="60"><line x1="0" y1="5" x2="60" y2="5" stroke="#FFA500" stroke-width="2"/></svg> Percentage<br><br>
-        <label style="font-weight:normal;">
-          <input type="checkbox" id="toggleLease">
-          Show Leases
-        </label>
-      `;
-      document.body.appendChild(legend);
+  fitGraph();
+});
 
-      // Toggle lease arrows & deck_family_trust node
-      const toggleCheckbox = document.getElementById('toggleLease');
-      toggleCheckbox.addEventListener('change', () => {
-        const show = toggleCheckbox.checked;
-        cy.edges('[lease]').style('display', show ? 'element' : 'none');
-        cy.getElementById('deck_family_trust').style('display', show ? 'element' : 'none');
-      });
 
-      // 🔒 Default state: leases OFF, legend visible
-      cy.edges('[lease]').style('display', 'none');
-      cy.getElementById('deck_family_trust').style('display', 'none');
-      toggleCheckbox.checked = false;
-
-      // Fit graph after initial state set
-      const fitGraph = () => cy.fit(null, 80);
-      fitGraph();
-      window.addEventListener('resize', fitGraph);
-    });
-  </script>
+</script>
 </body>
 </html>
 

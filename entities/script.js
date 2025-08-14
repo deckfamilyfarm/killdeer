@@ -35,7 +35,7 @@ const yBottom2 = 600;
 // X positions
 const nodePositions = {
   olympia_provisions:        { x: -500, y: yTop },
-  garden_wholesale:          { x: 700, y: yTop },
+  garden_wholesale:          { x: 700,  y: yTop },
   farmers_market_customers:  { x: -200, y: yTop },
   wholesale_customers:       { x: 200,  y: yTop },
   ffcsa_members:             { x: 500,  y: yTop },
@@ -135,7 +135,6 @@ const cy = cytoscape({
         'padding': '15px'
       }
     },
-
     {
       selector: 'edge[percent]',
       style: {
@@ -171,24 +170,16 @@ const cy = cytoscape({
         'text-margin-y': -10,
         'text-rotation': 'horizontal'
       }
-    },
-    {
-      selector: 'edge:hover',
-      style: {
-      }
     }
   ],
 
-  layout: {
-    name: 'preset'
-  },
-
+  layout: { name: 'preset' },
   userZoomingEnabled: true,
   userPanningEnabled: true,
   wheelSensitivity: 0.2
 });
 
-// Tooltip for edge note
+// Tooltip for edge note + hide leases by default
 cy.ready(() => {
   const tooltip = document.createElement('div');
   tooltip.style.position = 'absolute';
@@ -236,7 +227,6 @@ cy.ready(() => {
   }
 
   const fitGraph = () => cy.fit(null, 80);
-  fitGraph();
   window.addEventListener('resize', fitGraph);
 
   // Legend
@@ -250,32 +240,31 @@ cy.ready(() => {
   legend.style.fontSize = '14px';
   legend.style.borderRadius = '5px';
   legend.style.boxShadow = '0 2px 5px rgba(0,0,0,0.1)';
-legend.innerHTML = `
-  <strong>Legend:</strong><br>
-  <svg height="10" width="40"><line x1="0" y1="5" x2="40" y2="5" stroke="#4CAF50" stroke-width="2" stroke-dasharray="5,5"/></svg> Lease<br>
-  <svg height="10" width="40"><line x1="0" y1="5" x2="40" y2="5" stroke="#FFA500" stroke-width="2"/></svg> Percentage<br><br>
-  <label style="font-weight:normal;">
-    <input type="checkbox" id="toggleLease" checked>
-    Show Leases
-  </label>
-`;
+  legend.innerHTML = `
+    <strong>Legend:</strong><br>
+    <svg height="10" width="40"><line x1="0" y1="5" x2="40" y2="5" stroke="#4CAF50" stroke-width="2" stroke-dasharray="5,5"/></svg> Lease<br>
+    <svg height="10" width="40"><line x1="0" y1="5" x2="40" y2="5" stroke="#FFA500" stroke-width="2"/></svg> Percentage<br><br>
+    <label style="font-weight:normal;">
+      <input type="checkbox" id="toggleLease">
+      Show Leases
+    </label>
+  `;
   document.body.appendChild(legend);
 
-// 🚦 Toggle lease arrows from legend checkbox
-// 🚦 Toggle lease arrows and deck_family_trust node
-const toggleCheckbox = document.getElementById('toggleLease');
-toggleCheckbox.addEventListener('change', () => {
-  const show = toggleCheckbox.checked;
-
-  // Toggle lease edges
-  cy.edges('[lease]').forEach(edge => {
-    edge.style('display', show ? 'element' : 'none');
+  // Toggle leases from checkbox
+  const toggleCheckbox = document.getElementById('toggleLease');
+  toggleCheckbox.addEventListener('change', () => {
+    const show = toggleCheckbox.checked;
+    cy.edges('[lease]').style('display', show ? 'element' : 'none');
+    cy.getElementById('deck_family_trust').style('display', show ? 'element' : 'none');
+    fitGraph();
   });
 
-  // Toggle lease node
-  const trustNode = cy.getElementById('deck_family_trust');
-  trustNode.style('display', show ? 'element' : 'none');
-});
+  // Default state: leases hidden, checkbox off
+  cy.edges('[lease]').style('display', 'none');
+  cy.getElementById('deck_family_trust').style('display', 'none');
+  toggleCheckbox.checked = false;
 
+  fitGraph();
 });
 
