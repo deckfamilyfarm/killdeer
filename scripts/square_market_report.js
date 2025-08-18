@@ -91,7 +91,11 @@ async function fetchLocationIds() {
   const res = await axios.get(BASE_LOCATIONS_URL, {
     headers: { Authorization: `Bearer ${ACCESS_TOKEN}` }
   });
-  return res.data.locations.filter(loc => loc.status === 'ACTIVE').map(loc => ({ id: loc.id, name: loc.name }));
+
+  // filter out "ON FARM SALES"
+  return res.data.locations
+    .filter(loc => loc.status === 'ACTIVE' && loc.id !== 'C0T7DVZY5XVG5')
+    .map(loc => ({ id: loc.id, name: loc.name }));
 }
 
 async function fetchOrders(locationId, begin, end, cursor = null, collected = []) {
