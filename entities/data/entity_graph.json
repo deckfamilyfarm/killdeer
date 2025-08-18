@@ -1,0 +1,46 @@
+{
+  "entities": [
+    "friends_marketing",
+    "ffcsa",
+    "hyland_processing",
+    "layers",
+    "roasters",
+    "grazers",
+    "pork",
+    "creamy_cow",
+    "garden",
+    "olympia_provisions",
+    "garden_wholesale",
+    "farmers_market_customers",
+    "ffcsa_members",
+    "wholesale_customers",
+    "deck_family_trust"
+  ],
+  "relationships": [
+    { "to": "hyland_processing", "from": "friends_marketing", "percentage": "23" },
+    { "from": "hyland_processing", "to": "friends_marketing", "percentage": "23" },
+    { "from": "layers", "to": "friends_marketing", "percentage": "23", "note": "discuss" },
+    { "from": "roasters", "to": "friends_marketing", "percentage": "23" },
+    { "from": "grazers", "to": "friends_marketing", "percentage": "23" },
+    { "from": "pork", "to": "friends_marketing", "percentage": "23" },
+    { "from": "friends_marketing", "to": "ffcsa", "percentage": "XX" },
+    { "from": "pork", "to": "olympia_provisions", "percentage": "23", "note": "whole hogs" },
+    { "from": "creamy_cow", "to": "ffcsa", "percentage": "23" },
+    { "from": "garden", "to": "ffcsa", "percentage": "23" },
+    { "from": "garden", "to": "garden_wholesale", "percentage": "23" },
+    { "from": "friends_marketing", "to": "farmers_market_customers", "percentage": "XX" },
+    { "from": "ffcsa", "to": "ffcsa_members", "percentage": "XX" },
+    { "from": "friends_marketing", "to": "wholesale_customers", "percentage": "XX" },
+
+    { "from": "ffcsa", "to": "deck_family_trust", "note": "lease" },
+    { "from": "friends_marketing", "to": "deck_family_trust", "note": "lease" },
+    { "from": "garden", "to": "deck_family_trust", "note": "lease" },
+    { "from": "pork", "to": "deck_family_trust", "note": "lease" },
+    { "from": "layers", "to": "deck_family_trust", "note": "lease" },
+    { "from": "roasters", "to": "deck_family_trust", "note": "lease" },
+    { "from": "grazers", "to": "deck_family_trust", "note": "lease" },
+    { "from": "creamy_cow", "to": "deck_family_trust", "note": "lease" },
+    { "from": "hyland_processing", "to": "deck_family_trust", "note": "lease" }
+  ]
+}
+
