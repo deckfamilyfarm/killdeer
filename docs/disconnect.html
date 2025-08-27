@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Disconnected from QuickBooks</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root { --max:780px; --fg:#0f172a; --muted:#475569; --line:#e2e8f0; --accent:#2563eb; }
+    * { box-sizing:border-box }
+    body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; color:var(--fg); line-height:1.6; }
+    main { max-width:var(--max); margin:6vh auto; padding:24px; }
+    h1 { margin:0 0 .25rem 0; line-height:1.2 }
+    p.muted { color:var(--muted); margin-top:.25rem }
+    .card { border:1px solid var(--line); border-radius:12px; padding:20px; margin-top:16px }
+    .row { display:flex; gap:12px; flex-wrap:wrap; margin-top:16px }
+    a.btn { display:inline-block; padding:.6rem 1rem; border-radius:10px; border:1px solid var(--accent); color:white; background:var(--accent); text-decoration:none; }
+    a.link { color:var(--accent); text-decoration:none }
+    a.link:hover { text-decoration:underline }
+    code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; background:#f8fafc; padding:.1rem .35rem; border:1px solid var(--line); border-radius:6px }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>You're disconnected from QuickBooks</h1>
+    <p class="muted">The integration has been removed from your QuickBooks company.</p>
+
+    <div class="card">
+      <p><strong>Company (realmId):</strong> <span id="realm">unknown</span></p>
+      <p>If you disconnected by mistake, you can reconnect below. Reconnecting will ask you to grant access again.</p>
+      <div class="row">
+        <!-- Point this to your OAuth start route -->
+        <a class="btn" id="reconnect" href="/intuit/connect">Reconnect to QuickBooks</a>
+        <a class="link" href="/">Back to Home</a>
+      </div>
+    </div>
+
+    <p class="muted" style="margin-top:20px">
+      Need help? <a class="link" href="mailto:support@yourdomain.com">support@yourdomain.com</a> ·
+      <a class="link" href="/legal/privacy">Privacy</a> ·
+      <a class="link" href="/legal/terms">Terms</a>
+    </p>
+  </main>
+
+  <script>
+    const p = new URLSearchParams(location.search);
+    const realmId = p.get('realmId');
+    if (realmId) document.getElementById('realm').textContent = realmId;
+  </script>
+</body>
+</html>
+
