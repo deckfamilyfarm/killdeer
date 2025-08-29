@@ -4,7 +4,7 @@ const envPath = path.resolve(__dirname, `../.env.${env}`);
 require('dotenv').config({ path: envPath });
 console.log(`✅ Loaded environment: ${env} from ${envPath}`);
 
-const IS_TESTING = true; // 👈 Set to false to enable updates
+const IS_TESTING = false; // 👈 Set to false to enable updates
 
 const Product = require('../src/models/Product');
 const utilities = require('../src/utils/utilities.pricing');
@@ -13,7 +13,7 @@ const tokenManager = require("../src/utils/tokenManager");
 (async () => {
   try {
     //const sql = "SELECT * FROM pricelist WHERE id = 39";
-    const sql = "SELECT * FROM pricelist WHERE available_on_ll = 1"
+    const sql = "SELECT * FROM pricelist WHERE available_on_ll = 1 and productName like '%Ranger%'"
     const [rows] = await utilities.db.query(sql);
     const accessToken = await tokenManager.getValidAccessToken();
 
