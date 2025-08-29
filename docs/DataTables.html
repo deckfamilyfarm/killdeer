@@ -1,193 +1,441 @@
 <!DOCTYPE html>
 <html lang="en">
-	<head>
-		<meta charset="UTF-8">
-		<meta name="viewport" content="width=device-width, initial-scale=1.0">
-		<title>Weekly KPI Data Tables</title>
-		<style>
-table {
-	border-collapse: collapse;
-	width: 100%;
-	margin-bottom: 20px;
-}
-		table, th, td {
-			border: 1px solid black;
-		}
-		th, td {
-			padding: 8px;
-			text-align: left;
-			cursor: pointer;
-		}
-		th:first-child, td:first-child {
-			white-space: nowrap;
-			width: 200px;
-		}
-		</style>
-	</head>
-	<body>
-		<h1>Weekly KPI Data Tables</h1>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KPI Explorer</title>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net"/>
+  <style>
+    :root {
+      --bg: #0f172a;         /* slate-900 */
+      --panel: #111827;      /* gray-900 */
+      --muted: #94a3b8;      /* slate-400 */
+      --text: #e5e7eb;       /* gray-200 */
+      --accent: #22c55e;     /* green-500 */
+      --border: #1f2937;     /* gray-800 */
+      --chip: #0b1223;       /* darker */
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0; padding: 24px; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans,
+      Helvetica Neue, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      background: linear-gradient(180deg, #0b1020, #0f172a 40%);
+      color: var(--text);
+    }
+    h1 { margin: 0 0 12px; font-size: 20px; letter-spacing: 0.3px; }
+    .subtle { color: var(--muted); font-size: 12px; }
 
-		<h2>Vendors</h2>
-		<table id="dataTable2">
-			<thead>
-				<tr>
-					<th onclick="sortTable(0, 'dataTable2')">Week</th>
-					<!-- Vendors headers will be inserted dynamically -->
-				</tr>
-			</thead>
-			<tbody></tbody>
-		</table>
+    .toolbar {
+      display: grid; gap: 12px; grid-template-columns: 1fr; margin: 16px 0 20px;
+    }
+    @media (min-width: 1000px) {
+      .toolbar { grid-template-columns: 220px 1fr 140px; align-items: end; }
+    }
 
-		<h2>Categories</h2>
-		<table id="dataTable3">
-			<thead>
-				<tr>
-					<th onclick="sortTable(0, 'dataTable3')">Week</th>
-					<!-- Categories headers will be inserted dynamically -->
-				</tr>
-			</thead>
-			<tbody></tbody>
-		</table>
+    .panel {
+      background: radial-gradient(90% 90% at 10% 10%, rgba(34,197,94,0.07), rgba(30,41,59,0.5) 40%, rgba(2,6,23,0.8) 100%), var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 14px; padding: 14px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+    }
 
-		<h2>Products</h2>
-		<table id="dataTable4">
-			<thead>
-				<tr>
-					<th onclick="sortTable(0, 'dataTable4')">Week</th>
-					<!-- Products headers will be inserted dynamically -->
-				</tr>
-			</thead>
-			<tbody></tbody>
-		</table>
+    label { font-size: 12px; color: var(--muted); display: block; margin: 2px 0 6px; }
+    select, input[type="text"], button {
+      width: 100%;
+      background: #0b1223; color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 10px; padding: 10px 12px; outline: none;
+    }
+    select[multiple] { height: 240px; }
 
-		<h2>Dropsites</h2>
-		<table id="dataTable5">
-			<thead>
-				<tr>
-					<th onclick="sortTable(0, 'dataTable5')">Week</th>
-					<!-- Dropsites headers will be inserted dynamically -->
-				</tr>
-			</thead>
-			<tbody></tbody>
-		</table>
+    .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+    .row button { width: auto; padding: 8px 12px; border-radius: 10px; cursor: pointer; }
+    .btn-primary { background: var(--accent); color: #052e16; border-color: #16a34a; font-weight: 600; }
+    .btn-ghost { background: #0b1223; }
 
-		<script>
-			// Fetching the JSON data
-			fetch('https://raw.githubusercontent.com/jdeck88/ffcsa_scripts/main/localline/data/weekly_kpi.json')
-				.then(response => response.json())
-				.then(jsonData => {
-					// Sort weeks by date in descending order
-					jsonData.weeks.sort((a, b) => new Date(b.dateRange.split(' - ')[0]) - new Date(a.dateRange.split(' - ')[0]));
+    .chips { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+    .chip {
+      background: var(--chip); border: 1px solid var(--border); color: var(--text);
+      padding: 4px 10px; border-radius: 999px; font-size: 12px;
+    }
 
-					createTable(jsonData, 'dataTable2', 'vendors');
-					createTable(jsonData, 'dataTable3', 'category');
-					createTable(jsonData, 'dataTable4', 'product');
-					createTable(jsonData, 'dataTable5', 'dropsite');
+    .chart-wrap { margin: 14px 0 6px; }
+    canvas { width: 100%; max-height: 420px; }
 
+    table { width: 100%; border-collapse: collapse; margin-top: 14px; }
+    th, td { padding: 8px 10px; border-bottom: 1px solid var(--border); text-align: right; }
+    th:first-child, td:first-child { text-align: left; position: sticky; left: 0; background: #0b1223; }
+    thead th { position: sticky; top: 0; background: #0b1223; z-index: 1; }
+    th.sortable { cursor: pointer; }
+    th.sortable .arrows { opacity: 0.55; font-size: 10px; margin-left: 6px; }
 
-					// Call sortTable function for the "Week" column (index 0) immediately after the tables are populated
-					sortTable(0, 'dataTable2');
-					sortTable(0, 'dataTable3');
-					sortTable(0, 'dataTable4');
-					sortTable(0, 'dataTable5');
+    .footer { margin-top: 18px; display: flex; gap: 10px; flex-wrap: wrap; }
 
-				})
-				.catch(error => console.error('Error fetching the JSON data:', error));
+    .empty { text-align: center; padding: 30px 12px; color: var(--muted); }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>KPI Explorer</h1>
+    <div class="subtle">Pick a grouping (vendors, categories, products, or dropsites), choose one or more items, then visualize weekly trends.</div>
+  </header>
 
+  <section class="panel">
+    <div class="toolbar">
+      <div>
+        <label for="dimension">Group by</label>
+        <select id="dimension">
+          <option value="vendors">Vendors</option>
+          <option value="category">Categories</option>
+          <option value="product">Products</option>
+          <option value="dropsite">Dropsites</option>
+        </select>
+      </div>
 
-function createTable(jsonData, tableId, dataKey) {
-    const table = document.getElementById(tableId);
-    const thead = table.querySelector('thead tr');
-    const tbody = table.querySelector('tbody');
+      <div>
+        <label for="filter">Filter & select (multi)</label>
+        <input id="filter" type="text" placeholder="Type to filter…" />
+        <select id="itemSelect" multiple></select>
+        <div class="row" style="margin-top:8px">
+          <button id="btnAll" class="btn-ghost" type="button">Select all visible</button>
+          <button id="btnNone" class="btn-ghost" type="button">Clear</button>
+        </div>
+        <div id="selectedChips" class="chips"></div>
+      </div>
 
-    const headers = new Set();
-    jsonData.weeks.forEach(week => {
-        Object.keys(week.data[dataKey]).forEach(key => headers.add(key));
-    });
+      <div>
+        <label>&nbsp;</label>
+        <div class="row">
+          <button id="btnApply" class="btn-primary" type="button">Apply</button>
+          <button id="btnCSV" class="btn-ghost" type="button">Download CSV</button>
+        </div>
+      </div>
+    </div>
+  </section>
 
-    let index = 0; // Initialize an index variable
-    headers.forEach(header => {
-		const th = document.createElement('th');
-        th.style.position = 'relative'; // Position relative for the arrow span
-        th.style.paddingRight = '30px'; // Add extra padding to accommodate the arrow
+  <section class="panel chart-wrap">
+    <div id="totalsBar" class="subtle" style="margin:4px 0 10px;"></div>
+    <canvas id="kpiChart" aria-label="Series chart" role="img"></canvas>
+    <div id="chartEmpty" class="empty" hidden>Pick at least one item to see a chart.</div>
+  </section>
 
-        // Create a span to hold the header text
-        const headerSpan = document.createElement('span');
-        headerSpan.textContent = header;
-        th.appendChild(headerSpan);
+  <section class="panel">
+    <div id="tableWrap"></div>
+  </section>
 
-        // Create a span to hold the sort arrows
-        const arrowSpan = document.createElement('span');
-        arrowSpan.style.position = 'absolute'; // Absolute positioning within the th
-        arrowSpan.style.right = '5px'; // Position the arrows to the right of the header text
-        arrowSpan.style.top = '50%'; // Vertically center the arrows
-        arrowSpan.style.transform = 'translateY(-50%)'; // Adjust vertical alignment
-        arrowSpan.style.fontSize = '14px'; // Adjust font size as needed
-        arrowSpan.style.lineHeight = '1'; // Ensure line height matches font size for vertical alignment
-        arrowSpan.innerHTML = '▲<br>▼'; // Display up and down arrows stacked vertically
-        th.appendChild(arrowSpan);
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+  (function(){
+    const DATA_URL = 'https://raw.githubusercontent.com/jdeck88/ffcsa_scripts/main/localline/data/weekly_kpi.json';
 
-        let currentIndex = index + 1;
-        th.onclick = () => {
-            sortTable(currentIndex, tableId, th);
+    /** State **/
+    let RAW = null;              // full json
+    let weeks = [];              // sorted weeks
+    let allItemsByDim = {};      // { vendors: string[], category: string[], ... }
+    let selected = new Set();    // user selections for current dimension
+    let chart = null;            // Chart.js instance
+    let currentDim = 'vendors';
+
+    /** DOM **/
+    const elDim = document.getElementById('dimension');
+    const elFilter = document.getElementById('filter');
+    const elSelect = document.getElementById('itemSelect');
+    const elChips = document.getElementById('selectedChips');
+    const elApply = document.getElementById('btnApply');
+    const elAll = document.getElementById('btnAll');
+    const elNone = document.getElementById('btnNone');
+    const elCSV = document.getElementById('btnCSV');
+    const elChart = document.getElementById('kpiChart');
+    const elChartEmpty = document.getElementById('chartEmpty');
+    const elTableWrap = document.getElementById('tableWrap');
+    const elTotals = document.getElementById('totalsBar');
+
+    /** Utilities **/
+    const fmtNumber = (n) => new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 }).format(n);
+
+    const parseDateFromRange = (range) => {
+      // supports "YYYY-MM-DD - YYYY-MM-DD" or "YYYY-MM-DD to YYYY-MM-DD"
+      const parts = range.includes(' - ') ? range.split(' - ') : range.split(' to ');
+      return new Date(parts[0]);
+    };
+
+    const uniqueSortedKeys = (dim) => {
+      const s = new Set();
+      for (const w of weeks) {
+        const obj = (w.data && w.data[dim]) || {};
+        for (const k of Object.keys(obj)) s.add(k);
+      }
+      return Array.from(s).sort((a,b) => a.localeCompare(b));
+    };
+
+    const sumAcrossWeeks = (dim, key) => {
+      let t = 0;
+      for (const w of weeks) t += Number((w.data?.[dim]?.[key]) || 0);
+      return t;
+    };
+
+    const debounce = (fn, ms=200) => {
+      let t; return (...args) => { clearTimeout(t); t = setTimeout(()=>fn(...args), ms); };
+    };
+
+    /** Fetch + bootstrap **/
+    fetch(DATA_URL)
+      .then(r => r.json())
+      .then(json => {
+        RAW = json;
+        weeks = (json.weeks || []).slice().sort((a,b)=>parseDateFromRange(b.dateRange) - parseDateFromRange(a.dateRange));
+        allItemsByDim = {
+          vendors: uniqueSortedKeys('vendors'),
+          category: uniqueSortedKeys('category'),
+          product: uniqueSortedKeys('product'),
+          dropsite: uniqueSortedKeys('dropsite')
         };
+        // Default: preselect top 5 vendors by total
+        currentDim = 'vendors';
+        const top5 = allItemsByDim[currentDim]
+          .map(k => ({ k, t: sumAcrossWeeks(currentDim, k) }))
+          .sort((a,b)=> b.t - a.t)
+          .slice(0,5)
+          .map(o=>o.k);
+        selected = new Set(top5);
+        renderDimension(currentDim);
+        renderChips();
+        apply();
+      })
+      .catch(err => {
+        console.error('Error loading JSON', err);
+        elTableWrap.innerHTML = `<div class="empty">Failed to load data.</div>`;
+      });
 
-        thead.appendChild(th);
-        index++; // Increment the index manually
-    });
+    /** Renderers **/
+    function renderDimension(dim){
+      currentDim = dim;
+      // Reset filter
+      elFilter.value = '';
+      // If switching dims, keep only items that exist in new dim
+      const all = new Set(allItemsByDim[dim]);
+      selected = new Set([...selected].filter(x => all.has(x)));
+      // Build options
+      rebuildSelectOptions();
+    }
 
-    jsonData.weeks.forEach(week => {
-        const tr = document.createElement('tr');
-        const weekTd = document.createElement('td');
-        weekTd.textContent = week.dateRange;
-        tr.appendChild(weekTd);
+    function rebuildSelectOptions(){
+      const query = elFilter.value.trim().toLowerCase();
+      const items = allItemsByDim[currentDim];
+      elSelect.innerHTML = '';
+      let shown = 0;
+      for (const k of items) {
+        if (query && !k.toLowerCase().includes(query)) continue;
+        const opt = document.createElement('option');
+        opt.value = k; opt.textContent = k; opt.selected = selected.has(k);
+        elSelect.appendChild(opt);
+        shown++;
+      }
+      if (shown === 0) {
+        const opt = document.createElement('option');
+        opt.disabled = true; opt.textContent = 'No matches';
+        elSelect.appendChild(opt);
+      }
+    }
 
-        headers.forEach(header => {
-            const td = document.createElement('td');
-            td.textContent = week.data[dataKey][header] || '';
-            tr.appendChild(td);
-        });
+    function renderChips(){
+      elChips.innerHTML = '';
+      for (const k of selected) {
+        const div = document.createElement('span');
+        div.className = 'chip';
+        div.textContent = k;
+        elChips.appendChild(div);
+      }
+    }
 
-        tbody.appendChild(tr);
-    });
-}
+    function buildDatasets(dim, keys){
+      const labels = weeks.map(w => w.dateRange);
+      const datasets = keys.map((k)=>({
+        label: k,
+        data: weeks.map(w => Number(w.data?.[dim]?.[k] || 0)),
+        tension: 0.2,
+        fill: false,
+      }));
+      return { labels, datasets };
+    }
 
+    // Compute per-week total across selected keys
+    function buildTotalSeries(dim, keys){
+      return weeks.map(w => keys.reduce((sum,k)=> sum + Number(w.data?.[dim]?.[k] || 0), 0));
+    }
 
-function sortTable(columnIndex, tableId) {
-    const table = document.getElementById(tableId);
-    const rows = Array.from(table.rows).slice(1); // Get all rows except the header
-    const isAsc = table.getAttribute('data-sort') === 'asc';
+    function renderTotalsBar(dim, keys){
+      if (!keys.length) { elTotals.textContent = ''; return; }
+      const series = buildTotalSeries(dim, keys);
+      const total = series.reduce((a,b)=>a+b,0);
+      const avg = series.length ? total/series.length : 0;
+      elTotals.textContent = `TOTAL across selected (all weeks): ${fmtNumber(total)} | Avg/week: ${fmtNumber(avg)}`;
+    }
 
-    console.log(`(Index: ${columnIndex})`);
-    const columnHeader = table.rows[0].cells[columnIndex].textContent.trim();
-    console.log(`Sorting by column: ${columnHeader} (Index: ${columnIndex})`);
+    function renderChart(dim, keys){
+      const { labels, datasets } = buildDatasets(dim, keys);
+      // Add TOTAL dataset across selected
+      const totalSeries = buildTotalSeries(dim, keys);
+      const totalHasData = totalSeries.some(v => v !== 0);
+      if (totalHasData) {
+        datasets.push({ label: 'TOTAL (selected)', data: totalSeries, tension: 0.2, fill: false, borderWidth: 3 });
+      }
+      const hasData = datasets.some(ds => ds.data.some(v => v !== 0));
+      elChart.style.display = hasData ? 'block' : 'none';
+      elChartEmpty.hidden = hasData;
+      if (!hasData) return;
 
-    rows.sort((rowA, rowB) => {
-        let cellA = rowA.cells[columnIndex].textContent.trim();
-        let cellB = rowB.cells[columnIndex].textContent.trim();
-
-        // Convert values to numbers, treating empty strings as 0
-        let valueA = cellA === '' ? 0 : (isNaN(cellA) ? cellA : parseFloat(cellA));
-        let valueB = cellB === '' ? 0 : (isNaN(cellB) ? cellB : parseFloat(cellB));
-
-        // Handle string comparison for non-numeric values
-        if (typeof valueA === 'string' && typeof valueB === 'string') {
-            return isAsc ? valueA.localeCompare(valueB) : valueB.localeCompare(valueA);
+      if (chart) chart.destroy();
+      chart = new Chart(elChart.getContext('2d'), {
+        type: 'line',
+        data: { labels, datasets },
+        options: {
+          responsive: true,
+          plugins: { legend: { position: 'top' }, tooltip: { mode: 'index', intersect: false } },
+          interaction: { mode: 'nearest', axis: 'x', intersect: false },
+          scales: {
+            x: { ticks: { autoSkip: true, maxRotation: 0 } },
+            y: { ticks: { callback: (v)=>fmtNumber(v) }, beginAtZero: true }
+          }
         }
+      });
+    }
 
-        // Handle numeric comparison
-        if (valueA < valueB) return isAsc ? -1 : 1;
-        if (valueA > valueB) return isAsc ? 1 : -1;
-        return 0;
+    function renderTable(dim, keys){
+      if (!keys.length) { elTableWrap.innerHTML = `<div class="empty">No items selected.</div>`; return; }
+      const headers = ['Week', ...keys, 'TOTAL'];
+      const rows = weeks.map(w => {
+        const values = keys.map(k => Number(w.data?.[dim]?.[k] || 0));
+        const rowTotal = values.reduce((a,b)=>a+b,0);
+        return [w.dateRange, ...values, rowTotal];
+      });
+
+      // Build table
+      const table = document.createElement('table');
+      const thead = document.createElement('thead');
+      const trh = document.createElement('tr');
+
+      headers.forEach((h, idx) => {
+        const th = document.createElement('th');
+        th.textContent = h;
+        th.className = 'sortable';
+        const arrows = document.createElement('span'); arrows.className = 'arrows'; arrows.textContent = ' ▲▼';
+        th.appendChild(arrows);
+        th.addEventListener('click', ()=> sortTable(table, idx));
+        trh.appendChild(th);
+      });
+      thead.appendChild(trh); table.appendChild(thead);
+
+      const tbody = document.createElement('tbody');
+      for (const r of rows) {
+        const tr = document.createElement('tr');
+        r.forEach((cell, i)=>{
+          const td = document.createElement('td');
+          td.textContent = (i===0) ? String(cell) : fmtNumber(cell);
+          tr.appendChild(td);
+        });
+        tbody.appendChild(tr);
+      }
+      table.appendChild(tbody);
+
+      elTableWrap.innerHTML = '';
+      elTableWrap.appendChild(table);
+    }
+
+    function sortTable(table, columnIndex){
+      const tbody = table.querySelector('tbody');
+      const rows = Array.from(tbody.querySelectorAll('tr'));
+      const current = table.getAttribute('data-sort') || '';
+      const [curIdx, curDir] = current.split(':');
+      const asc = !(Number(curIdx) === columnIndex && curDir === 'asc');
+
+      rows.sort((a,b)=>{
+        const A = a.children[columnIndex].textContent.replace(/,/g, '');
+        const B = b.children[columnIndex].textContent.replace(/,/g, '');
+        const aNum = Number(A); const bNum = Number(B);
+        if (!isNaN(aNum) && !isNaN(bNum)) return asc ? aNum - bNum : bNum - aNum;
+        return asc ? A.localeCompare(B) : B.localeCompare(A);
+      });
+      rows.forEach(r => tbody.appendChild(r));
+      table.setAttribute('data-sort', `${columnIndex}:${asc ? 'asc':'desc'}`);
+    }
+
+    function tableToCSV(){
+      const table = elTableWrap.querySelector('table');
+      if (!table) return '';
+      const rows = Array.from(table.querySelectorAll('tr')).map(tr => Array.from(tr.children).map(td => td.textContent));
+      const esc = (v) => /[",\n]/.test(v) ? '"' + v.replace(/"/g,'""') + '"' : v;
+      return rows.map(r => r.map(esc).join(',')).join('\n');
+    }
+
+    /** Apply flow **/
+    function apply(){
+      // If nothing selected, preselect top 5 of current dim
+      if (selected.size === 0) {
+        const top = allItemsByDim[currentDim]
+          .map(k => ({ k, t: sumAcrossWeeks(currentDim, k) }))
+          .sort((a,b)=> b.t - a.t)
+          .slice(0,5)
+          .map(o=>o.k);
+        selected = new Set(top);
+        rebuildSelectOptions();
+        renderChips();
+      }
+      const keys = [...selected];
+      renderChart(currentDim, keys);
+      renderTable(currentDim, keys);
+      renderTotalsBar(currentDim, keys);
+    }
+
+    /** Events **/
+    elDim.addEventListener('change', (e)=>{
+      // switch dimension, reset selection to empty so user picks explicitly
+      currentDim = e.target.value;
+      selected = new Set();
+      renderDimension(currentDim);
+      renderChips();
+      // Do not auto-apply; wait for user (they may want to search)
     });
 
-    rows.forEach(row => table.tBodies[0].appendChild(row));
-    table.setAttribute('data-sort', isAsc ? 'desc' : 'asc');
-}
+    elFilter.addEventListener('input', debounce(()=> rebuildSelectOptions(), 120));
 
+    elSelect.addEventListener('change', ()=>{
+      // keep Set in sync with current select selections
+      const opts = Array.from(elSelect.options);
+      for (const o of opts) {
+        if (o.disabled) continue;
+        if (o.selected) selected.add(o.value); else selected.delete(o.value);
+      }
+      renderChips();
+    });
 
+    elAll.addEventListener('click', ()=>{
+      const opts = Array.from(elSelect.options);
+      for (const o of opts) { if (!o.disabled) { o.selected = true; selected.add(o.value); } }
+      renderChips();
+    });
 
-		</script>
-	</body>
+    elNone.addEventListener('click', ()=>{
+      const opts = Array.from(elSelect.options);
+      for (const o of opts) { o.selected = false; }
+      selected.clear();
+      renderChips();
+    });
+
+    elApply.addEventListener('click', apply);
+
+    elCSV.addEventListener('click', ()=>{
+      const csv = tableToCSV();
+      if (!csv) return;
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = `kpi_${currentDim}.csv`; a.click();
+      URL.revokeObjectURL(url);
+    });
+  })();
+  </script>
+</body>
 </html>
 
