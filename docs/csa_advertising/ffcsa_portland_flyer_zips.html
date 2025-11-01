@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Deck Family Farm – Portland Home Delivery</title>
+  <style>
+    :root { --brand: #2f855a; --accent: #8bc34a; --dark: #1f2937; }
+    body { font-family: -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; color: var(--dark); margin: 0; }
+    .wrap { max-width: 850px; margin: 0 auto; padding: 28px; }
+    .hero { border: 3px solid var(--brand); border-radius: 18px; padding: 24px; display:flex; gap:24px; align-items:center; }
+    .hero h1 { margin: 0 0 6px; font-size: 2rem; color: var(--brand);}
+    .tag { font-weight: 600; letter-spacing:.3px; color: var(--dark);}
+    .grid { display:grid; grid-template-columns: 1.1fr .9fr; gap: 24px; margin-top: 20px; }
+    .card { border:1px solid #e5e7eb; border-radius:14px; padding:18px; }
+    .card h3 { margin:0 0 8px; color: var(--brand);}
+    ul { margin: 8px 0 0 18px; }
+    .cta { margin-top: 22px; padding: 14px 16px; background: var(--brand); color:white; text-decoration:none; border-radius: 10px; display:inline-block; }
+    .footer { margin-top: 22px; font-size: 12px; color:#6b7280; }
+    .qr { text-align:center; }
+    .offer { background: #ecfdf5; border:1px dashed var(--brand); padding: 12px; border-radius: 12px; }
+    @media print {
+      .cta { display:none; }
+      a { color: inherit; text-decoration: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="hero">
+      <div style="flex:1;">
+        <h1>Saturday Home Delivery – Portland</h1>
+        <div class="tag">Fresh from Deck Family Farm to your door</div>
+        <p>Launching near PSU and Hollywood. Kid-friendly farm staples, local milk & eggs, and seasonally curated bundles.</p>
+        <div class="offer"><strong>Intro offer:</strong> $0 first delivery + $10 farm credit on week 4 when you stick with us.</div>
+        <a class="cta" href="https://www.deckfamilyfarm.com/subscribe">Subscribe now</a>
+      </div>
+      <div class="qr">
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=https%3A%2F%2Fwww.deckfamilyfarm.com%2Fsubscribe" width="220" height="220" alt="QR to subscribe"/>
+        <div style="font-size:12px;margin-top:6px;">Scan to subscribe</div>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <h3>Now Delivering to These ZIPs</h3>
+        <p><strong>NE (Primary):</strong> 97212, 97213, 97232, 97214<br/>
+        <strong>SW (Secondary):</strong> 97201, 97205, 97204, 97239, 97221, 97219</p>
+        <p style="margin-top:10px;">Saturday windows: <strong>12–3 pm (NE)</strong> and <strong>3–6 pm (SW)</strong>. Vacation-skip anytime.</p>
+      </div>
+      <div class="card">
+        <h3>Bundles Parents Love</h3>
+        <ul>
+          <li>Family Staples: milk, eggs, ground beef, seasonal veg & fruit</li>
+          <li>“Dinner in a Dash” one-pan kit add-on</li>
+          <li>Kid-friendly snacks (carrots, cukes, apples)</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:20px;">
+      <h3>Questions?</h3>
+      <p>Email <a href="mailto:info@deckfamilyfarm.com">info@deckfamilyfarm.com</a> or ask us at the PSU or Hollywood markets on Saturday.</p>
+    </div>
+
+    <div class="footer">
+      © 2025 Deck Family Farm · Swap in official logo/colors to match brand guidelines.
+    </div>
+  </div>
+</body>
+</html>

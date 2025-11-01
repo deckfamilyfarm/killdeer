@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>FFCSA PDX – Official ZIP Boundaries</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+  <style>
+    html, body, #map { height: 100%; margin: 0; }
+    .legend { background: white; padding: 8px 10px; border-radius: 6px; line-height: 1.3; box-shadow: 0 1px 4px rgba(0,0,0,.2);}
+    .chip { display:inline-block; padding:2px 6px; border-radius: 10px; border:1px solid #2f855a; font-size:12px; }
+  </style>
+</head>
+<body>
+<div id="map"></div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script>
+  const map = L.map('map').setView([45.523, -122.66], 12);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19, attribution: '&copy; OpenStreetMap contributors'
+  }).addTo(map);
+
+  const hubs = [
+    { name: "PSU Farmers Market (Hub)", coords: [45.512258, -122.685409] },
+    { name: "Hollywood Farmers Market (Hub)", coords: [45.5369, -122.6176] }
+  ];
+  hubs.forEach(h => L.marker(h.coords).addTo(map).bindPopup(`<strong>${h.name}</strong>`));
+
+  // Fetch official RLIS ZIP polygons (GeoJSON)
+  const url = "https://gis.oregonmetro.gov/arcgis/rest/services/OpenData/BoundaryDataWebMerc/MapServer/8/query?where=ZIPCODE IN ('97212','97213','97232','97214','97201','97205','97204','97239','97221','97219')&outFields=*&f=geojson&outSR=4326";
+  fetch(url)
+    .then(r => r.json())
+    .then(gj => {
+      const layer = L.geoJSON(gj, {
+        style: () => ({ weight: 2, fillOpacity: 0.12 }),
+        onEachFeature: (f, l) => l.bindPopup(`ZIP: ${f.properties.ZIPCODE}`)
+      }).addTo(map);
+      map.fitBounds(layer.getBounds());
+    })
+    .catch(err => console.error("Failed to load RLIS GeoJSON", err));
+
+  const legend = L.control({position:'topright'});
+  legend.onAdd = function() {
+    const div = L.DomUtil.create('div','legend');
+    div.innerHTML = `
+      <div><strong>FFCSA Saturday Home Delivery – Official ZIPs</strong></div>
+      <div>NE: 97212, 97213, 97232, 97214<br/>SW: 97201, 97205, 97204, 97239, 97221, 97219</div>
+      <div style="margin-top:6px;font-size:12px;">Generated: October 10, 2025</div>
+      <div style="margin-top:6px;font-size:12px;">Data: Oregon Metro (RLIS) ZIP Code Boundaries</div>
+    `;
+    return div;
+  };
+  legend.addTo(map);
+</script>
+</body>
+</html>
