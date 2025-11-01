@@ -10,94 +10,98 @@ const utilities = require('../src/utils/utilities.pricing');
 const Product = require('../src/models/Product');
 
 async function exportPricelistToExcel() {
-  try {
-    const [columns] = await utilities.db.execute("SHOW COLUMNS FROM pricelist");
-    const booleanColumns = columns
-      .filter(col => col.Type.includes("tinyint(1)"))
-      .map(col => col.Field);
+	try {
+		const [columns] = await utilities.db.execute("SHOW COLUMNS FROM pricelist");
+		const booleanColumns = columns
+			.filter(col => col.Type.includes("tinyint(1)"))
+			.map(col => col.Field);
 
-    const orderedColumnNames = [
-      "id", "localLineProductID", "category", "productName", "packageName",
-      "retailSalesPrice", "lowest_weight", "highest_weight", "dff_unit_of_measure",
-      "wholesalePricePerLb", "ffcsaPurchasePrice", "ffcsaMemberSalesPrice", "ffcsaGuestSalesPrice",
-      "num_of_items", "available_on_ll", "description",
-      "track_inventory", "stock_inventory", "visible"
-    ];
+		const orderedColumnNames = [
+			"id", "localLineProductID", "category", "productName", "packageName",
+			"retailSalesPrice", "lowest_weight", "highest_weight", "dff_unit_of_measure",
+			"wholesalePricePerLb", "retailPackagePrice", "ffcsaPurchasePrice", "ffcsaMemberSalesPrice", "ffcsaGuestSalesPrice", "guestPercentOverRetail",
+			"num_of_items", "available_on_ll", "description",
+			"track_inventory", "stock_inventory", "visible"
+		];
 
-    const formatColumns = {
-      "retailSalesPrice": "$#,##0.00",
-      "lowest_weight": "0.00",
-      "highest_weight": "0.00",
-      "wholesalePricePerLb": "$#,##0.00",
-      "ffcsaPurchasePrice": "$#,##0.00",
-      "ffcsaMemberSalesPrice": "$#,##0.00",
-      "ffcsaGuestSalesPrice": "$#,##0.00"
-    };
+		const formatColumns = {
+			"retailSalesPrice": "$#,##0.00",
+			"lowest_weight": "0.00",
+			"highest_weight": "0.00",
+			"retailPackagePrice": "$#,##0.00",
+			"wholesalePricePerLb": "$#,##0.00",
+			"ffcsaPurchasePrice": "$#,##0.00",
+			"ffcsaMemberSalesPrice": "$#,##0.00",
+			"ffcsaGuestSalesPrice": "$#,##0.00",
+			"guestPercentOverRetail": "0.0%"
+		};
 
-    const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet('Pricelist');
-    worksheet.addRow(orderedColumnNames);
+		const workbook = new ExcelJS.Workbook();
+		const worksheet = workbook.addWorksheet('Pricelist');
+		worksheet.addRow(orderedColumnNames);
 
-    const [rows] = await utilities.db.execute('SELECT id FROM pricelist ORDER BY category_id, productName');
+		const [rows] = await utilities.db.execute('SELECT id FROM pricelist ORDER BY category_id, productName');
 
-    for (const row of rows) {
-      const product = new Product(row.id);
-      await product.init();
+		for (const row of rows) {
+			const product = new Product(row.id);
+			await product.init();
 
-      const data = product.data;
-      const pricing = product.pricing;
+			const data = product.data;
+			const pricing = product.pricing;
 
-      const rowData = orderedColumnNames.map(column => {
-        if (column === 'wholesalePricePerLb') {return pricing.wholesalePrice;}
-        if (column === 'ffcsaPurchasePrice') return pricing.purchasePrice;
-        if (column === 'ffcsaMemberSalesPrice') return pricing.memberSalesPrice;
-        if (column === 'ffcsaGuestSalesPrice') return pricing.guestSalesPrice;
-        if (column === 'retailSalesPrice') return Number(data[column]);
-        if (column === 'lowest_weight') return Number(data[column]);
-        if (column === 'highest_weight') return Number(data[column]);
-        if (booleanColumns.includes(column)) return data[column] === 1 ? "True" : "False";
-        return data[column] ?? "";
-      });
+			const rowData = orderedColumnNames.map(column => {
+				if (column === 'retailPackagePrice') {return pricing.retailPackagePrice;}
+				if (column === 'guestPercentOverRetail') {return pricing.guestPercentOverRetail;}
+				if (column === 'wholesalePricePerLb') {return pricing.wholesalePrice;}
+				if (column === 'ffcsaPurchasePrice') return pricing.purchasePrice;
+				if (column === 'ffcsaMemberSalesPrice') return pricing.memberSalesPrice;
+				if (column === 'ffcsaGuestSalesPrice') return pricing.guestSalesPrice;
+				if (column === 'retailSalesPrice') return Number(data[column]);
+				if (column === 'lowest_weight') return Number(data[column]);
+				if (column === 'highest_weight') return Number(data[column]);
+				if (booleanColumns.includes(column)) return data[column] === 1 ? "True" : "False";
+				return data[column] ?? "";
+			});
 
-      worksheet.addRow(rowData);
-    }
+			worksheet.addRow(rowData);
+		}
 
-    orderedColumnNames.forEach((column, index) => {
-      if (formatColumns[column]) {
-        worksheet.getColumn(index + 1).numFmt = formatColumns[column];
-      }
-    });
+		orderedColumnNames.forEach((column, index) => {
+			if (formatColumns[column]) {
+				worksheet.getColumn(index + 1).numFmt = formatColumns[column];
+			}
+		});
 
-const variableSheet = workbook.addWorksheet('Variables');
-variableSheet.getCell('A1').value = 'values';
-variableSheet.getCell('B1').value = 'keys';
+		const variableSheet = workbook.addWorksheet('Variables');
+		variableSheet.getCell('A1').value = 'values';
+		variableSheet.getCell('B1').value = 'keys';
 
-const variableMap = {
-  DISCOUNT,
-  WHOLESALE_DISCOUNT,
-  MEMBER_MARKUP,
-  GUEST_MARKUP,
-  //utilities.DAIRY_MARKUP,
-};
+		const variableMap = {
+			DISCOUNT,
+			WHOLESALE_DISCOUNT,
+			MEMBER_MARKUP,
+			GUEST_MARKUP,
+			//utilities.DAIRY_MARKUP,
+		};
 
-let rowIndex = 2;
-for (const [key, value] of Object.entries(variableMap)) {
-  variableSheet.getCell(`A${rowIndex}`).value = value;
-  variableSheet.getCell(`B${rowIndex}`).value = key;
-  rowIndex++;
-}
+		let rowIndex = 2;
+		for (const [key, value] of Object.entries(variableMap)) {
+			variableSheet.getCell(`A${rowIndex}`).value = value;
+			variableSheet.getCell(`B${rowIndex}`).value = key;
+			rowIndex++;
+		}
 
-    const outputFile = '../docs/masterPriceList.xlsx';
-    await workbook.xlsx.writeFile(outputFile);
-    console.log(`✅ Excel file created: ${outputFile}`);
-    await utilities.db.end();
-    console.log("✅ Database connection closed.");
-    process.exit(0);
+		const outputFile = '../docs/masterPriceList.xlsx';
+		await workbook.xlsx.writeFile(outputFile);
+		console.log(`✅ Excel file created: ${outputFile}`);
+		await utilities.db.end();
+		console.log("✅ Database connection closed.");
+		process.exit(0);
 
-  } catch (error) {
-    console.error('❌ Error exporting data:', error);
-    process.exit(1);
-  }
+	} catch (error) {
+		console.error('❌ Error exporting data:', error);
+		process.exit(1);
+	}
 }
 
 exportPricelistToExcel();
