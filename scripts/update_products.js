@@ -12,12 +12,12 @@ const tokenManager = require("../src/utils/tokenManager");
 
 (async () => {
   try {
-    //const sql = "SELECT * FROM pricelist WHERE id = 39";
+    //const sql = "SELECT * FROM pricelist WHERE localLineProductID >= 1013987";
+    //const sql = "SELECT * FROM pricelist";
+    const sql = "SELECT * FROM pricelist WHERE id = 130";
     //const sql = "SELECT * FROM pricelist WHERE available_on_ll = 1 and productName like '%Ranger%'"
     //const sql = "SELECT * FROM pricelist WHERE available_on_ll = 1 and sale_discount > 0"
     //const sql = "SELECT * FROM pricelist WHERE dateModified >= '2025-09-25'"
-    //const sql = "SELECT * FROM pricelist WHERE localLineProductID >= 1013987";
-    const sql = "SELECT * FROM pricelist";
     const [rows] = await utilities.db.query(sql);
     const accessToken = await tokenManager.getValidAccessToken();
 
