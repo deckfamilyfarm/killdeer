@@ -42,12 +42,6 @@ class Product {
 
         this.data = row;
 
-        // normalize available_on_ll to a boolean
-        const availableOnLl =
-            Buffer.isBuffer(row.available_on_ll)
-            ? this.data.available_on_ll[0] === 1
-            : this.data.available_on_ll == 1; // loose == to catch "1" as well
-
         this.pricing = this.#calculatePrices();
 
     }
@@ -63,7 +57,7 @@ class Product {
         const payload = { pricelist_id: pricelistID, product_id: this.productId };
 
 
-        if (!this.data.availableOnLl) {
+        if (!this.data.available_on_ll) {
             console.log(`Product ${this.data.id} (${this.data.productName}) is not available to update SKIPPING (available_on_ll=false).`);
         } else {
             if (this.IS_TESTING) {
@@ -287,7 +281,7 @@ const price = (parseFloat(base) + (parseFloat(base) * parseFloat(markup) / 100))
 
 let message = `${product.name} (${productId}) on price list ${priceListID} $${base} base price $${price} final price ${this.data.sale ? ' (Sale!)' : ''}${strike}`;
 
-if (!this.data.availableOnLl) {
+if (!this.data.available_on_ll) {
     console.log(`Product ${this.data.id} (${this.data.productName}) is not available to update SKIPPING (available_on_ll=false).`);
 } else {
     if (this.IS_TESTING) {
