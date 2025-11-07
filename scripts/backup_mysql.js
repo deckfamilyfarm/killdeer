@@ -45,7 +45,7 @@ const iso = now.toISOString().replace(/[:.]/g, '-');
 const week = Math.ceil((now.getDate() + new Date(now.getFullYear(), now.getMonth(), 1).getDay()) / 7);
 
 // ------------ Backup sets & base dir ------------
-const baseDir = path.resolve(__dirname, '../backups');
+const baseDir = path.resolve(__dirname, '../../backups');
 const backupSetsFor = (dbName) => ([
   { name: 'daily',   filename: `${dbName}_${yyyy}-${mm}-${dd}.sql.gz` },
   { name: 'weekly',  filename: `${dbName}_${yyyy}-W${week}.sql.gz` },
