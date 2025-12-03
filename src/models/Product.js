@@ -39,11 +39,9 @@ class Product {
 
         const row = rows[0];
 
-
         this.data = row;
 
         this.pricing = this.#calculatePrices();
-
     }
 
     static async create(productId, isTesting = false) {
@@ -55,7 +53,6 @@ class Product {
     async addToLLPricelist(pricelistID, accessToken) {
         console.log("adding " + this.productId + " to pricelist " + pricelistID);
         const payload = { pricelist_id: pricelistID, product_id: this.productId };
-
 
         if (!this.data.available_on_ll) {
             console.log(`Product ${this.data.id} (${this.data.productName}) is not available to update SKIPPING (available_on_ll=false).`);
@@ -69,22 +66,21 @@ class Product {
         }
     }
 
-
     async updateInventory({ visible, track_inventory, stock_inventory }, accessToken) {
         try {
-            const id = this.productId
+            const id = this.productId;
 
-                const payload = {
-                    visible,
-                    track_inventory,
-                    set_inventory: stock_inventory,
-                };
+            const payload = {
+                visible,
+                track_inventory,
+                set_inventory: stock_inventory,
+            };
 
             // ✅ Query product details
             const [results] = await utilities.db.query(
-                    "SELECT productName, packageName,  localLineProductID FROM pricelist WHERE id = ?",
-                    [this.productId]
-                    );
+                "SELECT productName, packageName,  localLineProductID FROM pricelist WHERE id = ?",
+                [this.productId]
+            );
 
             if (results.length === 0) {
                 throw new Error("Product not found");
@@ -94,10 +90,9 @@ class Product {
 
             // ✅ Perform the database update
             await utilities.db.query(
-                    "UPDATE pricelist SET visible=?, track_inventory=?, stock_inventory=? WHERE id=?",
-                    [visible, track_inventory, stock_inventory, this.productId]
-                    );
-
+                "UPDATE pricelist SET visible=?, track_inventory=?, stock_inventory=? WHERE id=?",
+                [visible, track_inventory, stock_inventory, this.productId]
+            );
 
             // ✅ Structured response object
             let updateStatus = {
@@ -112,10 +107,10 @@ class Product {
 
             if (!fs.existsSync(logFilePath)) {
                 fs.writeFileSync(
-                        logFilePath,
-                        "id,productName,packageName,visible,track_inventory,stock_inventory,timestamp\n",
-                        "utf8"
-                        );
+                    logFilePath,
+                    "id,productName,packageName,visible,track_inventory,stock_inventory,timestamp\n",
+                    "utf8"
+                );
             }
 
             const timestamp = new Date().toISOString();
@@ -135,17 +130,17 @@ class Product {
             fastCsv
                 .writeToStream(writableStream, [logEntry], { headers: false, quote: true })
                 .on("finish", () => {
-                        fs.appendFileSync(logFilePath, "\n");
-                        console.log("✅ Data appended to CSV successfully.");
-                        })
-            .on("error", (err) => console.error("❌ Error writing to CSV file:", err));
+                    fs.appendFileSync(logFilePath, "\n");
+                    console.log("✅ Data appended to CSV successfully.");
+                })
+                .on("error", (err) => console.error("❌ Error writing to CSV file:", err));
 
             // ✅ Attempt LocalLine API update
             if (this.data.localLineProductID) {
                 try {
                     let payload = {
-visible: visible,
-         track_inventory: track_inventory
+                        visible: visible,
+                        track_inventory: track_inventory
                     };
 
                     if (track_inventory === true || stock_inventory === 0) {
@@ -163,160 +158,204 @@ visible: visible,
                     }
                 } catch (error) {
                     utilities.sendEmail({
-from: "jdeck88@gmail.com",
-to: "jdeck88@gmail.com",
-subject: "LocalLine API update failed",
-text: `API update failed for ${localLineProductID}`
-});
-console.error(`❌ LocalLine API update failed for ${localLineProductID}:`, error);
-updateStatus.localLineUpdate = false;
-}
-} else {
-    utilities.sendEmail({
-from: "jdeck88@gmail.com",
-to: "jdeck88@gmail.com",
-subject: "LocalLine API update failed",
-text: `We do not have a record of this product in LocalLine: ${localLineProductID}`
-});
+                        from: "jdeck88@gmail.com",
+                        to: "jdeck88@gmail.com",
+                        subject: "LocalLine API update failed",
+                        text: `API update failed for ${localLineProductID}`
+                    });
+                    console.error(`❌ LocalLine API update failed for ${localLineProductID}:`, error);
+                    updateStatus.localLineUpdate = false;
+                }
+            } else {
+                utilities.sendEmail({
+                    from: "jdeck88@gmail.com",
+                    to: "jdeck88@gmail.com",
+                    subject: "LocalLine API update failed",
+                    text: `We do not have a record of this product in LocalLine: ${localLineProductID}`
+                });
 
-console.error(`❌ No record found in LocalLine for ${localLineProductID}`);
-updateStatus.localLineUpdate = false;
-}
-return updateStatus;
+                console.error(`❌ No record found in LocalLine for ${localLineProductID}`);
+                updateStatus.localLineUpdate = false;
+            }
+            return updateStatus;
 
-} catch (error) {
-    console.error("❌ Error in Product Module:", error);
-    throw Error;
-}
-}
-
-// Update LL Prices
-async updatePricelists(accessToken) {
-
-    const isDairy = this.data.category_id === 9;
-    const priceLists = isDairy ? this.LL_DAIRY_PRICE_LISTS : this.LL_PRICE_LISTS;
-
-    for (const listName in priceLists) {
-        const { id, markup } = priceLists[listName];
-        await this.updateSinglePriceList(id, markup, accessToken);
-    }
-}
-
-// Run the udpater script
-async updateSinglePriceList(priceListID, markupDecimal, accessToken) {
-
-    const productId = this.data.localLineProductID;
-    let newBasePrice = this.pricing.purchasePrice;
-    // Get the first package 
-    // TODO: move this section here to its own function
-    try {
-        const { data: product } = await axios.get(utilities.LL_BASEURL + "products/" + productId + "/",
-                { headers: { Authorization: `Bearer ${accessToken}` } }
-                );
-        const firstPackage = product.packages?.[0];
-        if (!firstPackage) {
-            console.error("❌ No package found for product", productId);
-            return;
+        } catch (error) {
+            console.error("❌ Error in Product Module:", error);
+            throw Error;
         }
-        const packageId = firstPackage.id;
-        const entry = (product.product_price_list_entries || []).find(
-                e => e.price_list === priceListID
-                );
+    }
 
-        if (!entry) {
-            const priceListName = Object.keys(this.LL_PRICE_LISTS).find(k => this.LL_PRICE_LISTS[k] === priceListID) || `ID ${priceListID}`;
-            console.warn(`⚠️ Product ${product.name} is not on price list "${priceListName}"`);
+    // Update LL Prices
+    async updatePricelists(accessToken) {
 
-            const now = new Date();
-            const timestamp = now.toLocaleString("en-US", {
-year: 'numeric',
-month: '2-digit',
-day: '2-digit',
-hour: 'numeric',
-minute: '2-digit',
-hour12: true
-}).replace(",", "");
-const message = `product does not appear in pricelist ${priceListName} (${priceListID})`;
-// TODO: restore missing links log
-/*
-   MISSING_LINKS_LOG.push({
-timestamp: timestamp,
-product_id: product.id,
-product_name: product.name, 
-missing_price_list: message
-});
- */
+        const isDairy = this.data.category_id === 9;
+        const priceLists = isDairy ? this.LL_DAIRY_PRICE_LISTS : this.LL_PRICE_LISTS;
 
-return;
-}
+        for (const listName in priceLists) {
+            const { id, markup } = priceLists[listName];
+            await this.updateSinglePriceList(id, markup, accessToken);
+        }
+    }
 
-const priceListEntry = this.generateSinglePriceListEntry(newBasePrice, entry, markupDecimal);
-if (!priceListEntry) return;
-newBasePrice = parseFloat(priceListEntry.base_price_used).toFixed(2)
+// Run the updater script
+async updateSinglePriceList(priceListID, markupDecimal, accessToken) {
+  const productId = this.data.localLineProductID;
+
+  // 🔹 Early guard: no LocalLine product ID
+  if (!productId) {
+    console.error(
+      `❌ Skipping product id=${this.data.id} (${this.data.productName}) on price list ${priceListID}: no localLineProductID set in pricelist table.`
+    );
+    return;
+  }
+
+  let newBasePrice = this.pricing.purchasePrice;
+
+  try {
+    const { data: product } = await axios.get(
+      utilities.LL_BASEURL + "products/" + productId + "/",
+      { headers: { Authorization: `Bearer ${accessToken}` } }
+    );
+
+    const firstPackage = product.packages?.[0];
+    if (!firstPackage) {
+      console.error(
+        `❌ No package found for LocalLine product ${productId} (pricelist.id=${this.data.id}, name="${this.data.productName}")`
+      );
+      return;
+    }
+
+    const packageId = firstPackage.id;
+    const entry = (product.product_price_list_entries || []).find(
+      (e) => e.price_list === priceListID
+    );
+
+    if (!entry) {
+      const priceListName =
+        Object.keys(this.LL_PRICE_LISTS).find(
+          (k) => this.LL_PRICE_LISTS[k] === priceListID
+        ) || `ID ${priceListID}`;
+
+      console.warn(
+        `⚠️ Product "${product.name}" (LocalLine ${productId}, pricelist.id=${this.data.id}) is not on price list "${priceListName}" (${priceListID}).`
+      );
+      // TODO: restore missing links log if needed
+      return;
+    }
+
+    const priceListEntry = this.generateSinglePriceListEntry(
+      newBasePrice,
+      entry,
+      markupDecimal
+    );
+    if (!priceListEntry) return;
+
+    newBasePrice = parseFloat(priceListEntry.base_price_used).toFixed(2);
+
+    // 🔹 Map packing_tag_code ('frozen' | 'dairy' | null) → packing_tag (86 | 85 | null)
+    const packingTagMap = {
+      frozen: 86,
+      dairy: 85,
+    };
+    const packingTagId = packingTagMap[this.data.packing_tag_code] ?? null;
 
     const payload = {
-name: this.data.productName,
+      name: this.data.productName,
       description: this.data.description,
       package_codes_enabled: true,
+      packing_tag: packingTagId,
       packages: [
-      {
-id: packageId,
-    name: this.data.packageName,
-    unit_price: newBasePrice,
-    package_price: newBasePrice,
-    package_unit_price: newBasePrice,
-    inventory_per_unit: 1,
-    price_list_entries: [priceListEntry],
-    package_code: this.data.upc,
-      }
-      ]
+        {
+          id: packageId,
+          name: this.data.packageName,
+          unit_price: newBasePrice,
+          package_price: newBasePrice,
+          package_unit_price: newBasePrice,
+          inventory_per_unit: 1,
+          price_list_entries: [priceListEntry],
+          package_code: this.data.upc,
+        },
+      ],
     };
 
+    // Update Product Pricing (for logging)
+    const base = parseFloat(priceListEntry.base_price_used).toFixed(2);
+    const markup = priceListEntry.adjustment_value.toFixed(2);
+    const strike = priceListEntry.strikethrough_display_value
+      ? ` (was $${parseFloat(
+          priceListEntry.strikethrough_display_value
+        ).toFixed(2)})`
+      : "";
+    const price = (
+      parseFloat(base) +
+      (parseFloat(base) * parseFloat(markup)) / 100
+    ).toFixed(2);
 
-// Update Product Pricing
-const base = parseFloat(priceListEntry.base_price_used).toFixed(2);
-const markup = priceListEntry.adjustment_value.toFixed(2);
-const strike = priceListEntry.strikethrough_display_value ? ` (was $${parseFloat(priceListEntry.strikethrough_display_value).toFixed(2)})` : '';
-const price = (parseFloat(base) + (parseFloat(base) * parseFloat(markup) / 100)).toFixed(2);
+    let message = `${product.name} (${productId}) on price list ${priceListID} $${base} base price $${price} final price ${
+      this.data.sale ? " (Sale!)" : ""
+    }${strike}`;
 
-let message = `${product.name} (${productId}) on price list ${priceListID} $${base} base price $${price} final price ${this.data.sale ? ' (Sale!)' : ''}${strike}`;
-
-if (!this.data.available_on_ll) {
-    console.log(`Product ${this.data.id} (${this.data.productName}) is not available to update SKIPPING (available_on_ll=false).`);
-} else {
-    if (this.IS_TESTING) {
-        console.log(`[TEST MODE] Would update ` + message);
+    if (!this.data.available_on_ll) {
+      console.log(
+        `Product ${this.data.id} (${this.data.productName}) is not available to update SKIPPING (available_on_ll=false).`
+      );
     } else {
-        await axios.patch(utilities.LL_BASEURL + "products/" + productId + "/?expand=vendor",
-                payload,
-                {
-headers: {
-Authorization: `Bearer ${accessToken}`,
-"Content-Type": "application/json",
-Referer: utilities.LL_TEST_COMPANY_BASEURL,
-Origin: utilities.LL_TEST_COMPANY_BASEURL
-}
-}
-);
+      if (this.IS_TESTING) {
+        console.log(`[TEST MODE] Would update ` + message);
+      } else {
+        await axios.patch(
+          utilities.LL_BASEURL +
+            "products/" +
+            productId +
+            "/?expand=vendor",
+          payload,
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+              "Content-Type": "application/json",
+              Referer: utilities.LL_TEST_COMPANY_BASEURL,
+              Origin: utilities.LL_TEST_COMPANY_BASEURL,
+            },
+          }
+        );
         console.log(`✅ Update ` + message);
-        } }
+      }
+    }
+  } catch (err) {
+    // 🔹 Compact Axios error output
+    const status = err.response?.status;
+    const statusText = err.response?.statusText;
+    const detail =
+      err.response?.data?.detail ||
+      err.response?.data?.title ||
+      err.message;
 
-} catch (err) {
-    console.error(`❌ Update failed for product ${productId}, price list ${priceListID}:`, err.response?.data || err.message);
-    console.log(err)
-}
+    console.error(
+      `❌ LocalLine API error for LocalLine product ${productId} (pricelist.id=${this.data.id}, name="${this.data.productName}") on price list ${priceListID}: ` +
+        (status ? `HTTP ${status} ${statusText} – ` : "") +
+        detail
+    );
+
+    if (this.IS_TESTING) {
+      // In test mode, log a tiny bit more for debugging, but not the full axios object
+      console.debug(
+        "[DEBUG] Raw LocalLine error data:",
+        err.response?.data || err.toString()
+      );
+    }
+  }
 }
 
-// Entry for updating a product on a single pricelist
-generateSinglePriceListEntry(basePrice, priceListEntry, markupDecimal) {
-    if (!priceListEntry) return null;
-    let calculated = parseFloat((basePrice * (1 + markupDecimal)).toFixed(2));
-    let adjustment_value = Number((markupDecimal * 100).toFixed(2));
-    let strikethrough_display_value = null;
-    let basePriceUsed = basePrice;
-    //const sale = true;
-    let on_sale_toggle = false;
-    let saleDeductValue = 0
+    // Entry for updating a product on a single pricelist
+    generateSinglePriceListEntry(basePrice, priceListEntry, markupDecimal) {
+        if (!priceListEntry) return null;
+        let calculated = parseFloat((basePrice * (1 + markupDecimal)).toFixed(2));
+        let adjustment_value = Number((markupDecimal * 100).toFixed(2));
+        let strikethrough_display_value = null;
+        let basePriceUsed = basePrice;
+        //const sale = true;
+        let on_sale_toggle = false;
+        let saleDeductValue = 0;
 
         if (this.data.sale) {
             saleDeductValue = this.data.sale_discount; // e.g., 0.25 for 25% off
@@ -347,101 +386,100 @@ generateSinglePriceListEntry(basePrice, priceListEntry, markupDecimal) {
             adjustment_value = Number((saleMarkup * 100).toFixed(2));
         }
 
-    return {
-adjustment: true,
-                adjustment_type: 2,
-                adjustment_value: adjustment_value,
-                price_list: priceListEntry.price_list,
-                checked: true,
-                notSubmitted: false,
-                edited: false,
-                dirty: true,
-                product_price_list_entry: priceListEntry.id,
-                calculated_value: calculated,
-                on_sale: this.data.sale,
-                on_sale_toggle: on_sale_toggle,
-                max_units_per_order: null,
-                strikethrough_display_value: strikethrough_display_value,
-                base_price_used: basePriceUsed
-    };
-}
-
-
-#calculatePrices() {
-    const DISCOUNT           = parseFloat(utilities.DISCOUNT);
-    const WHOLESALE_DISCOUNT = parseFloat(utilities.WHOLESALE_DISCOUNT);
-    const MEMBER_MARKUP      = parseFloat(utilities.MEMBER_MARKUP);
-    const GUEST_MARKUP       = parseFloat(utilities.GUEST_MARKUP);
-    const DAIRY_MARKUP       = parseFloat(utilities.DAIRY_MARKUP);
-
-    const toNum = (v) => {
-        const n = Number(v);
-        return Number.isFinite(n) ? n : NaN;
-    };
-
-    let ffcsaPurchasePrice = 0;
-    let retailPackagePrice = 0;
-
-    const retailUnit   = toNum(this.data.retailSalesPrice);
-    const uom          = String(this.data.dff_unit_of_measure || '').toLowerCase();
-    const highestW     = toNum(this.data.highest_weight);
-    const lowestW      = toNum(this.data.lowest_weight);
-
-    const wholesalePrice = retailUnit * WHOLESALE_DISCOUNT;
-
-    if (uom === 'lbs') {
-        // average weight; if one side is missing use the other
-        let avgWeight;
-        if (Number.isFinite(highestW) && Number.isFinite(lowestW)) {
-            avgWeight = (highestW + lowestW) / 2;
-        } else if (Number.isFinite(highestW)) {
-            avgWeight = highestW;
-        } else if (Number.isFinite(lowestW)) {
-            avgWeight = lowestW;
-        } else {
-            throw new Error(`Missing weight(s) for pounds-based item id=${this.data.id}`);
-        }
-
-        if (!(Number.isFinite(retailUnit) && Number.isFinite(avgWeight) && avgWeight > 0)) {
-            throw new Error(`Invalid retail/weight values for item id=${this.data.id}`);
-        }
-
-        retailPackagePrice = retailUnit * avgWeight;
-        ffcsaPurchasePrice = retailPackagePrice * DISCOUNT;
-
-    } else if (uom === 'each') {
-        if (!Number.isFinite(retailUnit)) {
-            throw new Error(`Invalid retail price for item id=${this.data.id}`);
-        }
-        retailPackagePrice = retailUnit;              // per-each already package price
-        ffcsaPurchasePrice = retailPackagePrice * DISCOUNT;
-
-    } else {
-        throw new Error(`Unknown unit of measure: ${this.data.dff_unit_of_measure}`);
+        return {
+            adjustment: true,
+            adjustment_type: 2,
+            adjustment_value: adjustment_value,
+            price_list: priceListEntry.price_list,
+            checked: true,
+            notSubmitted: false,
+            edited: false,
+            dirty: true,
+            product_price_list_entry: priceListEntry.id,
+            calculated_value: calculated,
+            on_sale: this.data.sale,
+            on_sale_toggle: on_sale_toggle,
+            max_units_per_order: null,
+            strikethrough_display_value: strikethrough_display_value,
+            base_price_used: basePriceUsed
+        };
     }
 
-    const memberSalesPrice = ffcsaPurchasePrice * (1 + MEMBER_MARKUP);
-    const guestSalesPrice  = ffcsaPurchasePrice * (1 + GUEST_MARKUP);
+    #calculatePrices() {
+        const DISCOUNT           = parseFloat(utilities.DISCOUNT);
+        const WHOLESALE_DISCOUNT = parseFloat(utilities.WHOLESALE_DISCOUNT);
+        const MEMBER_MARKUP      = parseFloat(utilities.MEMBER_MARKUP);
+        const GUEST_MARKUP       = parseFloat(utilities.GUEST_MARKUP);
+        const DAIRY_MARKUP       = parseFloat(utilities.DAIRY_MARKUP);
 
-    // percent over retail (fraction). Guard divide-by-zero.
-    const guestPercentOverRetail =
-        retailPackagePrice > 0
-        ? (guestSalesPrice - retailPackagePrice) / retailPackagePrice
-        : null;
+        const toNum = (v) => {
+            const n = Number(v);
+            return Number.isFinite(n) ? n : NaN;
+        };
 
-    return {
-wholesalePrice:        Number(wholesalePrice.toFixed(2)),
-                           purchasePrice:         Number(ffcsaPurchasePrice.toFixed(2)),
-                           memberSalesPrice:      Number(memberSalesPrice.toFixed(2)),
-                           guestSalesPrice:       Number(guestSalesPrice.toFixed(2)),
-                           productID:             Number(this.data.localLineProductID),
-                           retailPackagePrice:    Number(retailPackagePrice.toFixed(2)),
-                           guestPercentOverRetail: guestPercentOverRetail === null
-                               ? null
-                               : Number(guestPercentOverRetail.toFixed(4)),  // e.g., 0.1250 = 12.50%
-    };
-}
+        let ffcsaPurchasePrice = 0;
+        let retailPackagePrice = 0;
 
+        const retailUnit   = toNum(this.data.retailSalesPrice);
+        const uom          = String(this.data.dff_unit_of_measure || '').toLowerCase();
+        const highestW     = toNum(this.data.highest_weight);
+        const lowestW      = toNum(this.data.lowest_weight);
+
+        const wholesalePrice = retailUnit * WHOLESALE_DISCOUNT;
+
+        if (uom === 'lbs') {
+            // average weight; if one side is missing use the other
+            let avgWeight;
+            if (Number.isFinite(highestW) && Number.isFinite(lowestW)) {
+                avgWeight = (highestW + lowestW) / 2;
+            } else if (Number.isFinite(highestW)) {
+                avgWeight = highestW;
+            } else if (Number.isFinite(lowestW)) {
+                avgWeight = lowestW;
+            } else {
+                throw new Error(`Missing weight(s) for pounds-based item id=${this.data.id}`);
+            }
+
+            if (!(Number.isFinite(retailUnit) && Number.isFinite(avgWeight) && avgWeight > 0)) {
+                throw new Error(`Invalid retail/weight values for item id=${this.data.id}`);
+            }
+
+            retailPackagePrice = retailUnit * avgWeight;
+            ffcsaPurchasePrice = retailPackagePrice * DISCOUNT;
+
+        } else if (uom === 'each') {
+            if (!Number.isFinite(retailUnit)) {
+                throw new Error(`Invalid retail price for item id=${this.data.id}`);
+            }
+            retailPackagePrice = retailUnit;              // per-each already package price
+            ffcsaPurchasePrice = retailPackagePrice * DISCOUNT;
+
+        } else {
+            throw new Error(`Unknown unit of measure: ${this.data.dff_unit_of_measure}`);
+        }
+
+        const memberSalesPrice = ffcsaPurchasePrice * (1 + MEMBER_MARKUP);
+        const guestSalesPrice  = ffcsaPurchasePrice * (1 + GUEST_MARKUP);
+
+        // percent over retail (fraction). Guard divide-by-zero.
+        const guestPercentOverRetail =
+            retailPackagePrice > 0
+                ? (guestSalesPrice - retailPackagePrice) / retailPackagePrice
+                : null;
+
+        return {
+            wholesalePrice:        Number(wholesalePrice.toFixed(2)),
+            purchasePrice:         Number(ffcsaPurchasePrice.toFixed(2)),
+            memberSalesPrice:      Number(memberSalesPrice.toFixed(2)),
+            guestSalesPrice:       Number(guestSalesPrice.toFixed(2)),
+            productID:             Number(this.data.localLineProductID),
+            retailPackagePrice:    Number(retailPackagePrice.toFixed(2)),
+            guestPercentOverRetail: guestPercentOverRetail === null
+                ? null
+                : Number(guestPercentOverRetail.toFixed(4)),  // e.g., 0.1250 = 12.50%
+        };
+    }
 }
 
 module.exports = Product;
+

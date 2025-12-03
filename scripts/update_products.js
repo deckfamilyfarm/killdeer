@@ -16,9 +16,9 @@ const tokenManager = require("../src/utils/tokenManager");
     //const sql = "SELECT * FROM pricelist";
     //const sql = "SELECT * FROM pricelist where productName like '%lamb shank%' ";
     //const sql = "SELECT * FROM pricelist where id = 155";
-    const sql = "SELECT * FROM pricelist WHERE productName like '%egg%'"
-    //const sql = "SELECT * FROM pricelist WHERE available_on_ll = 1 and sale_discount > 0"
+    //const sql = "SELECT * FROM pricelist WHERE dateModified > '2025-12-01 23:00:00'";
     //const sql = "SELECT * FROM pricelist WHERE dateModified >= '2025-09-25'"
+    const sql = "SELECT * FROM pricelist WHERE id = 0 or id = 1"
     const [rows] = await utilities.db.query(sql);
     const accessToken = await tokenManager.getValidAccessToken();
 
