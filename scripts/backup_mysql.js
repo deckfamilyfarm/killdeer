@@ -28,6 +28,14 @@ const dbConfigs = [
     password: process.env.TIMESHEETS_DB_PASSWORD,
     database: process.env.TIMESHEETS_DB_DATABASE,
   },
+  {
+    label: 'herdlist',
+    host: process.env.HERDLIST_DB_HOST,
+    port: process.env.HERDLIST_DB_PORT || 3306,
+    user: process.env.HERDLIST_DB_USER,
+    password: process.env.HERDLIST_DB_PASSWORD,
+    database: process.env.HERDLIST_DB_DATABASE,
+  },
 ];
 
 // Validate presence (host/user/database are minimum)
@@ -83,16 +91,18 @@ async function dumpAndCompress({ host, port, user, password, database }) {
   return tempGZ;
 }
 
-function rotateOldBackups(folder) {
+function rotateOldBackups(folder, dbName) {
+  const prefix = `${dbName}_`; // matches your filename scheme: `${dbName}_YYYY-MM-DD.sql.gz`
+
   const files = fs.readdirSync(folder)
-    .filter(f => f.endsWith('.sql.gz'))
+    .filter(f => f.endsWith('.sql.gz') && f.startsWith(prefix))
     .map(f => ({ f, t: fs.statSync(path.join(folder, f)).mtime.getTime() }))
     .sort((a, b) => b.t - a.t);
 
-  const excess = files.slice(5); // keep 5 most recent
+  const excess = files.slice(7); // keep 5 most recent for THIS db in THIS folder
   for (const { f } of excess) {
     fs.unlinkSync(path.join(folder, f));
-    console.log(`🗑️ Deleted old backup: ${f}`);
+    console.log(`🗑️ Deleted old backup (db=${dbName}): ${f}`);
   }
 }
 
@@ -112,7 +122,7 @@ async function backupOneDB(cfg) {
     const finalPath = path.join(destDir, set.filename);
     fs.copyFileSync(gzPath, finalPath);
     console.log(`✅ Saved ${cfg.label} → ${finalPath}`);
-    rotateOldBackups(destDir);
+    rotateOldBackups(destDir, cfg.database);
   }
 
   // Remove temp gzip
