@@ -3,10 +3,19 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>KPI Explorer</title>
+  <title>Data Explorer</title>
   <link rel="preconnect" href="https://cdn.jsdelivr.net"/>
   <style>
     :root {
+      --bg: #f8fafc;         /* slate-50 */
+      --panel: #ffffff;      /* white */
+      --muted: #64748b;      /* slate-500 */
+      --text: #0f172a;       /* slate-900 */
+      --accent: #16a34a;     /* green-600 */
+      --border: #e2e8f0;     /* slate-200 */
+      --chip: #f1f5f9;       /* slate-100 */
+    }
+    [data-theme="dark"] {
       --bg: #0f172a;         /* slate-900 */
       --panel: #111827;      /* gray-900 */
       --muted: #94a3b8;      /* slate-400 */
@@ -20,7 +29,7 @@
     body {
       margin: 0; padding: 24px; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans,
       Helvetica Neue, Arial, "Apple Color Emoji", "Segoe UI Emoji";
-      background: linear-gradient(180deg, #0b1020, #0f172a 40%);
+      background: linear-gradient(180deg, #f8fafc, #e2e8f0 40%);
       color: var(--text);
     }
     h1 { margin: 0 0 12px; font-size: 20px; letter-spacing: 0.3px; }
@@ -30,20 +39,20 @@
       display: grid; gap: 12px; grid-template-columns: 1fr; margin: 16px 0 20px;
     }
     @media (min-width: 1000px) {
-      .toolbar { grid-template-columns: 220px 1fr 140px; align-items: end; }
+      .toolbar { grid-template-columns: 260px 1fr; align-items: end; }
     }
 
     .panel {
-      background: radial-gradient(90% 90% at 10% 10%, rgba(34,197,94,0.07), rgba(30,41,59,0.5) 40%, rgba(2,6,23,0.8) 100%), var(--panel);
+      background: radial-gradient(90% 90% at 10% 10%, rgba(22,163,74,0.08), rgba(226,232,240,0.6) 40%, rgba(248,250,252,0.9) 100%), var(--panel);
       border: 1px solid var(--border);
       border-radius: 14px; padding: 14px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+      box-shadow: 0 10px 30px rgba(15,23,42,0.08);
     }
 
     label { font-size: 12px; color: var(--muted); display: block; margin: 2px 0 6px; }
     select, input[type="text"], button {
       width: 100%;
-      background: #0b1223; color: var(--text);
+      background: var(--chip); color: var(--text);
       border: 1px solid var(--border);
       border-radius: 10px; padding: 10px 12px; outline: none;
     }
@@ -52,7 +61,7 @@
     .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
     .row button { width: auto; padding: 8px 12px; border-radius: 10px; cursor: pointer; }
     .btn-primary { background: var(--accent); color: #052e16; border-color: #16a34a; font-weight: 600; }
-    .btn-ghost { background: #0b1223; }
+    .btn-ghost { background: var(--chip); }
 
     .chips { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
     .chip {
@@ -65,35 +74,122 @@
 
     table { width: 100%; border-collapse: collapse; margin-top: 14px; }
     th, td { padding: 8px 10px; border-bottom: 1px solid var(--border); text-align: right; }
-    th:first-child, td:first-child { text-align: left; position: sticky; left: 0; background: #0b1223; }
-    thead th { position: sticky; top: 0; background: #0b1223; z-index: 1; }
+    th:first-child, td:first-child { text-align: left; position: sticky; left: 0; background: var(--chip); }
+    thead th { position: sticky; top: 0; background: var(--chip); z-index: 1; }
     th.sortable { cursor: pointer; }
     th.sortable .arrows { opacity: 0.55; font-size: 10px; margin-left: 6px; }
+    .section-title { margin: 14px 0 6px; font-size: 12px; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; }
+    tr.active td { background: rgba(22,163,74,0.12); }
 
     .footer { margin-top: 18px; display: flex; gap: 10px; flex-wrap: wrap; }
 
     .empty { text-align: center; padding: 30px 12px; color: var(--muted); }
+    .tabs { display: flex; gap: 10px; align-items: center; justify-content: space-between; }
+    .tabs-left { display: flex; gap: 10px; align-items: center; }
+    .theme-toggle {
+      width: 40px; height: 40px; border-radius: 999px;
+      border: 1px solid var(--border); background: var(--chip); color: var(--text);
+      display: inline-flex; align-items: center; justify-content: center; cursor: pointer;
+    }
+    .theme-toggle svg { width: 18px; height: 18px; }
+    .theme-toggle .icon-sun { display: none; }
+    [data-theme="dark"] .theme-toggle .icon-sun { display: block; }
+    [data-theme="dark"] .theme-toggle .icon-moon { display: none; }
+    .stack { display: grid; gap: 10px; }
+    .compact select { padding: 8px 10px; font-size: 12px; }
+    .category-grid { display: grid; gap: 16px; grid-template-columns: 1.1fr 0.9fr; }
+    .toggle { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
+    @media (max-width: 1100px) {
+      .category-grid { grid-template-columns: 1fr; }
+    }
+    .tab {
+      padding: 8px 14px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--chip);
+      color: var(--text);
+      cursor: pointer;
+      font-size: 12px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+    .tab.active { background: var(--accent); color: #052e16; border-color: #16a34a; font-weight: 600; }
+    .hidden { display: none; }
   </style>
 </head>
 <body>
   <header>
-    <h1>KPI Explorer</h1>
-    <div class="subtle">Pick a grouping (vendors, categories, products, or dropsites), choose one or more items, then visualize weekly trends.</div>
+    <h1>Data Explorer</h1>
+    <div class="subtle">Pick a view, choose one or more items, then visualize monthly trends.</div>
   </header>
 
   <section class="panel">
+    <div class="tabs">
+      <div class="tabs-left">
+        <button id="tabVendors" class="tab active" type="button">Data Explorer</button>
+        <button id="tabProducts" class="tab" type="button">Category View</button>
+      </div>
+      <button id="themeToggle" class="theme-toggle" type="button" aria-label="Toggle theme">
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"></path>
+        </svg>
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="4"></circle>
+          <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"></path>
+        </svg>
+      </button>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div id="productInsights" class="hidden">
+      <div class="category-grid">
+        <div>
+          <div class="section-title">Category totals (normalized)</div>
+          <div id="productGroupTableWrap"></div>
+        </div>
+        <div>
+          <div class="toggle">
+            <button id="catChartBtn" class="tab active" type="button">Chart</button>
+            <button id="catVariantsBtn" class="tab" type="button">Category variants</button>
+          </div>
+          <div id="categoryChartWrap">
+            <canvas id="categoryChart" aria-label="Category chart" role="img"></canvas>
+            <div id="categoryChartEmpty" class="empty">Select a category.</div>
+          </div>
+          <div id="categoryVariantsWrap" class="hidden">
+            <div id="productGroupDetailWrap"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="section-title hidden" id="monthTotalsTitle">Month totals</div>
+    <div id="tableWrap" class="hidden"></div>
+  </section>
+
+  <section class="panel">
     <div class="toolbar">
-      <div>
-        <label for="dimension">Group by</label>
-        <select id="dimension">
-          <option value="vendors">Vendors</option>
-          <option value="category">Categories</option>
-          <option value="product">Products</option>
-          <option value="dropsite">Dropsites</option>
-        </select>
+      <div id="groupByBlock" class="stack">
+        <div id="dimensionBlock">
+          <label for="dimension">Group by</label>
+          <select id="dimension"></select>
+        </div>
+        <div class="compact" id="topLimitBlock">
+          <label for="topLimit">Top</label>
+          <select id="topLimit">
+            <option value="5">Top 5</option>
+            <option value="10" selected>Top 10</option>
+            <option value="20">Top 20</option>
+            <option value="50">Top 50</option>
+          </select>
+        </div>
+        <div class="compact" id="yearBlock">
+          <label for="yearSelect">Year</label>
+          <select id="yearSelect"></select>
+        </div>
       </div>
 
-      <div>
+      <div id="selectorBlock">
         <label for="filter">Filter & select (multi)</label>
         <input id="filter" type="text" placeholder="Type to filter…" />
         <select id="itemSelect" multiple></select>
@@ -104,24 +200,14 @@
         <div id="selectedChips" class="chips"></div>
       </div>
 
-      <div>
-        <label>&nbsp;</label>
-        <div class="row">
-          <button id="btnApply" class="btn-primary" type="button">Apply</button>
-          <button id="btnCSV" class="btn-ghost" type="button">Download CSV</button>
-        </div>
-      </div>
+      <div></div>
     </div>
   </section>
 
-  <section class="panel chart-wrap">
+  <section class="panel chart-wrap" id="chartPanel">
     <div id="totalsBar" class="subtle" style="margin:4px 0 10px;"></div>
     <canvas id="kpiChart" aria-label="Series chart" role="img"></canvas>
-    <div id="chartEmpty" class="empty" hidden>Pick at least one item to see a chart.</div>
-  </section>
-
-  <section class="panel">
-    <div id="tableWrap"></div>
+    <div id="chartEmpty" class="empty" hidden></div>
   </section>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -135,43 +221,122 @@
     let allItemsByDim = {};      // { vendors: string[], category: string[], ... }
     let selected = new Set();    // user selections for current dimension
     let chart = null;            // Chart.js instance
+    let categoryChart = null;    // Chart.js instance (category view)
     let currentDim = 'vendors';
+    let currentView = 'vendors';
+    let currentCategoryFocus = null;
+    let categoryRightMode = 'chart';
+    let categoryDataCache = null;
+    let selectedYear = 'All';
 
     /** DOM **/
     const elDim = document.getElementById('dimension');
     const elFilter = document.getElementById('filter');
     const elSelect = document.getElementById('itemSelect');
     const elChips = document.getElementById('selectedChips');
-    const elApply = document.getElementById('btnApply');
     const elAll = document.getElementById('btnAll');
     const elNone = document.getElementById('btnNone');
-    const elCSV = document.getElementById('btnCSV');
     const elChart = document.getElementById('kpiChart');
     const elChartEmpty = document.getElementById('chartEmpty');
+    const elChartPanel = document.getElementById('chartPanel');
     const elTableWrap = document.getElementById('tableWrap');
+    const elMonthTotalsTitle = document.getElementById('monthTotalsTitle');
+    const elProductInsights = document.getElementById('productInsights');
+    const elProductGroupTableWrap = document.getElementById('productGroupTableWrap');
+    const elProductGroupDetailWrap = document.getElementById('productGroupDetailWrap');
+    const elCategoryChart = document.getElementById('categoryChart');
+    const elCategoryChartEmpty = document.getElementById('categoryChartEmpty');
+    const elCategoryChartWrap = document.getElementById('categoryChartWrap');
+    const elCategoryVariantsWrap = document.getElementById('categoryVariantsWrap');
+    const elCatChartBtn = document.getElementById('catChartBtn');
+    const elCatVariantsBtn = document.getElementById('catVariantsBtn');
     const elTotals = document.getElementById('totalsBar');
+    const elTabVendors = document.getElementById('tabVendors');
+    const elTabProducts = document.getElementById('tabProducts');
+    const elThemeToggle = document.getElementById('themeToggle');
+    const elSelectorBlock = document.getElementById('selectorBlock');
+    const elDimensionBlock = document.getElementById('dimensionBlock');
+    const elYearSelect = document.getElementById('yearSelect');
+    const elYearBlock = document.getElementById('yearBlock');
+    const elTopLimit = document.getElementById('topLimit');
+    const elTopLimitBlock = document.getElementById('topLimitBlock');
 
     /** Utilities **/
+    const MIN_DATE = new Date('2024-01-01T00:00:00Z');
     const fmtNumber = (n) => new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 }).format(n);
+    const fmtPercent = (n) => `${n.toFixed(1)}%`;
+    const pieColors = (count) => Array.from({ length: count }, (_, i) => `hsl(${(i * 47) % 360} 65% 55%)`);
+    const pieLabelPlugin = {
+      id: 'pieLabelPlugin',
+      afterDatasetsDraw(chart) {
+        const { ctx } = chart;
+        const dataset = chart.data.datasets[0];
+        if (!dataset) return;
+        const meta = chart.getDatasetMeta(0);
+        ctx.save();
+        ctx.font = '12px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica Neue, Arial';
+        ctx.fillStyle = '#e5e7eb';
+        ctx.strokeStyle = 'rgba(15,23,42,0.8)';
+        ctx.lineWidth = 3;
+        meta.data.forEach((arc, i) => {
+          const label = chart.data.labels[i];
+          if (!label) return;
+          const angle = (arc.startAngle + arc.endAngle) / 2;
+          const radius = arc.outerRadius + 16;
+          const x = arc.x + Math.cos(angle) * radius;
+          const y = arc.y + Math.sin(angle) * radius;
+          ctx.textAlign = Math.cos(angle) >= 0 ? 'left' : 'right';
+          ctx.textBaseline = 'middle';
+          ctx.strokeText(label, x, y);
+          ctx.fillText(label, x, y);
+        });
+        ctx.restore();
+      }
+    };
 
     const parseDateFromRange = (range) => {
       // supports "YYYY-MM-DD - YYYY-MM-DD" or "YYYY-MM-DD to YYYY-MM-DD"
       const parts = range.includes(' - ') ? range.split(' - ') : range.split(' to ');
-      return new Date(parts[0]);
+      return new Date(`${parts[0]}T00:00:00Z`);
     };
+
+    function yearFromWeek(w){
+      const d = parseDateFromRange(w.dateRange);
+      if (Number.isNaN(d.getTime()) || d < MIN_DATE) return null;
+      return d.getUTCFullYear();
+    }
+
+    function getWeeksByYear(){
+      if (selectedYear === 'All') return weeks;
+      const year = Number(selectedYear);
+      return weeks.filter(w => yearFromWeek(w) === year);
+    }
+
 
     const uniqueSortedKeys = (dim) => {
       const s = new Set();
       for (const w of weeks) {
         const obj = (w.data && w.data[dim]) || {};
-        for (const k of Object.keys(obj)) s.add(k);
+        for (const k of Object.keys(obj)) {
+          const key = dim === 'category' ? normalizeCategoryName(k) : k;
+          s.add(key);
+        }
       }
       return Array.from(s).sort((a,b) => a.localeCompare(b));
     };
 
     const sumAcrossWeeks = (dim, key) => {
       let t = 0;
-      for (const w of weeks) t += Number((w.data?.[dim]?.[key]) || 0);
+      for (const w of weeks) {
+        if (dim === 'category') {
+          const categories = w.data?.category || {};
+          for (const [raw, value] of Object.entries(categories)) {
+            if (normalizeCategoryName(raw) === key) t += Number(value || 0);
+          }
+        } else {
+          t += Number((w.data?.[dim]?.[key]) || 0);
+        }
+      }
       return t;
     };
 
@@ -184,15 +349,24 @@
       .then(r => r.json())
       .then(json => {
         RAW = json;
-        weeks = (json.weeks || []).slice().sort((a,b)=>parseDateFromRange(b.dateRange) - parseDateFromRange(a.dateRange));
+        weeks = (json.weeks || [])
+          .filter(w => {
+            const d = parseDateFromRange(w.dateRange);
+            return !Number.isNaN(d.getTime()) && d >= MIN_DATE;
+          })
+          .slice()
+          .sort((a,b)=>parseDateFromRange(a.dateRange) - parseDateFromRange(b.dateRange));
         allItemsByDim = {
           vendors: uniqueSortedKeys('vendors'),
           category: uniqueSortedKeys('category'),
           product: uniqueSortedKeys('product'),
           dropsite: uniqueSortedKeys('dropsite')
         };
+        buildYearOptions();
         // Default: preselect top 5 vendors by total
         currentDim = 'vendors';
+        currentView = 'vendors';
+        renderDimensionOptions();
         const top5 = allItemsByDim[currentDim]
           .map(k => ({ k, t: sumAcrossWeeks(currentDim, k) }))
           .sort((a,b)=> b.t - a.t)
@@ -209,8 +383,49 @@
       });
 
     /** Renderers **/
+    function renderDimensionOptions(){
+      elDim.innerHTML = '';
+      if (currentView === 'vendors') {
+        addDimOption('vendors', 'Vendors');
+        addDimOption('category', 'Categories');
+        addDimOption('dropsite', 'Dropsites');
+      } else {
+        addDimOption('category', 'Categories');
+      }
+    }
+
+    function buildYearOptions(){
+      const years = new Set();
+      for (const w of weeks) {
+        const y = yearFromWeek(w);
+        if (y) years.add(y);
+      }
+      const sorted = Array.from(years).sort((a,b)=>b-a);
+      elYearSelect.innerHTML = '';
+      const allOpt = document.createElement('option');
+      allOpt.value = 'All';
+      allOpt.textContent = 'All years';
+      elYearSelect.appendChild(allOpt);
+      for (const y of sorted) {
+        const opt = document.createElement('option');
+        opt.value = String(y);
+        opt.textContent = String(y);
+        elYearSelect.appendChild(opt);
+      }
+      elYearSelect.value = selectedYear;
+    }
+
+
+    function addDimOption(value, label){
+      const opt = document.createElement('option');
+      opt.value = value;
+      opt.textContent = label;
+      elDim.appendChild(opt);
+    }
+
     function renderDimension(dim){
       currentDim = dim;
+      elDim.value = dim;
       // Reset filter
       elFilter.value = '';
       // If switching dims, keep only items that exist in new dim
@@ -249,34 +464,226 @@
       }
     }
 
+    function buildMonthMap(dim, keys){
+      const monthMap = new Map();
+      for (const w of getWeeksByYear()) {
+        const d = parseDateFromRange(w.dateRange);
+        if (Number.isNaN(d.getTime())) continue;
+        const y = d.getUTCFullYear();
+        const m = d.getUTCMonth() + 1;
+        const key = `${y}-${String(m).padStart(2, '0')}`;
+        if (!monthMap.has(key)) {
+          const label = new Date(Date.UTC(y, m - 1, 1)).toLocaleString('en-US', { month: 'short', year: 'numeric', timeZone: 'UTC' });
+          monthMap.set(key, { label, totals: {} });
+        }
+        const entry = monthMap.get(key);
+        if (dim === 'category') {
+          const categories = w.data?.category || {};
+          for (const [raw, value] of Object.entries(categories)) {
+            const normalized = normalizeCategoryName(raw);
+            if (!keys.includes(normalized)) continue;
+            entry.totals[normalized] = (entry.totals[normalized] || 0) + Number(value || 0);
+          }
+        } else {
+          for (const k of keys) {
+            entry.totals[k] = (entry.totals[k] || 0) + Number(w.data?.[dim]?.[k] || 0);
+          }
+        }
+      }
+      const monthKeys = Array.from(monthMap.keys()).sort();
+      return { monthKeys, monthMap };
+    }
+
     function buildDatasets(dim, keys){
-      const labels = weeks.map(w => w.dateRange);
+      const { monthKeys, monthMap } = buildMonthMap(dim, keys);
+      const labels = monthKeys.map(k => monthMap.get(k).label);
       const datasets = keys.map((k)=>({
         label: k,
-        data: weeks.map(w => Number(w.data?.[dim]?.[k] || 0)),
+        data: monthKeys.map(m => monthMap.get(m).totals[k] || 0),
         tension: 0.2,
         fill: false,
       }));
-      return { labels, datasets };
-    }
-
-    // Compute per-week total across selected keys
-    function buildTotalSeries(dim, keys){
-      return weeks.map(w => keys.reduce((sum,k)=> sum + Number(w.data?.[dim]?.[k] || 0), 0));
+      const totalSeries = monthKeys.map(m => keys.reduce((sum, k) => sum + (monthMap.get(m).totals[k] || 0), 0));
+      return { labels, datasets, totalSeries, monthKeys, monthMap };
     }
 
     function renderTotalsBar(dim, keys){
       if (!keys.length) { elTotals.textContent = ''; return; }
-      const series = buildTotalSeries(dim, keys);
-      const total = series.reduce((a,b)=>a+b,0);
-      const avg = series.length ? total/series.length : 0;
-      elTotals.textContent = `TOTAL across selected (all weeks): ${fmtNumber(total)} | Avg/week: ${fmtNumber(avg)}`;
+      const { totalSeries } = buildDatasets(dim, keys);
+      const total = totalSeries.reduce((a,b)=>a+b,0);
+      const avg = totalSeries.length ? total/totalSeries.length : 0;
+      elTotals.textContent = `TOTAL across selected (all months): ${fmtNumber(total)} | Avg/month: ${fmtNumber(avg)}`;
     }
 
     function renderChart(dim, keys){
-      const { labels, datasets } = buildDatasets(dim, keys);
-      // Add TOTAL dataset across selected
-      const totalSeries = buildTotalSeries(dim, keys);
+      if (currentView === 'vendors') {
+        const limit = Number(elTopLimit.value) || 10;
+        const ranked = keys
+          .map(k => ({ k, t: sumAcrossWeeks(dim, k) }))
+          .sort((a,b)=> b.t - a.t)
+          .slice(0, limit);
+        const labels = ranked.map(r => r.k);
+        const totals = ranked.map(r => r.t);
+        const hasData = totals.some(v => v !== 0);
+        elChart.style.display = hasData ? 'block' : 'none';
+        elChartEmpty.hidden = hasData;
+        if (!hasData) return;
+
+        if (chart) chart.destroy();
+        chart = new Chart(elChart.getContext('2d'), {
+          type: 'pie',
+          data: {
+            labels,
+            datasets: [{
+              data: totals,
+              backgroundColor: pieColors(labels.length)
+            }]
+          },
+          options: {
+            responsive: true,
+            interaction: { mode: 'nearest', intersect: true },
+            plugins: { legend: { position: 'right' }, tooltip: { enabled: true } }
+          },
+          plugins: [pieLabelPlugin]
+        });
+        return;
+      }
+      const { labels, datasets, totalSeries } = buildDatasets(dim, keys);
+      renderChartWithData(labels, datasets, totalSeries);
+    }
+
+    function renderTable(dim, keys){
+      if (!keys.length) { elTableWrap.innerHTML = `<div class="empty">No items selected.</div>`; return; }
+      const { monthKeys, monthMap } = buildMonthMap(dim, keys);
+      const headers = ['Month', ...keys, 'TOTAL'];
+      const rows = monthKeys.map(m => {
+        const entry = monthMap.get(m);
+        const values = keys.map(k => entry.totals[k] || 0);
+        const rowTotal = values.reduce((a,b)=>a+b,0);
+        return [entry.label, ...values, rowTotal];
+      });
+      const table = buildSortableTable(headers, rows);
+
+      elTableWrap.innerHTML = '';
+      elTableWrap.appendChild(table);
+    }
+
+    function buildSortableTable(headers, rows){
+      const table = document.createElement('table');
+      const thead = document.createElement('thead');
+      const trh = document.createElement('tr');
+
+      headers.forEach((h, idx) => {
+        const th = document.createElement('th');
+        th.textContent = h;
+        th.className = 'sortable';
+        const arrows = document.createElement('span'); arrows.className = 'arrows'; arrows.textContent = ' ▲▼';
+        th.appendChild(arrows);
+        th.addEventListener('click', ()=> sortTable(table, idx));
+        trh.appendChild(th);
+      });
+      thead.appendChild(trh); table.appendChild(thead);
+
+      const tbody = document.createElement('tbody');
+      for (const r of rows) {
+        const tr = document.createElement('tr');
+        r.forEach((cell, i)=>{
+          const td = document.createElement('td');
+          if (i === 0) {
+            td.textContent = String(cell);
+          } else if (typeof cell === 'number' && Number.isFinite(cell)) {
+            td.textContent = fmtNumber(cell);
+          } else {
+            td.textContent = String(cell);
+          }
+          tr.appendChild(td);
+        });
+        tbody.appendChild(tr);
+      }
+      table.appendChild(tbody);
+      return table;
+    }
+
+    function normalizeCategoryName(name){
+      const stripped = name.replace(/[^\x00-\x7F]/g, '');
+      const cleaned = stripped.replace(/\s+/g, ' ').replace(/\s*-\s*/g, ' - ').trim();
+      const lower = cleaned.toLowerCase();
+
+      if (lower.includes('pork')) return 'Pork';
+      if (lower.includes('beef')) return 'Beef';
+      if (lower.includes('lamb')) return 'Lamb';
+      if (lower.includes('poultry') || lower.includes('chicken') || lower.includes('turkey')) return 'Poultry';
+      if (lower.includes('egg')) return 'Eggs';
+      if (lower.includes('pantry')) return 'Home Goods';
+      if (lower.includes('whole milk')) return 'Dairy - Whole Milk';
+      if (lower.includes('value added products')) return 'Dairy - Value Added Products';
+      if (lower.includes('dairy') || lower.includes('raw dairy') || lower.includes('unpasteurized')) return 'Dairy';
+      if (lower.includes('vegetable') || lower.includes('fruit') || lower.includes('mushroom') || lower.includes('flowers')) return 'Vegetables/Fruit';
+      if (/(^|[^a-z])organs?([^a-z]|$)/.test(lower) || lower.includes('lard') || lower.includes('bones')) return 'Organs/Lard/Bones';
+      if (lower.includes('specials and bundles') || lower.includes('baked goods') || lower.includes('events') || lower.includes('beverages') || lower.includes('snacks') || lower.includes('pasture raised meats') || lower.includes('full farm free basket')) return 'Uncategorized';
+      if (lower.includes('broccoli/cauliflower/cabbage')) return 'Organic Vegetables - Broccoli/Cauliflower/Cabbage';
+
+      if (lower.startsWith('organic fruiting vegetables')) return 'Organic Fruit';
+      if (lower === 'organic fruit') return 'Organic Fruit';
+      return cleaned;
+    }
+
+    function buildNormalizedCategoryData(filterCategory, weeksList = weeks){
+      const monthMap = new Map();
+      const totalsByCategory = new Map();
+      const variantsByCategory = new Map();
+      const totalsByCategoryYear = new Map();
+      const totalsByYear = new Map();
+      const yearSet = new Set();
+
+      for (const w of weeksList) {
+        const d = parseDateFromRange(w.dateRange);
+        if (Number.isNaN(d.getTime())) continue;
+        const y = d.getUTCFullYear();
+        const m = d.getUTCMonth() + 1;
+        const key = `${y}-${String(m).padStart(2, '0')}`;
+        yearSet.add(y);
+        const categories = w.data?.category || {};
+        for (const [raw, value] of Object.entries(categories)) {
+          const normalized = normalizeCategoryName(raw);
+          const v = Number(value || 0);
+          totalsByCategory.set(normalized, (totalsByCategory.get(normalized) || 0) + v);
+          totalsByYear.set(y, (totalsByYear.get(y) || 0) + v);
+          if (!totalsByCategoryYear.has(normalized)) totalsByCategoryYear.set(normalized, new Map());
+          const byYear = totalsByCategoryYear.get(normalized);
+          byYear.set(y, (byYear.get(y) || 0) + v);
+          if (!variantsByCategory.has(normalized)) variantsByCategory.set(normalized, new Map());
+          const variantTotals = variantsByCategory.get(normalized);
+          variantTotals.set(raw, (variantTotals.get(raw) || 0) + v);
+
+          if (filterCategory && normalized !== filterCategory) continue;
+          if (!monthMap.has(key)) {
+            const label = new Date(Date.UTC(y, m - 1, 1)).toLocaleString('en-US', { month: 'short', year: 'numeric', timeZone: 'UTC' });
+            monthMap.set(key, { label, totals: {} });
+          }
+          const entry = monthMap.get(key);
+          entry.totals[normalized] = (entry.totals[normalized] || 0) + v;
+        }
+      }
+
+      const monthKeys = Array.from(monthMap.keys()).sort();
+      const years = Array.from(yearSet).sort((a,b)=>a-b);
+      return { monthKeys, monthMap, totalsByCategory, variantsByCategory, totalsByCategoryYear, totalsByYear, years };
+    }
+
+    function buildDatasetsFromMonthMap(monthKeys, monthMap, keys){
+      const labels = monthKeys.map(k => monthMap.get(k).label);
+      const datasets = keys.map((k)=>({
+        label: k,
+        data: monthKeys.map(m => monthMap.get(m).totals[k] || 0),
+        tension: 0.2,
+        fill: false,
+      }));
+      const totalSeries = monthKeys.map(m => keys.reduce((sum, k) => sum + (monthMap.get(m).totals[k] || 0), 0));
+      return { labels, datasets, totalSeries };
+    }
+
+    function renderChartWithData(labels, datasets, totalSeries){
       const totalHasData = totalSeries.some(v => v !== 0);
       if (totalHasData) {
         datasets.push({ label: 'TOTAL (selected)', data: totalSeries, tension: 0.2, fill: false, borderWidth: 3 });
@@ -302,45 +709,136 @@
       });
     }
 
-    function renderTable(dim, keys){
+    function renderTableFromMonthMap(monthKeys, monthMap, keys){
       if (!keys.length) { elTableWrap.innerHTML = `<div class="empty">No items selected.</div>`; return; }
-      const headers = ['Week', ...keys, 'TOTAL'];
-      const rows = weeks.map(w => {
-        const values = keys.map(k => Number(w.data?.[dim]?.[k] || 0));
+      const headers = ['Month', ...keys, 'TOTAL'];
+      const rows = monthKeys.map(m => {
+        const entry = monthMap.get(m);
+        const values = keys.map(k => entry.totals[k] || 0);
         const rowTotal = values.reduce((a,b)=>a+b,0);
-        return [w.dateRange, ...values, rowTotal];
+        return [entry.label, ...values, rowTotal];
       });
-
-      // Build table
-      const table = document.createElement('table');
-      const thead = document.createElement('thead');
-      const trh = document.createElement('tr');
-
-      headers.forEach((h, idx) => {
-        const th = document.createElement('th');
-        th.textContent = h;
-        th.className = 'sortable';
-        const arrows = document.createElement('span'); arrows.className = 'arrows'; arrows.textContent = ' ▲▼';
-        th.appendChild(arrows);
-        th.addEventListener('click', ()=> sortTable(table, idx));
-        trh.appendChild(th);
-      });
-      thead.appendChild(trh); table.appendChild(thead);
-
-      const tbody = document.createElement('tbody');
-      for (const r of rows) {
-        const tr = document.createElement('tr');
-        r.forEach((cell, i)=>{
-          const td = document.createElement('td');
-          td.textContent = (i===0) ? String(cell) : fmtNumber(cell);
-          tr.appendChild(td);
-        });
-        tbody.appendChild(tr);
-      }
-      table.appendChild(tbody);
-
+      const table = buildSortableTable(headers, rows);
       elTableWrap.innerHTML = '';
       elTableWrap.appendChild(table);
+    }
+
+    function renderTotalsBarFromSeries(totalSeries){
+      if (!totalSeries.length) { elTotals.textContent = ''; return; }
+      const total = totalSeries.reduce((a,b)=>a+b,0);
+      const avg = totalSeries.length ? total/totalSeries.length : 0;
+      elTotals.textContent = `TOTAL across selected (all months): ${fmtNumber(total)} | Avg/month: ${fmtNumber(avg)}`;
+    }
+
+    function renderCategoryInsights(totalsByCategory, variantsByCategory, totalsByCategoryYear, totalsByYear, years){
+      const groupHeaders = ['Category'];
+      for (const y of years) {
+        groupHeaders.push(`${y} Total`, `${y} %`);
+      }
+      groupHeaders.push('TOTAL');
+
+      const groupRows = Array.from(totalsByCategory.entries())
+        .sort((a,b) => b[1] - a[1])
+        .map(([category, total]) => {
+          const row = [category];
+          const byYear = totalsByCategoryYear.get(category) || new Map();
+          for (const y of years) {
+            const yearTotal = byYear.get(y) || 0;
+            const yearAll = totalsByYear.get(y) || 0;
+            const share = yearAll ? (yearTotal / yearAll) * 100 : 0;
+            row.push(yearTotal, fmtPercent(share));
+          }
+          row.push(total);
+          return row;
+        });
+
+      if (!groupRows.length) {
+        elProductGroupTableWrap.innerHTML = `<div class="empty">No category totals available.</div>`;
+        elProductGroupDetailWrap.innerHTML = `<div class="empty">Select a category to see variants.</div>`;
+        return;
+      }
+
+      const groupTable = buildSortableTable(groupHeaders, groupRows);
+      elProductGroupTableWrap.innerHTML = '';
+      elProductGroupTableWrap.appendChild(groupTable);
+      elProductGroupDetailWrap.innerHTML = `<div class="empty">Select a category to see variants.</div>`;
+
+      const rows = Array.from(groupTable.querySelectorAll('tbody tr'));
+      rows.forEach((row) => {
+        const category = row.children[0].textContent;
+        row.style.cursor = 'pointer';
+        row.addEventListener('click', () => {
+          rows.forEach(r => r.classList.remove('active'));
+          row.classList.add('active');
+          const variants = variantsByCategory.get(category) || new Map();
+          const detailRows = Array.from(variants.entries())
+            .sort((a,b) => b[1] - a[1])
+            .map(([name, total]) => [name, total]);
+          if (!detailRows.length) {
+            elProductGroupDetailWrap.innerHTML = `<div class="empty">No variants in ${category}.</div>`;
+            return;
+          }
+          const headers = ['Category Variant', 'Total Sales'];
+          const detailTable = buildSortableTable(headers, detailRows);
+          elProductGroupDetailWrap.innerHTML = '';
+          elProductGroupDetailWrap.appendChild(detailTable);
+          renderCategoryFocus(category);
+        });
+      });
+    }
+
+    function setCategoryRightMode(mode){
+      categoryRightMode = mode;
+      elCatChartBtn.classList.toggle('active', mode === 'chart');
+      elCatVariantsBtn.classList.toggle('active', mode === 'variants');
+      elCategoryChartWrap.classList.toggle('hidden', mode !== 'chart');
+      elCategoryVariantsWrap.classList.toggle('hidden', mode !== 'variants');
+    }
+
+    function renderCategoryChart(category){
+      const { monthKeys, monthMap } = buildNormalizedCategoryData(category, weeks);
+      const keys = [category];
+      const { labels, datasets, totalSeries } = buildDatasetsFromMonthMap(monthKeys, monthMap, keys);
+      const hasData = totalSeries.some(v => v !== 0);
+      elCategoryChartEmpty.hidden = hasData;
+      if (!hasData) {
+        if (categoryChart) categoryChart.destroy();
+        return;
+      }
+      if (categoryChart) categoryChart.destroy();
+      categoryChart = new Chart(elCategoryChart.getContext('2d'), {
+        type: 'line',
+        data: { labels, datasets },
+        options: {
+          responsive: true,
+          plugins: { legend: { position: 'top' }, tooltip: { mode: 'index', intersect: false } },
+          interaction: { mode: 'nearest', axis: 'x', intersect: false },
+          scales: {
+            x: { ticks: { autoSkip: true, maxRotation: 0 } },
+            y: { ticks: { callback: (v)=>fmtNumber(v) }, beginAtZero: true }
+          }
+        }
+      });
+    }
+
+    function renderCategoryFocus(category){
+      currentCategoryFocus = category;
+      renderCategoryChart(category);
+      setCategoryRightMode(categoryRightMode);
+    }
+
+    function renderCategoryExplorer(){
+      elProductInsights.classList.remove('hidden');
+      categoryDataCache = buildNormalizedCategoryData(null, weeks);
+      const { totalsByCategory, variantsByCategory, totalsByCategoryYear, totalsByYear, years } = categoryDataCache;
+      renderCategoryInsights(totalsByCategory, variantsByCategory, totalsByCategoryYear, totalsByYear, years);
+      if (!currentCategoryFocus) {
+        if (categoryChart) categoryChart.destroy();
+        elCategoryChartEmpty.hidden = false;
+        elProductGroupDetailWrap.innerHTML = `<div class="empty">Select a category.</div>`;
+        return;
+      }
+      renderCategoryFocus(currentCategoryFocus);
     }
 
     function sortTable(table, columnIndex){
@@ -361,16 +859,13 @@
       table.setAttribute('data-sort', `${columnIndex}:${asc ? 'asc':'desc'}`);
     }
 
-    function tableToCSV(){
-      const table = elTableWrap.querySelector('table');
-      if (!table) return '';
-      const rows = Array.from(table.querySelectorAll('tr')).map(tr => Array.from(tr.children).map(td => td.textContent));
-      const esc = (v) => /[",\n]/.test(v) ? '"' + v.replace(/"/g,'""') + '"' : v;
-      return rows.map(r => r.map(esc).join(',')).join('\n');
-    }
 
     /** Apply flow **/
     function apply(){
+      if (currentView === 'products') {
+        renderCategoryExplorer();
+        return;
+      }
       // If nothing selected, preselect top 5 of current dim
       if (selected.size === 0) {
         const top = allItemsByDim[currentDim]
@@ -385,6 +880,7 @@
       const keys = [...selected];
       renderChart(currentDim, keys);
       renderTable(currentDim, keys);
+      elProductInsights.classList.add('hidden');
       renderTotalsBar(currentDim, keys);
     }
 
@@ -398,6 +894,44 @@
       // Do not auto-apply; wait for user (they may want to search)
     });
 
+    function setView(view){
+      currentView = view;
+      elTabVendors.classList.toggle('active', view === 'vendors');
+      elTabProducts.classList.toggle('active', view === 'products');
+      elSelectorBlock.classList.toggle('hidden', view === 'products');
+      elDimensionBlock.classList.toggle('hidden', view === 'products');
+      elYearBlock.classList.toggle('hidden', view === 'products');
+      elTopLimitBlock.classList.toggle('hidden', view === 'products');
+      elChartPanel.classList.toggle('hidden', view === 'products');
+      currentCategoryFocus = null;
+      elChartEmpty.textContent = '';
+      renderDimensionOptions();
+      currentDim = view === 'products' ? 'category' : 'vendors';
+      selected = new Set();
+      renderDimension(currentDim);
+      renderChips();
+      apply();
+    }
+
+    elTabVendors.addEventListener('click', ()=> setView('vendors'));
+    elTabProducts.addEventListener('click', ()=> setView('products'));
+    const savedTheme = localStorage.getItem('kpiTheme');
+    if (savedTheme) {
+      document.documentElement.setAttribute('data-theme', savedTheme === 'dark' ? 'dark' : 'light');
+    }
+    elThemeToggle.addEventListener('click', ()=>{
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      const next = isDark ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('kpiTheme', next);
+    });
+    elYearSelect.addEventListener('change', (e)=>{
+      selectedYear = e.target.value;
+      apply();
+    });
+    elCatChartBtn.addEventListener('click', ()=> setCategoryRightMode('chart'));
+    elCatVariantsBtn.addEventListener('click', ()=> setCategoryRightMode('variants'));
+
     elFilter.addEventListener('input', debounce(()=> rebuildSelectOptions(), 120));
 
     elSelect.addEventListener('change', ()=>{
@@ -408,34 +942,27 @@
         if (o.selected) selected.add(o.value); else selected.delete(o.value);
       }
       renderChips();
+      apply();
     });
 
     elAll.addEventListener('click', ()=>{
       const opts = Array.from(elSelect.options);
       for (const o of opts) { if (!o.disabled) { o.selected = true; selected.add(o.value); } }
       renderChips();
+      apply();
     });
+
+    elTopLimit.addEventListener('change', apply);
 
     elNone.addEventListener('click', ()=>{
       const opts = Array.from(elSelect.options);
       for (const o of opts) { o.selected = false; }
       selected.clear();
       renderChips();
+      apply();
     });
 
-    elApply.addEventListener('click', apply);
-
-    elCSV.addEventListener('click', ()=>{
-      const csv = tableToCSV();
-      if (!csv) return;
-      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url; a.download = `kpi_${currentDim}.csv`; a.click();
-      URL.revokeObjectURL(url);
-    });
   })();
   </script>
 </body>
 </html>
-
