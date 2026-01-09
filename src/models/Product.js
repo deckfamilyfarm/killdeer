@@ -88,9 +88,11 @@ class Product {
             }
 
             const { productName, packageName, localLineProductID } = results[0];
-            const effectiveSale = typeof sale === "boolean" ? sale : results[0].sale;
-            const hasSaleDiscount = sale_discount !== undefined && sale_discount !== null && sale_discount !== "";
-            const effectiveSaleDiscount = hasSaleDiscount ? normalizedSaleDiscount : results[0].sale_discount;
+            const saleProvided = typeof sale === "boolean";
+            const saleDiscountProvided = sale_discount !== undefined && sale_discount !== null && sale_discount !== "";
+            const effectiveSale = saleProvided ? sale : results[0].sale;
+            const effectiveSaleDiscount = saleDiscountProvided ? normalizedSaleDiscount : results[0].sale_discount;
+            const priceFieldsProvided = saleProvided || saleDiscountProvided;
 
             // ✅ Perform the database update
             await utilities.db.query(
@@ -103,7 +105,8 @@ class Product {
                 id,
                 productName,
                 databaseUpdate: true,
-                localLineUpdate: false
+                localLineUpdate: false,
+                localLinePriceUpdate: null
             };
 
             // ✅ Append change to CSV file
@@ -180,6 +183,18 @@ class Product {
 
                 console.error(`❌ No record found in LocalLine for ${localLineProductID}`);
                 updateStatus.localLineUpdate = false;
+            }
+
+            if (priceFieldsProvided) {
+                this.data.sale = effectiveSale;
+                this.data.sale_discount = effectiveSaleDiscount;
+                try {
+                    await this.updatePricelists(accessToken);
+                    updateStatus.localLinePriceUpdate = true;
+                } catch (error) {
+                    console.error("❌ LocalLine price update failed:", error);
+                    updateStatus.localLinePriceUpdate = false;
+                }
             }
             return updateStatus;
 

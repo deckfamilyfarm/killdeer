@@ -112,6 +112,11 @@ th, td {
             max-height: 60vh;
             overflow: auto;
         }
+        .response-progress {
+            color: var(--muted);
+            font-size: 13px;
+            margin-bottom: 10px;
+        }
         .response-card {
             border: 1px solid var(--line);
             border-radius: 8px;
@@ -136,6 +141,10 @@ th, td {
         .status.warn {
             background: #fff3cd;
             color: #8a6d3b;
+        }
+        .status.pending {
+            background: #eef2f7;
+            color: #475569;
         }
         .response-actions {
             display: flex;
@@ -269,6 +278,7 @@ th, td {
     <div class="modal-backdrop" id="responseModal" hidden>
         <div class="response-modal">
             <h3>Updates Applied</h3>
+            <div class="response-progress" id="responseProgress"></div>
             <div class="response-list" id="responseList"></div>
             <div class="response-actions">
                 <button type="button" onclick="hideResponseModal()">Close</button>
@@ -478,6 +488,8 @@ function toggleSwitch(element) {
 function markEdited(element) {
     let row = element.closest("tr");
     let id = row.getAttribute("data-id");
+    const isSaleToggle = element.classList.contains("toggle-sale");
+    const isSaleDiscount = element.classList.contains("sale-discount-input");
 
     // Get values from row
     //let productName = row.querySelector(".editable-input"); // Select product name input
@@ -502,6 +514,9 @@ function markEdited(element) {
     // ✅ Mark row as edited
     editedRows.add(id);
     row.classList.add("edited");
+    if (isSaleToggle || isSaleDiscount) {
+        row.dataset.priceChange = "true";
+    }
     document.getElementById("applyChanges").disabled = false;
 }
 
@@ -519,44 +534,58 @@ async function applyChanges() {
         let row = document.querySelector(`tr[data-id="${id}"]`);
         //let productNameField = row.querySelector(".editable-input");
         let descriptionField = row.querySelector(".editable-textarea");
+        const priceChange = row.dataset.priceChange === "true";
+        const productNameCell = row.children[1] ? row.children[1].textContent.trim() : `Product ${id}`;
 
         let data = {
             //productName: productNameField ? productNameField.value : "",
             description: descriptionField ? descriptionField.value : "",
             visible: row.querySelector(".toggle-visible").classList.contains("active"),
             track_inventory: row.querySelector(".toggle-track").classList.contains("active"),
-            stock_inventory: row.querySelector(".stock-input").value,
-            sale: row.querySelector(".toggle-sale").classList.contains("active"),
-            sale_discount: Math.min(Math.max(parseFloat(row.querySelector(".sale-discount-input").value) || 0, 0), 100) / 100
+            stock_inventory: row.querySelector(".stock-input").value
         };
-        updates.push({ id, data });
+        if (priceChange) {
+            data.sale = row.querySelector(".toggle-sale").classList.contains("active");
+            data.sale_discount = Math.min(Math.max(parseFloat(row.querySelector(".sale-discount-input").value) || 0, 0), 100) / 100;
+        }
+        updates.push({ id, data, productName: productNameCell });
     });
 
     try {
-    // Execute all update requests
-    const responses = await Promise.all(updates.map(async ({ id, data }) => {
-        const response = await fetch(`${API_BASE}/update-inventory/${id}`, {
-            method: "PUT",
-            headers: {
-                "Authorization": `Bearer ${token}`,
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(data)
-        });
+    initResponseModal(updates);
+    let completed = 0;
+    let hadFailure = false;
+    setResponseProgress(completed, updates.length);
 
-        // Parse the response JSON
-        const result = await response.json();
+    await Promise.all(updates.map(async ({ id, data, productName }) => {
+        try {
+            const response = await fetch(`${API_BASE}/update-inventory/${id}`, {
+                method: "PUT",
+                headers: {
+                    "Authorization": `Bearer ${token}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(data)
+            });
 
-        // Return the response in a structured format
-        return { id, result };
+            const result = await response.json();
+            updateResponseCard(id, productName, result);
+        } catch (error) {
+            hadFailure = true;
+            updateResponseCard(id, productName, { databaseUpdate: false, localLineUpdate: false, localLinePriceUpdate: false });
+        } finally {
+            completed += 1;
+            setResponseProgress(completed, updates.length);
+        }
     }));
-
-    renderResponseModal(responses);
 
     // Clear edited rows and refresh data
     editedRows.clear();
     document.getElementById("applyChanges").disabled = true;
     loadData();
+    if (hadFailure) {
+        alert("Failed to save changes.");
+    }
 } catch (error) {
     alert("Failed to save changes.");
     console.error("Error updating items:", error);
@@ -564,32 +593,58 @@ async function applyChanges() {
 
 }
 
-function renderResponseModal(responses) {
+function initResponseModal(updates) {
     const responseList = document.getElementById("responseList");
     responseList.innerHTML = "";
-
-    responses.forEach(({ id, result }) => {
-        const databaseUpdate = result && result.databaseUpdate;
-        const localLineUpdate = result && result.localLineUpdate;
-        const productName = result && result.productName ? result.productName : `Product ${id}`;
-
-        const databaseStatus = databaseUpdate ? "Updated" : "Failed";
-        const localLineStatus = localLineUpdate ? "Updated" : "Skipped";
-
-        const databaseClass = databaseUpdate ? "ok" : "warn";
-        const localLineClass = localLineUpdate ? "ok" : "warn";
-
+    updates.forEach(({ id, productName }) => {
         const card = document.createElement("div");
         card.className = "response-card";
+        card.setAttribute("data-id", id);
         card.innerHTML = `
             <div class="title">${productName}</div>
-            <div>Database: <span class="status ${databaseClass}">${databaseStatus}</span></div>
-            <div>LocalLine: <span class="status ${localLineClass}">${localLineStatus}</span></div>
+            <div>Database: <span class="status pending">Updating</span></div>
+            <div>LocalLine: <span class="status pending">Updating</span></div>
+            <div>LocalLine Pricing: <span class="status pending">Updating</span></div>
         `;
         responseList.appendChild(card);
     });
 
     document.getElementById("responseModal").hidden = false;
+}
+
+function updateResponseCard(id, productName, result) {
+    const card = document.querySelector(`.response-card[data-id="${id}"]`);
+    if (!card) return;
+
+    const databaseUpdate = result && result.databaseUpdate;
+    const localLineUpdate = result && result.localLineUpdate;
+    const localLinePriceUpdate = result && Object.prototype.hasOwnProperty.call(result, "localLinePriceUpdate")
+        ? result.localLinePriceUpdate
+        : null;
+
+    const databaseStatus = databaseUpdate ? "Updated" : "Failed";
+    const localLineStatus = localLineUpdate ? "Updated" : "Skipped";
+    const localLinePriceStatus = localLinePriceUpdate === true
+        ? "Updated"
+        : localLinePriceUpdate === false
+            ? "Failed"
+            : "Skipped";
+
+    const databaseClass = databaseUpdate ? "ok" : "warn";
+    const localLineClass = localLineUpdate ? "ok" : "warn";
+    const localLinePriceClass = localLinePriceUpdate === true ? "ok" : "warn";
+
+    card.innerHTML = `
+        <div class="title">${productName}</div>
+        <div>Database: <span class="status ${databaseClass}">${databaseStatus}</span></div>
+        <div>LocalLine: <span class="status ${localLineClass}">${localLineStatus}</span></div>
+        <div>LocalLine Pricing: <span class="status ${localLinePriceClass}">${localLinePriceStatus}</span></div>
+    `;
+}
+
+function setResponseProgress(completed, total) {
+    const progress = document.getElementById("responseProgress");
+    progress.textContent = `Updating ${completed} of ${total} products`;
 }
 
 function hideResponseModal() {
