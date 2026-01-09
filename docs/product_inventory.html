@@ -174,11 +174,27 @@ th, td {
             border: none;
             background: transparent;
         }
+        .sale-discount-wrapper {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            position: relative;
+        }
         .sale-discount-input {
-            width: 80px;
-            text-align: center;
+            width: 64px;
+            text-align: right;
             border: none;
             background: transparent;
+            padding-right: 14px;
+        }
+        .sale-discount-suffix {
+            color: var(--muted);
+            font-size: 12px;
+            position: absolute;
+            right: 4px;
+            top: 50%;
+            transform: translateY(-50%);
+            pointer-events: none;
         }
         .editable {
             background: white;
@@ -261,9 +277,10 @@ th, td {
     </div>
 
     <h2>Deck Family Farm Product Inventory</h2>
-    <label for="categoryFilter">Filter by Category: </label>
+    <label for="categoryFilter">Filter Options: </label>
     <select id="categoryFilter" onchange="filterCategory()">
         <option value="all">All Categories</option>
+        <option value="on_sale">On Sale</option>
     </select>
     
     <table>
@@ -359,7 +376,12 @@ async function loadData() {
         <td><div class="toggle-switch toggle-track ${row.track_inventory ? 'active' : ''}" onclick="toggleSwitch(this)"></div></td>
         <td><input type="number" class="stock-input" value="${row.stock_inventory}" oninput="markEdited(this)"></td>
         <td><div class="toggle-switch toggle-sale ${row.sale ? 'active' : ''}" onclick="toggleSwitch(this)"></div></td>
-        <td><input type="number" class="sale-discount-input" min="0" max="100" step="0.01" value="${(Number(row.sale_discount || 0) * 100).toFixed(2)}" oninput="markEdited(this)"></td>
+        <td>
+            <span class="sale-discount-wrapper">
+                <input type="number" class="sale-discount-input" min="0" max="100" step="1" value="${Math.round(Number(row.sale_discount || 0) * 100)}" oninput="markEdited(this)">
+                <span class="sale-discount-suffix">%</span>
+            </span>
+        </td>
         <td></td>
     </tr>`;
 
@@ -368,7 +390,7 @@ async function loadData() {
         // Populate the category filter dropdown
         let categoryFilter = document.getElementById("categoryFilter");
         const selectedCategory = categoryFilter.value || "all";
-        categoryFilter.innerHTML = `<option value="all">All Categories</option>`;
+        categoryFilter.innerHTML = `<option value="all">All Categories</option><option value="on_sale">On Sale</option>`;
         categories.forEach(category => {
             categoryFilter.innerHTML += `<option value="${category}">${category}</option>`;
         });
@@ -393,7 +415,16 @@ function filterCategory() {
 
     rows.forEach(row => {
         let rowCategory = row.getAttribute("data-category");
-        if (selectedCategory === "all" || rowCategory === selectedCategory) {
+        if (selectedCategory === "all") {
+            row.style.display = "";
+            return;
+        }
+        if (selectedCategory === "on_sale") {
+            const onSale = row.querySelector(".toggle-sale").classList.contains("active");
+            row.style.display = onSale ? "" : "none";
+            return;
+        }
+        if (rowCategory === selectedCategory) {
             row.style.display = "";
         } else {
             row.style.display = "none";
