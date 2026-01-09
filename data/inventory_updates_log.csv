@@ -774,3 +774,9 @@ id,productName,packageName,visible,track_inventory,stock_inventory,timestamp
 131,Lamb Heart,"2 pack, 0.8 - 1.1 lbs	",true,true,5,2025-12-19T00:16:26.154Z
 72,Rack of Lamb,2.50 - 3.10 lbs,true,true,18,2025-12-19T00:16:26.361Z
 76,Lamb Stew,0.90 - 1.10 lbs,true,false,0,2025-12-19T00:16:26.551Z
+8,Beef Bones,3.00 - 5.00 lbs,false,false,0,2026-01-09T15:16:17.175Z
+8,Beef Bones,3.00 - 5.00 lbs,true,false,0,2026-01-09T15:16:29.739Z
+8,Beef Bones,3.00 - 5.00 lbs,false,false,0,2026-01-09T15:18:10.007Z
+8,Beef Bones,3.00 - 5.00 lbs,true,false,0,2026-01-09T15:18:19.251Z
+8,Beef Bones,3.00 - 5.00 lbs,false,false,0,2026-01-09T15:19:47.970Z
+8,Beef Bones,3.00 - 5.00 lbs,true,false,0,2026-01-09T15:19:57.426Z

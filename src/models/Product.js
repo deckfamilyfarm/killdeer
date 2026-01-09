@@ -66,9 +66,10 @@ class Product {
         }
     }
 
-    async updateInventory({ visible, track_inventory, stock_inventory }, accessToken) {
+    async updateInventory({ visible, track_inventory, stock_inventory, sale, sale_discount }, accessToken) {
         try {
             const id = this.productId;
+            const normalizedSaleDiscount = Math.min(Math.max(Number(sale_discount) || 0, 0), 1);
 
             const payload = {
                 visible,
@@ -78,7 +79,7 @@ class Product {
 
             // ✅ Query product details
             const [results] = await utilities.db.query(
-                "SELECT productName, packageName,  localLineProductID FROM pricelist WHERE id = ?",
+                "SELECT productName, packageName, localLineProductID, sale, sale_discount FROM pricelist WHERE id = ?",
                 [this.productId]
             );
 
@@ -87,11 +88,14 @@ class Product {
             }
 
             const { productName, packageName, localLineProductID } = results[0];
+            const effectiveSale = typeof sale === "boolean" ? sale : results[0].sale;
+            const hasSaleDiscount = sale_discount !== undefined && sale_discount !== null && sale_discount !== "";
+            const effectiveSaleDiscount = hasSaleDiscount ? normalizedSaleDiscount : results[0].sale_discount;
 
             // ✅ Perform the database update
             await utilities.db.query(
-                "UPDATE pricelist SET visible=?, track_inventory=?, stock_inventory=? WHERE id=?",
-                [visible, track_inventory, stock_inventory, this.productId]
+                "UPDATE pricelist SET visible=?, track_inventory=?, stock_inventory=?, sale=?, sale_discount=? WHERE id=?",
+                [visible, track_inventory, stock_inventory, effectiveSale, effectiveSaleDiscount, this.productId]
             );
 
             // ✅ Structured response object
@@ -482,4 +486,3 @@ async updateSinglePriceList(priceListID, markupDecimal, accessToken) {
 }
 
 module.exports = Product;
-

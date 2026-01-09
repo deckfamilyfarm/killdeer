@@ -24,7 +24,9 @@ async function fetchProductData() {
       p.localLineProductID,
       p.visible,
       p.track_inventory,
-      p.stock_inventory
+      p.stock_inventory,
+      p.sale,
+      p.sale_discount
     FROM pricelist p
     JOIN category c ON p.category_id = c.id
     WHERE p.available_on_ll IS TRUE
