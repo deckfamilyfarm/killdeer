@@ -798,3 +798,18 @@ id,productName,packageName,visible,track_inventory,stock_inventory,timestamp
 75,Lamb Shoulder Roast,2.30 - 2.70 lbs,true,false,0,2026-01-09T16:23:05.740Z
 69,Ground Lamb,1.00 lbs,false,false,0,2026-01-09T16:23:23.891Z
 69,Ground Lamb,1.00 lbs,true,false,0,2026-01-09T16:23:29.823Z
+75,Lamb Shoulder Roast,2.30 - 2.70 lbs,true,false,0,2026-01-10T16:43:35.767Z
+15,Beef Flat Iron Steak,0.70 - 1.10 lbs,true,true,3,2026-01-16T01:18:02.623Z
+23,Beef Oxtail,1.40 - 1.90 lbs,true,true,2,2026-01-16T01:18:02.728Z
+36,Beef Tri-Tip,1.90 - 2.20 lbs,true,true,2,2026-01-16T01:18:02.743Z
+11,"Brisket, Medium","Medium, 3.00 - 3.99 lbs",true,true,2,2026-01-16T01:18:02.749Z
+32,Beef Tenderloin,0.40 - 0.70 lbs,false,false,0,2026-01-16T01:18:02.762Z9,Beef Marrow Bones,3.00 - 5.00 lbs,true,true,1,2026-01-16T01:18:02.767Z
+
+14,Flank Steak,1.10 - 1.40 lbs,true,true,2,2026-01-16T01:18:03.785Z
+62,"Red Ranger Roasting Chicken, Medium","Medium, 4.01 - 5.00 lbs",false,true,12,2026-01-16T01:18:04.165Z
+41,"Pork Chop, Boneless",1.20 - 1.50 lbs,true,true,15,2026-01-16T01:18:04.173Z
+133,"Cornish Roasting Chicken, Extra Large","Extra Large, 5.00 - 6.00 lbs",true,true,10,2026-01-16T01:18:04.184Z
+29,"Skirt Steak, Small","Small, 0.40 - 0.79 lbs",true,true,1,2026-01-16T01:18:04.187Z
+33,Teres Major Steak,0.40 - 0.70 lbs,false,true,0,2026-01-16T01:18:04.802Z
+60,"Cornish Roasting Chicken, Large","Large, 4.21 - 4.99 lbs",true,true,6,2026-01-16T01:18:05.207Z
+72,Rack of Lamb,2.50 - 3.10 lbs,true,true,15,2026-01-16T01:18:05.406Z
