@@ -176,7 +176,7 @@ async function getServiceAccountAccessToken(credentialsPath) {
 
 async function updateGoogleSheet({ accessToken, spreadsheetId, sheetName, values }) {
 	const encodedSheet = encodeURIComponent(sheetName);
-	const columnCount = values[0]?.length || 1;
+	const columnCount = values.reduce((max, row) => Math.max(max, row?.length || 0), 1);
 	const rowCount = values.length || 1;
 	const endColumn = columnIndexToLetter(columnCount);
 	const range = `${sheetName}!A1:${endColumn}${rowCount}`;
