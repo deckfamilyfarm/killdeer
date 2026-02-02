@@ -94,7 +94,7 @@ async function fetchLocationIds() {
 
   // filter out "ON FARM SALES"
   return res.data.locations
-    .filter(loc => loc.status === 'ACTIVE' && loc.id !== 'C0T7DVZY5XVG5')
+    .filter(loc => loc.status === 'ACTIVE')
     .map(loc => ({ id: loc.id, name: loc.name }));
 }
 
