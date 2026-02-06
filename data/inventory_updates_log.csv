@@ -872,3 +872,21 @@ id,productName,packageName,visible,track_inventory,stock_inventory,timestamp
 101,"Organic Pasture Raised Chicken Eggs, 1 dozen",1 dozen,true,false,0,2026-01-30T16:47:42.683Z
 102,"Organic Pasture Raised Chicken Eggs, 1/2 dozen",1/2 dozen,true,false,0,2026-01-30T16:47:42.707Z
 20,Beef Kidney,0.80 - 1.00 lbs,true,false,0,2026-01-30T16:49:15.594Z
+15,Beef Flat Iron Steak,0.70 - 1.10 lbs,true,true,8,2026-02-05T23:57:59.204Z
+134,Bavette Steak,0.9 - 1.6 lbs,false,true,0,2026-02-05T23:57:59.428Z
+14,Flank Steak,1.10 - 1.40 lbs,true,true,3,2026-02-05T23:57:59.445Z
+33,Teres Major Steak,0.40 - 0.70 lbs,true,true,2,2026-02-05T23:57:59.448Z
+29,"Skirt Steak, Small","Small, 0.40 - 0.79 lbs",true,true,2,2026-02-05T23:57:59.453Z
+168,Classic Pork Broth,1 quart,true,true,4,2026-02-05T23:57:59.465Z
+40,Pork Bones,3.00 - 5.00 lbs,false,false,0,2026-02-05T23:58:00.612Z
+41,"Pork Chop, Boneless",1.20 - 1.50 lbs,true,true,8,2026-02-05T23:58:00.619Z
+133,"Cornish Roasting Chicken, Extra Large","Extra Large, 5.00 - 6.00 lbs",true,true,15,2026-02-05T23:58:00.943Z
+123,"Rendered Pork Leaf Lard, 16 oz",16 oz,true,true,4,2026-02-05T23:58:01.039Z
+99,Sweet Italian Sausage Links,12 oz,true,false,4,2026-02-05T23:58:01.439Z
+115,Hot Italian Sausage Links,4 links/ pack 14 oz pack,true,true,10,2026-02-05T23:58:01.715Z
+124,"Rendered Pork Leaf Lard, 8 oz",8 oz,true,false,8,2026-02-05T23:58:02.197Z
+36,Beef Tri-Tip,1.90 - 2.20 lbs,true,true,4,2026-02-05T23:58:02.243Z
+30,"Skirt Steak, Large","Large, .80 - 1.20 lbs",true,true,2,2026-02-05T23:58:02.448Z
+58,"Cornish Roasting Chicken, Small","Small, 2.50 - 3.19 lbs",false,true,3,2026-02-05T23:58:02.500Z
+60,"Cornish Roasting Chicken, Large","Large, 4.21 - 4.99 lbs",false,true,3,2026-02-05T23:58:02.726Z
+61,"Red Ranger Roasting Chicken, Small","Small, 3.00 - 4.00 lbs",true,true,10,2026-02-05T23:58:02.934Z
