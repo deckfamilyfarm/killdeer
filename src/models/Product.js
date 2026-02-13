@@ -70,6 +70,33 @@ class Product {
         try {
             const id = this.productId;
             const normalizedSaleDiscount = Math.min(Math.max(Number(sale_discount) || 0, 0), 1);
+            const safeStringify = (value) => {
+                try {
+                    return JSON.stringify(value, null, 2);
+                } catch (err) {
+                    return String(value);
+                }
+            };
+            const toErrorSummary = (error) => {
+                const status = error?.response?.status ?? "n/a";
+                const statusText = error?.response?.statusText ?? "n/a";
+                const code = error?.code ?? "n/a";
+                const message = error?.message ?? "n/a";
+                const apiDetail = error?.response?.data?.detail
+                    || error?.response?.data?.title
+                    || error?.response?.data?.message
+                    || "n/a";
+                const responseBody = error?.response?.data ? safeStringify(error.response.data) : "n/a";
+
+                return {
+                    status,
+                    statusText,
+                    code,
+                    message,
+                    apiDetail,
+                    responseBody
+                };
+            };
 
             const payload = {
                 visible,
@@ -164,22 +191,64 @@ class Product {
                         }
                     }
                 } catch (error) {
-                    utilities.sendEmail({
-                        from: "jdeck88@gmail.com",
-                        to: "jdeck88@gmail.com",
-                        subject: "LocalLine API update failed",
-                        text: `API update failed for ${localLineProductID}`
-                    });
+                    const errorSummary = toErrorSummary(error);
+                    const emailBody = [
+                        "LocalLine inventory PATCH failed.",
+                        "",
+                        `Timestamp: ${new Date().toISOString()}`,
+                        `DB Product ID: ${id}`,
+                        `LocalLine Product ID: ${localLineProductID || "n/a"}`,
+                        `Product Name: ${productName || "n/a"}`,
+                        `Package Name: ${packageName || "n/a"}`,
+                        "",
+                        "Request payload:",
+                        safeStringify(payload),
+                        "",
+                        `HTTP Status: ${errorSummary.status}`,
+                        `HTTP Status Text: ${errorSummary.statusText}`,
+                        `Error Code: ${errorSummary.code}`,
+                        `Error Message: ${errorSummary.message}`,
+                        `API Detail: ${errorSummary.apiDetail}`,
+                        "",
+                        "API Response Body:",
+                        errorSummary.responseBody
+                    ].join("\n");
+
+                    try {
+                        await utilities.sendEmail({
+                            from: "jdeck88@gmail.com",
+                            to: "jdeck88@gmail.com",
+                            subject: "LocalLine API update failed",
+                            text: emailBody
+                        });
+                    } catch (mailError) {
+                        console.error("❌ Failed to send LocalLine API failure email:", mailError.message);
+                    }
                     console.error(`❌ LocalLine API update failed for ${localLineProductID}:`, error);
                     updateStatus.localLineUpdate = false;
                 }
             } else {
-                utilities.sendEmail({
-                    from: "jdeck88@gmail.com",
-                    to: "jdeck88@gmail.com",
-                    subject: "LocalLine API update failed",
-                    text: `We do not have a record of this product in LocalLine: ${localLineProductID}`
-                });
+                try {
+                    await utilities.sendEmail({
+                        from: "jdeck88@gmail.com",
+                        to: "jdeck88@gmail.com",
+                        subject: "LocalLine API update failed",
+                        text: [
+                            "No LocalLine product record found during inventory update.",
+                            "",
+                            `Timestamp: ${new Date().toISOString()}`,
+                            `DB Product ID: ${id}`,
+                            `LocalLine Product ID: ${localLineProductID || "n/a"}`,
+                            `Product Name: ${productName || "n/a"}`,
+                            `Package Name: ${packageName || "n/a"}`,
+                            "",
+                            "Requested inventory update:",
+                            safeStringify({ visible, track_inventory, stock_inventory })
+                        ].join("\n")
+                    });
+                } catch (mailError) {
+                    console.error("❌ Failed to send missing LocalLine record email:", mailError.message);
+                }
 
                 console.error(`❌ No record found in LocalLine for ${localLineProductID}`);
                 updateStatus.localLineUpdate = false;
@@ -200,7 +269,7 @@ class Product {
 
         } catch (error) {
             console.error("❌ Error in Product Module:", error);
-            throw Error;
+            throw error;
         }
     }
 
