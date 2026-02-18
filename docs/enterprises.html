@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Farm Enterprise Relationships</title>
+  <title>Deck Family Farm Enterprises</title>
 
   <!-- Cytoscape library -->
   <script src="https://unpkg.com/cytoscape@3.26.0/dist/cytoscape.min.js"></script>
@@ -39,7 +39,7 @@
 </head>
 
 <body>
-  <h2>Farm Enterprise Relationships</h2>
+  <h2>Deck Family Farm Enterprises</h2>
   <div id="cy"></div>
 
   <!-- Your main script -->
@@ -119,6 +119,44 @@ productionEntities.forEach(prod => {
 
 const elements = [];
 
+function getEntityLabel(entity) {
+  if (entity === "friends_marketing") return "Friends Sales and Marketing";
+  if (entity === "ffcsa") return "FFCSA";
+  if (entity === "ffcsa_members") return "CSA Members";
+  return entity.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+}
+
+const salesOutletAndCustomerEntities = new Set([
+  "olympia_provisions",
+  "garden_wholesale",
+  "farmers_market_customers",
+  "wholesale_customers",
+  "ffcsa_members"
+]);
+
+const aggregationAndDistributionEntities = new Set([
+  "friends_marketing",
+  "ffcsa"
+]);
+
+const productionRowEntities = new Set([
+  "pork",
+  "hyland_processing",
+  "layers",
+  "roasters",
+  "grazers",
+  "creamy_cow",
+  "garden"
+]);
+
+function getEntityGroup(entity) {
+  if (salesOutletAndCustomerEntities.has(entity)) return "sales_outlet_or_customer";
+  if (aggregationAndDistributionEntities.has(entity)) return "aggregation_and_distribution";
+  if (productionRowEntities.has(entity)) return "production";
+  if (entity === "deck_family_trust") return "lease_entity";
+  return "aggregation_and_distribution";
+}
+
 // Y positions
 const yTop = 0;
 const yMiddle = 200;
@@ -152,7 +190,8 @@ for (const [id, position] of Object.entries(nodePositions)) {
   elements.push({
     data: {
       id,
-      label: id.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase())
+      label: getEntityLabel(id),
+      group: getEntityGroup(id)
     },
     position
   });
@@ -165,7 +204,8 @@ for (const entity of entities) {
     elements.push({
       data: {
         id: entity,
-        label: entity.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase())
+        label: getEntityLabel(entity),
+        group: getEntityGroup(entity)
       }
     });
   }
@@ -214,9 +254,27 @@ const cy = cytoscape({
       }
     },
     {
+      selector: 'node[group = "sales_outlet_or_customer"]',
+      style: {
+        'background-color': '#2E86AB'
+      }
+    },
+    {
+      selector: 'node[group = "aggregation_and_distribution"]',
+      style: {
+        'background-color': '#4CAF50'
+      }
+    },
+    {
+      selector: 'node[group = "production"]',
+      style: {
+        'background-color': '#A36A4A'
+      }
+    },
+    {
       selector: 'node#deck_family_trust',
       style: {
-        'background-color': '#4CAF50',
+        'background-color': '#5E8C31',
         'shape': 'roundrectangle',
         'label': 'data(label)',
         'color': '#fff',
@@ -325,18 +383,25 @@ cy.ready(() => {
   // Legend
   const legend = document.createElement('div');
   legend.style.position = 'absolute';
-  legend.style.bottom = '20px';
-  legend.style.left = '20px';
+  legend.style.top = '70px';
+  legend.style.right = '20px';
   legend.style.background = '#f9f9f9';
   legend.style.border = '1px solid #ccc';
-  legend.style.padding = '10px 15px';
-  legend.style.fontSize = '14px';
+  legend.style.padding = '8px 12px';
+  legend.style.fontSize = '13px';
   legend.style.borderRadius = '5px';
   legend.style.boxShadow = '0 2px 5px rgba(0,0,0,0.1)';
+  legend.style.display = 'flex';
+  legend.style.alignItems = 'center';
+  legend.style.gap = '14px';
+  legend.style.whiteSpace = 'nowrap';
   legend.innerHTML = `
-    <strong>Legend:</strong><br>
-    <svg height="10" width="40"><line x1="0" y1="5" x2="40" y2="5" stroke="#4CAF50" stroke-width="2" stroke-dasharray="5,5"/></svg> Lease<br>
-    <svg height="10" width="40"><line x1="0" y1="5" x2="40" y2="5" stroke="#FFA500" stroke-width="2"/></svg> Percentage<br><br>
+    <strong>Legend:</strong>
+    <span><span style="display:inline-block;width:10px;height:10px;background:#2E86AB;border:1px solid #888;margin-right:5px;vertical-align:middle;"></span>Customers & Sales Outlets</span>
+    <span><span style="display:inline-block;width:10px;height:10px;background:#4CAF50;border:1px solid #888;margin-right:5px;vertical-align:middle;"></span>Aggregation & Distribution</span>
+    <span><span style="display:inline-block;width:10px;height:10px;background:#A36A4A;border:1px solid #888;margin-right:5px;vertical-align:middle;"></span>Production</span>
+    <span><svg height="10" width="34" style="vertical-align:middle;"><line x1="0" y1="5" x2="34" y2="5" stroke="#4CAF50" stroke-width="2" stroke-dasharray="5,5"/></svg> Lease</span>
+    <span><svg height="10" width="34" style="vertical-align:middle;"><line x1="0" y1="5" x2="34" y2="5" stroke="#FFA500" stroke-width="2"/></svg> Percentage</span>
     <label style="font-weight:normal;">
       <input type="checkbox" id="toggleLease">
       Show Leases
@@ -365,4 +430,3 @@ cy.ready(() => {
 </script>
 </body>
 </html>
-
