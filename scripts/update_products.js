@@ -13,7 +13,7 @@ const tokenManager = require("../src/utils/tokenManager");
 (async () => {
   try {
     //const sql = "SELECT * FROM pricelist WHERE localLineProductID >= 1013987";
-    const sql = "SELECT * FROM pricelist where id = 16";
+    const sql = "SELECT * FROM pricelist";
     //const sql = "SELECT * FROM pricelist where productName like '%lamb shank%' ";
     //const sql = "SELECT * FROM pricelist where id = 155";
     //const sql = "SELECT * FROM pricelist WHERE dateModified > '2025-12-01 23:00:00'";
