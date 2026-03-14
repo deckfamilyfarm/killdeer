@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="referrer" content="strict-origin-when-cross-origin" />
+  <title>Training Library</title>
+  <style>
+    :root {
+      --page-bg: #f6f3ec;
+      --card-bg: #ffffff;
+      --ink: #223127;
+      --muted: #5a695e;
+      --border: #d9d2c2;
+      --accent: #446b46;
+      --accent-soft: #edf3ea;
+      --shadow: 0 16px 40px rgba(34, 49, 39, 0.12);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top right, rgba(163, 188, 141, 0.25), transparent 28%),
+        linear-gradient(180deg, #fbfaf6 0%, var(--page-bg) 100%);
+    }
+
+    .page {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 32px 20px 48px;
+    }
+
+    .hero {
+      background: rgba(255, 255, 255, 0.8);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 28px;
+      box-shadow: var(--shadow);
+      margin-bottom: 28px;
+    }
+
+    .hero h1 {
+      margin: 0 0 10px;
+      font-size: clamp(30px, 4vw, 42px);
+    }
+
+    .hero p {
+      margin: 0;
+      max-width: 760px;
+      color: var(--muted);
+      line-height: 1.6;
+      font-size: 16px;
+    }
+
+    .hero a {
+      color: var(--accent);
+      font-weight: bold;
+    }
+
+    .topic-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+    }
+
+    .topic-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 14px 16px;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .topic-heading {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .topic-card h2 {
+      margin: 0;
+      font-size: 19px;
+      text-transform: capitalize;
+    }
+
+    .topic-meta {
+      color: var(--muted);
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .video-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .video-item {
+      border-top: 1px solid rgba(217, 210, 194, 0.7);
+      padding: 5px 0;
+      min-width: 0;
+    }
+
+    .video-item:first-child {
+      border-top: 0;
+      padding-top: 0;
+    }
+
+    .video-link {
+      display: block;
+      color: var(--accent);
+      font-size: 13px;
+      line-height: 1.25;
+      text-decoration: none;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .video-link:hover,
+    .video-link:focus {
+      text-decoration: underline;
+    }
+
+    .empty-state {
+      border: 1px dashed var(--border);
+      border-radius: 12px;
+      padding: 10px 12px;
+      background: var(--accent-soft);
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+      background: rgba(20, 28, 22, 0.78);
+      z-index: 1000;
+    }
+
+    .modal.open {
+      display: flex;
+    }
+
+    .modal-panel {
+      width: min(900px, 100%);
+      max-height: min(92dvh, 860px);
+      background: #fff;
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.35);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .modal-panel.is-shorts {
+      width: min(420px, 100%);
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .modal-header h3 {
+      margin: 0;
+      font-size: 16px;
+      line-height: 1.3;
+    }
+
+    .close-button {
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      font-size: 30px;
+      line-height: 1;
+      cursor: pointer;
+      padding: 0;
+      width: 40px;
+      height: 40px;
+      flex: 0 0 auto;
+    }
+
+    .video-frame-wrap {
+      position: relative;
+      background: #000;
+      aspect-ratio: 16 / 9;
+      min-height: 220px;
+    }
+
+    .modal-panel.is-shorts .video-frame-wrap {
+      aspect-ratio: 9 / 16;
+      min-height: 420px;
+    }
+
+    .video-frame-wrap iframe {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      border: 0;
+    }
+
+    .modal-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 16px 16px;
+      border-top: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+
+    .modal-status {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.4;
+      flex: 1 1 220px;
+    }
+
+    .modal-status[hidden] {
+      display: none;
+    }
+
+    .fallback-link {
+      color: var(--accent);
+      font-size: 13px;
+      font-weight: bold;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    .fallback-link:hover,
+    .fallback-link:focus {
+      text-decoration: underline;
+    }
+
+    @media (max-width: 640px) {
+      .page {
+        padding: 20px 14px 36px;
+      }
+
+      .hero,
+      .topic-card {
+        border-radius: 14px;
+      }
+
+      .modal {
+        padding: 8px;
+      }
+
+      .modal-panel {
+        width: 100%;
+        max-height: calc(100dvh - 16px);
+        border-radius: 16px;
+      }
+
+      .modal-panel.is-shorts {
+        width: min(100%, 430px);
+      }
+
+      .modal-header {
+        padding: 12px 14px;
+      }
+
+      .video-frame-wrap {
+        min-height: 200px;
+      }
+
+      .modal-panel.is-shorts .video-frame-wrap {
+        min-height: min(72dvh, 620px);
+      }
+
+      .modal-footer {
+        padding: 12px 14px 14px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <section class="hero">
+      <h1>Training Library</h1>
+      <p>
+        Short farm training videos organized by topic. Tap a title to open it in a popup player on this page.
+        If a particular YouTube video refuses to load in the popup, use the in-popup YouTube fallback link.
+        To add more videos later, edit the <strong>TRAINING_VIDEOS</strong> list in this file and add another item.
+        <a href="index.html">Back to reports</a>.
+      </p>
+    </section>
+
+    <section class="topic-grid" id="topicGrid"></section>
+  </div>
+
+  <div class="modal" id="videoModal" aria-hidden="true">
+    <div class="modal-panel" id="modalPanel" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modal-header">
+        <h3 id="modalTitle">Training Video</h3>
+        <button class="close-button" id="closeModal" type="button" aria-label="Close video">&times;</button>
+      </div>
+      <div class="video-frame-wrap">
+        <iframe
+          id="videoFrame"
+          title="Training video player"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allowfullscreen
+          referrerpolicy="strict-origin-when-cross-origin"
+        ></iframe>
+      </div>
+      <div class="modal-footer">
+        <p class="modal-status" id="modalStatus" hidden></p>
+        <a class="fallback-link" id="fallbackLink" href="#" target="_blank" rel="noopener">Open in YouTube</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const TOPICS = ["maintenance", "pork", "poultry", "grazing", "dairy"];
+
+    // Edit this list to add or remove training videos.
+    const TRAINING_VIDEOS = [
+      {
+        topic: "maintenance",
+        title: "Filling DEF with Petro Cards",
+        url: "https://youtube.com/shorts/ZdcG_eoHBR4?si=qquz1pklPoCLmJ4N",
+        description: "Quick walkthrough for filling DEF using Petro cards."
+      },
+      {
+        topic: "maintenance",
+        title: "Filling Diesel with Petro Cards",
+        url: "https://youtube.com/shorts/SpEpUAGtgOA?si=z_OENADLfKgKC4YL",
+        description: "Quick walkthrough for filling diesel using Petro cards."
+      }
+    ];
+
+    const topicGrid = document.getElementById("topicGrid");
+    const videoModal = document.getElementById("videoModal");
+    const modalPanel = document.getElementById("modalPanel");
+    const modalTitle = document.getElementById("modalTitle");
+    const modalStatus = document.getElementById("modalStatus");
+    const fallbackLink = document.getElementById("fallbackLink");
+    const closeModal = document.getElementById("closeModal");
+    const videoFrame = document.getElementById("videoFrame");
+
+    let lockedScrollY = 0;
+
+    function getYouTubeVideoMeta(url) {
+      try {
+        const parsed = new URL(url);
+        const pathParts = parsed.pathname.split("/").filter(Boolean);
+        let videoId = parsed.searchParams.get("v");
+        let format = "standard";
+
+        if (parsed.hostname.includes("youtu.be")) {
+          videoId = pathParts[0] || "";
+        }
+
+        if (pathParts.includes("shorts")) {
+          format = "shorts";
+          videoId = pathParts[pathParts.indexOf("shorts") + 1] || videoId;
+        }
+
+        if (!videoId) {
+          return null;
+        }
+
+        return {
+          videoId: videoId,
+          format: format
+        };
+      } catch (error) {
+        return null;
+      }
+    }
+
+    function lockPageScroll() {
+      lockedScrollY = window.scrollY || window.pageYOffset || 0;
+      document.body.style.position = "fixed";
+      document.body.style.top = "-" + lockedScrollY + "px";
+      document.body.style.left = "0";
+      document.body.style.right = "0";
+      document.body.style.width = "100%";
+    }
+
+    function unlockPageScroll() {
+      document.body.style.position = "";
+      document.body.style.top = "";
+      document.body.style.left = "";
+      document.body.style.right = "";
+      document.body.style.width = "";
+      window.scrollTo(0, lockedScrollY);
+    }
+
+    function setStatus(message) {
+      if (message) {
+        modalStatus.textContent = message;
+        modalStatus.hidden = false;
+        return;
+      }
+
+      modalStatus.hidden = true;
+      modalStatus.textContent = "";
+    }
+
+    function buildEmbedUrl(video) {
+      const params = new URLSearchParams({
+        autoplay: "1",
+        controls: "1",
+        playsinline: "1",
+        rel: "0"
+      });
+
+      if (window.location.protocol === "http:" || window.location.protocol === "https:") {
+        params.set("origin", window.location.origin);
+        params.set("widget_referrer", window.location.href.split("#")[0]);
+      }
+
+      return "https://www.youtube.com/embed/" + video.videoId + "?" + params.toString();
+    }
+
+    function openVideo(video) {
+      const meta = getYouTubeVideoMeta(video.url);
+      if (!meta) {
+        window.open(video.url, "_blank", "noopener");
+        return;
+      }
+
+      const selectedVideo = {
+        title: video.title,
+        url: video.url,
+        videoId: meta.videoId,
+        format: meta.format
+      };
+
+      modalTitle.textContent = video.title;
+      fallbackLink.href = video.url;
+      if (window.location.protocol === "http:" || window.location.protocol === "https:") {
+        setStatus("If the player stays blank, use Open in YouTube.");
+      } else {
+        setStatus("This page is not being served from a normal web address, which can trigger YouTube error 153. Use Open in YouTube.");
+      }
+      modalPanel.classList.toggle("is-shorts", meta.format === "shorts");
+      videoFrame.src = buildEmbedUrl(selectedVideo);
+      videoModal.classList.add("open");
+      videoModal.setAttribute("aria-hidden", "false");
+      lockPageScroll();
+    }
+
+    function closeVideoModal() {
+      setStatus("");
+      videoFrame.src = "";
+      videoModal.classList.remove("open");
+      videoModal.setAttribute("aria-hidden", "true");
+      modalPanel.classList.remove("is-shorts");
+      unlockPageScroll();
+    }
+
+    function createVideoMarkup(video) {
+      const item = document.createElement("div");
+      item.className = "video-item";
+
+      const directLink = document.createElement("a");
+      directLink.className = "video-link";
+      directLink.href = video.url;
+      directLink.target = "_blank";
+      directLink.rel = "noopener";
+      directLink.textContent = video.title;
+      directLink.title = video.description || video.title;
+      directLink.addEventListener("click", function (event) {
+        if (
+          event.defaultPrevented ||
+          event.button !== 0 ||
+          event.metaKey ||
+          event.ctrlKey ||
+          event.shiftKey ||
+          event.altKey
+        ) {
+          return;
+        }
+
+        event.preventDefault();
+        openVideo(video);
+      });
+      item.appendChild(directLink);
+
+      return item;
+    }
+
+    function renderTopics() {
+      TOPICS.forEach(function (topic) {
+        const videos = TRAINING_VIDEOS.filter(function (video) {
+          return video.topic === topic;
+        });
+
+        const card = document.createElement("section");
+        card.className = "topic-card";
+
+        const headingWrap = document.createElement("div");
+        headingWrap.className = "topic-heading";
+
+        const heading = document.createElement("h2");
+        heading.textContent = topic;
+        headingWrap.appendChild(heading);
+
+        const meta = document.createElement("span");
+        meta.className = "topic-meta";
+        meta.textContent = videos.length === 1 ? "1 link" : videos.length + " links";
+        headingWrap.appendChild(meta);
+
+        card.appendChild(headingWrap);
+
+        if (videos.length === 0) {
+          const emptyState = document.createElement("div");
+          emptyState.className = "empty-state";
+          emptyState.textContent = "No videos yet. Add a new item to the TRAINING_VIDEOS list in this file.";
+          card.appendChild(emptyState);
+        } else {
+          const list = document.createElement("div");
+          list.className = "video-list";
+          videos.forEach(function (video) {
+            list.appendChild(createVideoMarkup(video));
+          });
+          card.appendChild(list);
+        }
+
+        topicGrid.appendChild(card);
+      });
+    }
+
+    closeModal.addEventListener("click", closeVideoModal);
+    videoModal.addEventListener("click", function (event) {
+      if (event.target === videoModal) {
+        closeVideoModal();
+      }
+    });
+    document.addEventListener("keydown", function (event) {
+      if (event.key === "Escape" && videoModal.classList.contains("open")) {
+        closeVideoModal();
+      }
+    });
+
+    renderTopics();
+  </script>
+</body>
+</html>
