@@ -365,6 +365,7 @@ async function loadData() {
         });
 
         const data = await response.json();
+        const activeData = data.filter(row => row.active !== false && row.active !== 0 && row.active !== "0");
         let tableBody = document.getElementById("tableBody");
         tableBody.innerHTML = "";
         editedRows.clear();
@@ -372,7 +373,7 @@ async function loadData() {
 
         // Extract unique categories
         let categories = new Set();
-        data.forEach(row => {
+        activeData.forEach(row => {
             categories.add(row.category);
             tableBody.innerHTML += `
     <tr data-id="${row.id}" data-category="${row.category}">

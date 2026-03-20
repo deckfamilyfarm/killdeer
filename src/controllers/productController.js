@@ -14,6 +14,8 @@ const tokenManager = require("../utils/tokenManager");
  */
 async function fetchProductData() {
   console.log('fetching product data');
+  const [activeColumnRows] = await utilities.db.query("SHOW COLUMNS FROM pricelist LIKE 'active'");
+  const hasActiveColumn = activeColumnRows.length > 0;
   const sqlQuery = `
     SELECT
       p.id,
@@ -22,6 +24,7 @@ async function fetchProductData() {
       p.packageName,
       p.description,
       p.localLineProductID,
+      ${hasActiveColumn ? 'p.active,' : ''}
       p.visible,
       p.track_inventory,
       p.stock_inventory,
@@ -30,6 +33,7 @@ async function fetchProductData() {
     FROM pricelist p
     JOIN category c ON p.category_id = c.id
     WHERE p.available_on_ll IS TRUE
+    ${hasActiveColumn ? 'AND p.active IS TRUE' : ''}
     ORDER BY c.name, p.productName`;
 
   const [results] = await utilities.db.query(sqlQuery);

@@ -252,6 +252,7 @@ async function exportPricelistToExcel() {
 	try {
 		const syncTimestamp = new Date();
 		const [columns] = await utilities.db.execute("SHOW COLUMNS FROM pricelist");
+		const hasActiveColumn = columns.some(col => col.Field === "active");
 		const booleanColumns = columns
 			.filter(col => col.Type.includes("tinyint(1)"))
 			.map(col => col.Field);
@@ -293,7 +294,12 @@ async function exportPricelistToExcel() {
 		worksheet.addRow(orderedColumnNames);
 
 		const sheetValues = [orderedColumnNames];
-		const [rows] = await utilities.db.execute('SELECT id FROM pricelist ORDER BY category_id, productName');
+		const [rows] = await utilities.db.execute(`
+			SELECT id
+			FROM pricelist
+			${hasActiveColumn ? 'WHERE active IS TRUE' : ''}
+			ORDER BY category_id, productName
+		`);
 
 		for (const row of rows) {
 			const product = new Product(row.id);
