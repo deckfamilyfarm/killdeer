@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Inventory</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        :root {
+            --ink: #1f2933;
+            --muted: #6b7280;
+            --line: #e5e7eb;
+            --panel: #ffffff;
+            --panel-soft: #f9fafb;
+            --accent: #2f7d5b;
+            --accent-soft: #e7f3ed;
+        }
+        body {
+            font-family: "Space Grotesk", sans-serif;
+            margin: 20px;
+            color: var(--ink);
+            background:
+                linear-gradient(180deg, #ffffff 0%, #f7f8f6 100%);
+        }
+        table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed; /* Ensures columns respect their widths */
+    background: var(--panel);
+    box-shadow: 0 10px 30px rgba(17, 24, 39, 0.06);
+    border-radius: 10px;
+    overflow: hidden;
+}
+th, td {
+    padding: 8px;
+    text-align: left;
+    border-bottom: 1px solid var(--line);
+}
+        th:nth-child(4), td:nth-child(4) { /* 4th column is Description */
+    width: 30%; /* Makes Description wider */
+}
+        th {
+            background-color: var(--panel-soft);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            font-weight: 600;
+        }
+        button {
+            cursor: pointer;
+            padding: 8px 12px;
+            margin: 5px;
+            border-radius: 6px;
+            border: 1px solid var(--line);
+            background: var(--panel);
+        }
+        .logout-bar {
+            position: fixed;
+            top: 12px;
+            right: 16px;
+            z-index: 20;
+        }
+        .logout-button {
+            padding: 6px 10px;
+            background: var(--panel);
+        }
+        .logout-button[hidden] {
+            display: none;
+        }
+        .modal-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.45);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 30;
+        }
+        .modal-backdrop[hidden] {
+            display: none;
+        }
+        .modal {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            width: 320px;
+            box-shadow: 0 18px 40px rgba(17, 24, 39, 0.18);
+        }
+        .modal h3 {
+            margin: 0 0 12px;
+        }
+        .modal form {
+            display: grid;
+            gap: 10px;
+        }
+        .response-modal {
+            background: #fff;
+            padding: 18px 20px;
+            border-radius: 10px;
+            width: min(520px, 92vw);
+            box-shadow: 0 18px 40px rgba(17, 24, 39, 0.18);
+        }
+        .response-modal h3 {
+            margin: 0 0 10px;
+        }
+        .response-list {
+            display: grid;
+            gap: 10px;
+            max-height: 60vh;
+            overflow: auto;
+        }
+        .response-progress {
+            color: var(--muted);
+            font-size: 13px;
+            margin-bottom: 10px;
+        }
+        .response-card {
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            padding: 10px 12px;
+            background: var(--panel-soft);
+        }
+        .response-card .title {
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+        .status {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .status.ok {
+            background: var(--accent-soft);
+            color: var(--accent);
+        }
+        .status.warn {
+            background: #fff3cd;
+            color: #8a6d3b;
+        }
+        .status.pending {
+            background: #eef2f7;
+            color: #475569;
+        }
+        .response-actions {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 12px;
+        }
+        .toggle-switch {
+            cursor: pointer;
+            display: inline-block;
+            width: 40px;
+            height: 20px;
+            background-color: #ccc;
+            border-radius: 10px;
+            position: relative;
+        }
+        .toggle-switch::before {
+            content: "";
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background-color: white;
+            top: 1px;
+            left: 1px;
+            transition: 0.3s;
+        }
+        .toggle-switch.active {
+            background-color: var(--accent);
+        }
+        .toggle-switch.active::before {
+            left: 20px;
+        }
+        .stock-input {
+            width: 60px;
+            text-align: center;
+            border: none;
+            background: transparent;
+        }
+        .sale-discount-wrapper {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            position: relative;
+        }
+        .sale-discount-input {
+            width: 64px;
+            text-align: right;
+            border: none;
+            background: transparent;
+            padding-right: 14px;
+        }
+        .sale-discount-suffix {
+            color: var(--muted);
+            font-size: 12px;
+            position: absolute;
+            right: 4px;
+            top: 50%;
+            transform: translateY(-50%);
+            pointer-events: none;
+        }
+        .editable {
+            background: white;
+            border: 1px solid #ddd;
+        }
+        /* Highlight edited rows */
+        tr.edited {
+            background-color: var(--accent-soft); /* Subtle green */
+        }
+        /* Apply Changes button in header */
+        .apply-button {
+            font-size: 14px;
+            font-weight: bold;
+            background-color: var(--accent);
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            float: right;
+        }
+        .apply-button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        .editable-input, .editable-textarea {
+    width: 100%;
+    border: 1px solid #ddd;
+    background: #fff;
+    padding: 5px;
+    font-size: 14px;
+    resize: none;
+}
+
+.editable-textarea {
+    width: 100%;
+    min-height: 40px;
+    max-height: 150px;
+    resize: none;
+    line-height: 1.5;
+}
+
+
+        .editable-input:focus {
+    background: #f9f9f9;
+    outline: none;
+    border-bottom: 2px solid var(--accent);
+}
+
+        h2 {
+            font-size: 22px;
+            font-weight: 600;
+            margin: 12px 0 18px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="logout-bar">
+        <button class="logout-button" id="logoutButton" type="button" onclick="logout()" hidden>Logout</button>
+    </div>
+
+    <div class="modal-backdrop" id="loginModal" hidden>
+        <div class="modal">
+            <h3>Login</h3>
+            <form onsubmit="event.preventDefault(); login();">
+                <input type="text" id="username" placeholder="Username" required>
+                <input type="password" id="password" placeholder="Password" required>
+                <button type="submit">Login</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal-backdrop" id="responseModal" hidden>
+        <div class="response-modal">
+            <h3>Updates Applied</h3>
+            <div class="response-progress" id="responseProgress"></div>
+            <div class="response-list" id="responseList"></div>
+            <div class="response-actions">
+                <button type="button" onclick="hideResponseModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <h2>Deck Family Farm Product Inventory and Sales Price Update Tool</h2>
+    <label for="categoryFilter">Filter Options: </label>
+    <select id="categoryFilter" onchange="filterCategory()">
+        <option value="all">All Categories</option>
+        <option value="on_sale">On Sale</option>
+    </select>
+    
+    <table>
+        <thead>
+            <tr>
+                <th>Category</th>
+                <th>Product Name</th>
+                <th>Package Name</th>
+                <th>Description</th>
+                <th>Visible</th>
+                <th>Track Inventory</th>
+                <th>Stock Inventory</th>
+                <th>On Sale</th>
+                <th>Sale Discount (%)</th>
+                <th>
+                    <button class="apply-button" id="applyChanges" onclick="applyChanges()" disabled>Apply Changes</button>
+                </th>
+            </tr>
+        </thead>
+        <tbody id="tableBody">
+            <!-- Data will be populated dynamically here -->
+        </tbody>
+    </table>
+
+    <script>
+let editedRows = new Set();
+const isLocalHost = location.hostname === "localhost" || location.hostname === "127.0.0.1";
+const isFileProtocol = location.protocol === "file:";
+const API_BASE = (isLocalHost || isFileProtocol)
+    ? "http://localhost:3402/killdeer/v2"
+    : "https://api.deckfamilyfarm.com/killdeer/v2";
+
+async function login() {
+    const username = document.getElementById("username").value;
+    const password = document.getElementById("password").value;
+    try {
+        const response = await fetch(`${API_BASE}/login`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ username, password })
+        });
+        const data = await response.json();
+        if (response.ok && data.token) {  
+            localStorage.setItem("token", data.token);
+            setLoggedInState(true);
+            loadData();
+        } else {
+            alert("Login failed!");
+        }
+    } catch (error) {
+        alert("Network error! ❌ Unable to reach server.");
+    }
+}
+
+function setLoggedInState(isLoggedIn) {
+    document.getElementById("loginModal").hidden = isLoggedIn;
+    document.getElementById("logoutButton").hidden = !isLoggedIn;
+}
+
+async function loadData() {
+    const token = localStorage.getItem("token");
+    if (!token) {
+        setLoggedInState(false);
+        alert("Please log in first.");
+        return;
+    }
+
+    try {
+        const response = await fetch(`${API_BASE}/get-product-data`, {
+            method: "GET",
+            headers: { "Authorization": `Bearer ${token}` }
+        });
+
+        const data = await response.json();
+        const activeData = data.filter(row => row.active !== false && row.active !== 0 && row.active !== "0");
+        let tableBody = document.getElementById("tableBody");
+        tableBody.innerHTML = "";
+        editedRows.clear();
+        document.getElementById("applyChanges").disabled = true;
+
+        // Extract unique categories
+        let categories = new Set();
+        activeData.forEach(row => {
+            categories.add(row.category);
+            tableBody.innerHTML += `
+    <tr data-id="${row.id}" data-category="${row.category}">
+        <td>${row.category}</td>        
+        <td>${row.productName}</td>
+        <td>${row.packageName}</td>
+     <td><i>${((row.description || '').length > 40) ? row.description.substring(0, 40) + ' ...' : row.description || ''}</i></td>
+
+        <!--<td><textarea class="editable-textarea" oninput="markEdited(this); autoResize(this)">${row.description || ''}</textarea></td>     --> 
+        <td><div class="toggle-switch toggle-visible ${row.visible ? 'active' : ''}" onclick="toggleSwitch(this)"></div></td>
+        <td><div class="toggle-switch toggle-track ${row.track_inventory ? 'active' : ''}" onclick="toggleSwitch(this)"></div></td>
+        <td><input type="number" class="stock-input" value="${row.stock_inventory}" oninput="markEdited(this)"></td>
+        <td><div class="toggle-switch toggle-sale ${row.sale ? 'active' : ''}" onclick="toggleSwitch(this)"></div></td>
+        <td>
+            <span class="sale-discount-wrapper">
+                <input type="number" class="sale-discount-input" min="0" max="100" step="1" value="${Math.round(Number(row.sale_discount || 0) * 100)}" oninput="markEdited(this)">
+                <span class="sale-discount-suffix">%</span>
+            </span>
+        </td>
+        <td></td>
+    </tr>`;
+
+        });
+
+        // Populate the category filter dropdown
+        let categoryFilter = document.getElementById("categoryFilter");
+        const selectedCategory = categoryFilter.value || "all";
+        categoryFilter.innerHTML = `<option value="all">All Categories</option><option value="on_sale">On Sale</option>`;
+        categories.forEach(category => {
+            categoryFilter.innerHTML += `<option value="${category}">${category}</option>`;
+        });
+        categoryFilter.value = selectedCategory;
+        filterCategory();
+
+        // Apply sorting functionality after data loads
+        applySorting();
+    } catch (error) {
+        alert("Session expired. Please log in again.");
+    }
+}
+
+function autoResize(textarea) {
+    textarea.style.height = "auto"; // Reset height to recalculate
+    textarea.style.height = (textarea.scrollHeight) + "px"; // Set new height
+}
+
+function filterCategory() {
+    let selectedCategory = document.getElementById("categoryFilter").value;
+    let rows = document.querySelectorAll("#tableBody tr");
+
+    rows.forEach(row => {
+        let rowCategory = row.getAttribute("data-category");
+        if (selectedCategory === "all") {
+            row.style.display = "";
+            return;
+        }
+        if (selectedCategory === "on_sale") {
+            const onSale = row.querySelector(".toggle-sale").classList.contains("active");
+            row.style.display = onSale ? "" : "none";
+            return;
+        }
+        if (rowCategory === selectedCategory) {
+            row.style.display = "";
+        } else {
+            row.style.display = "none";
+        }
+    });
+}
+
+// Sorting Functionality (Re-applied after data loads)
+function applySorting() {
+    $("th").not(":last-child").off("click").each(function (index) {
+        $(this).css("cursor", "pointer").on("click", function () {
+            let table = $(this).closest("table");
+            let rows = table.find("tbody tr").toArray();
+            let ascending = $(this).hasClass("asc");
+
+            // Remove sort indicators from all headers
+            $("th").removeClass("asc desc");
+
+            // Toggle sorting order
+            $(this).toggleClass("asc", !ascending);
+            $(this).toggleClass("desc", ascending);
+
+            // Sort function
+            rows.sort((rowA, rowB) => {
+                let cellA = $(rowA).children("td").eq(index).text().trim();
+                let cellB = $(rowB).children("td").eq(index).text().trim();
+
+                // Convert to numbers if possible
+                let numA = parseFloat(cellA);
+                let numB = parseFloat(cellB);
+                if (!isNaN(numA) && !isNaN(numB)) {
+                    return ascending ? numB - numA : numA - numB;
+                }
+
+                return ascending ? cellB.localeCompare(cellA) : cellA.localeCompare(cellB);
+            });
+
+            // Reorder the table rows
+            $.each(rows, function (_, row) {
+                table.children("tbody").append(row);
+            });
+        });
+    });
+}
+
+function toggleSwitch(element) {
+    element.classList.toggle("active");
+    markEdited(element);
+}
+
+function markEdited(element) {
+    let row = element.closest("tr");
+    let id = row.getAttribute("data-id");
+    const isSaleToggle = element.classList.contains("toggle-sale");
+    const isSaleDiscount = element.classList.contains("sale-discount-input");
+
+    // Get values from row
+    //let productName = row.querySelector(".editable-input"); // Select product name input
+    let description = row.querySelector(".editable-textarea"); // Select description textarea
+
+    let visible = row.querySelector(".toggle-visible").classList.contains("active");
+    let track_inventory = row.querySelector(".toggle-track").classList.contains("active");
+    let stock_inventory = parseInt(row.querySelector(".stock-input").value) || 0;
+
+    // ✅ Condition Check
+    if (track_inventory && visible && stock_inventory === 0) {
+        alert("⚠️ If there are 0 items and 'Track Inventory' is ON, you must set 'Visible' to OFF.");
+        // **Immediately revert the change**
+        if (element.classList.contains("toggle-switch")) {
+            element.classList.toggle("active"); // Toggle switch back
+        } else {
+            element.value = "1"; // Reset stock_inventory input to 1
+        }
+        return;
+    }
+
+    // ✅ Mark row as edited
+    editedRows.add(id);
+    row.classList.add("edited");
+    if (isSaleToggle || isSaleDiscount) {
+        row.dataset.priceChange = "true";
+    }
+    document.getElementById("applyChanges").disabled = false;
+}
+
+async function applyChanges() {
+    if (editedRows.size === 0) return;
+
+    const token = localStorage.getItem("token");
+    if (!token) {
+        alert("Please log in first.");
+        return;
+    }
+
+    let updates = [];
+    editedRows.forEach(id => {
+        let row = document.querySelector(`tr[data-id="${id}"]`);
+        //let productNameField = row.querySelector(".editable-input");
+        let descriptionField = row.querySelector(".editable-textarea");
+        const priceChange = row.dataset.priceChange === "true";
+        const productNameCell = row.children[1] ? row.children[1].textContent.trim() : `Product ${id}`;
+
+        let data = {
+            //productName: productNameField ? productNameField.value : "",
+            description: descriptionField ? descriptionField.value : "",
+            visible: row.querySelector(".toggle-visible").classList.contains("active"),
+            track_inventory: row.querySelector(".toggle-track").classList.contains("active"),
+            stock_inventory: row.querySelector(".stock-input").value
+        };
+        if (priceChange) {
+            data.sale = row.querySelector(".toggle-sale").classList.contains("active");
+            data.sale_discount = Math.min(Math.max(parseFloat(row.querySelector(".sale-discount-input").value) || 0, 0), 100) / 100;
+        }
+        updates.push({ id, data, productName: productNameCell });
+    });
+
+    try {
+    initResponseModal(updates);
+    let completed = 0;
+    let hadFailure = false;
+    setResponseProgress(completed, updates.length);
+
+    await Promise.all(updates.map(async ({ id, data, productName }) => {
+        try {
+            const response = await fetch(`${API_BASE}/update-inventory/${id}`, {
+                method: "PUT",
+                headers: {
+                    "Authorization": `Bearer ${token}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(data)
+            });
+
+            const result = await response.json();
+            updateResponseCard(id, productName, result);
+        } catch (error) {
+            hadFailure = true;
+            updateResponseCard(id, productName, { databaseUpdate: false, localLineUpdate: false, localLinePriceUpdate: false });
+        } finally {
+            completed += 1;
+            setResponseProgress(completed, updates.length);
+        }
+    }));
+
+    // Clear edited rows and refresh data
+    editedRows.clear();
+    document.getElementById("applyChanges").disabled = true;
+    loadData();
+    if (hadFailure) {
+        alert("Failed to save changes.");
+    }
+} catch (error) {
+    alert("Failed to save changes.");
+    console.error("Error updating items:", error);
+}
+
+}
+
+function initResponseModal(updates) {
+    const responseList = document.getElementById("responseList");
+    responseList.innerHTML = "";
+    updates.forEach(({ id, productName }) => {
+        const card = document.createElement("div");
+        card.className = "response-card";
+        card.setAttribute("data-id", id);
+        card.innerHTML = `
+            <div class="title">${productName}</div>
+            <div>Database: <span class="status pending">Updating</span></div>
+            <div>LocalLine: <span class="status pending">Updating</span></div>
+            <div>LocalLine Pricing: <span class="status pending">Updating</span></div>
+        `;
+        responseList.appendChild(card);
+    });
+
+    document.getElementById("responseModal").hidden = false;
+}
+
+function updateResponseCard(id, productName, result) {
+    const card = document.querySelector(`.response-card[data-id="${id}"]`);
+    if (!card) return;
+
+    const databaseUpdate = result && result.databaseUpdate;
+    const localLineUpdate = result && result.localLineUpdate;
+    const localLinePriceUpdate = result && Object.prototype.hasOwnProperty.call(result, "localLinePriceUpdate")
+        ? result.localLinePriceUpdate
+        : null;
+
+    const databaseStatus = databaseUpdate ? "Updated" : "Failed";
+    const localLineStatus = localLineUpdate ? "Updated" : "Skipped";
+    const localLinePriceStatus = localLinePriceUpdate === true
+        ? "Updated"
+        : localLinePriceUpdate === false
+            ? "Failed"
+            : "Skipped";
+
+    const databaseClass = databaseUpdate ? "ok" : "warn";
+    const localLineClass = localLineUpdate ? "ok" : "warn";
+    const localLinePriceClass = localLinePriceUpdate === true ? "ok" : "warn";
+
+    card.innerHTML = `
+        <div class="title">${productName}</div>
+        <div>Database: <span class="status ${databaseClass}">${databaseStatus}</span></div>
+        <div>LocalLine: <span class="status ${localLineClass}">${localLineStatus}</span></div>
+        <div>LocalLine Pricing: <span class="status ${localLinePriceClass}">${localLinePriceStatus}</span></div>
+    `;
+}
+
+function setResponseProgress(completed, total) {
+    const progress = document.getElementById("responseProgress");
+    progress.textContent = `Updating ${completed} of ${total} products`;
+}
+
+function hideResponseModal() {
+    document.getElementById("responseModal").hidden = true;
+}
+
+function logout() {
+    localStorage.removeItem("token");
+    document.getElementById("tableBody").innerHTML = "";
+    setLoggedInState(false);
+    alert("Logged out!");
+}
+
+window.onload = function() {
+    if (localStorage.getItem("token")) {
+        setLoggedInState(true);
+        loadData();
+    } else {
+        setLoggedInState(false);
+    }
+};
+
+
+</script>
+
+</body>
+</html>
