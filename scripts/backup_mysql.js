@@ -12,30 +12,13 @@ console.log(`✅ Loaded environment: ${env} from ${envPath}`);
 
 // ------------ Env → DB Configs ------------
 const dbConfigs = [
-  {
-    label: 'DFF',
-    host: process.env.DFF_DB_HOST,
-    port: process.env.DFF_DB_PORT || 3306,
-    user: process.env.DFF_DB_USER,
-    password: process.env.DFF_DB_PASSWORD,
-    database: process.env.DFF_DB_DATABASE,
-  },
-  {
-    label: 'TIMESHEETS',
-    host: process.env.TIMESHEETS_DB_HOST,
-    port: process.env.TIMESHEETS_DB_PORT || 3306,
-    user: process.env.TIMESHEETS_DB_USER,
-    password: process.env.TIMESHEETS_DB_PASSWORD,
-    database: process.env.TIMESHEETS_DB_DATABASE,
-  },
-  {
-    label: 'herdlist',
-    host: process.env.HERDLIST_DB_HOST,
-    port: process.env.HERDLIST_DB_PORT || 3306,
-    user: process.env.HERDLIST_DB_USER,
-    password: process.env.HERDLIST_DB_PASSWORD,
-    database: process.env.HERDLIST_DB_DATABASE,
-  },
+  { label: 'DFF', host: process.env.DFF_DB_HOST, port: process.env.DFF_DB_PORT || 3306, user: process.env.DFF_DB_USER, password: process.env.DFF_DB_PASSWORD, database: process.env.DFF_DB_DATABASE, },
+  { label: 'DFF_WORKFLOW_BUILDER', host: process.env.DFF_DB_HOST, port: process.env.DFF_DB_PORT || 3306, user: process.env.DFF_DB_USER, password: process.env.DFF_DB_PASSWORD, database: 'dff_workflow_builder', },
+  { label: 'STORE', host: process.env.DFF_DB_HOST, port: process.env.DFF_DB_PORT || 3306, user: process.env.DFF_DB_USER, password: process.env.DFF_DB_PASSWORD, database: 'store', },
+  { label: 'NON_PROFIT_PLATFORM', host: process.env.DFF_DB_HOST, port: process.env.DFF_DB_PORT || 3306, user: process.env.DFF_DB_USER, password: process.env.DFF_DB_PASSWORD, database: 'non_profit_platform', },
+  { label: 'DASHBOARDS', host: process.env.DFF_DB_HOST, port: process.env.DFF_DB_PORT || 3306, user: process.env.DFF_DB_USER, password: process.env.DFF_DB_PASSWORD, database: 'dashboards', },
+  { label: 'TIMESHEETS', host: process.env.TIMESHEETS_DB_HOST, port: process.env.TIMESHEETS_DB_PORT || 3306, user: process.env.TIMESHEETS_DB_USER, password: process.env.TIMESHEETS_DB_PASSWORD, database: process.env.TIMESHEETS_DB_DATABASE, },
+  { label: 'herdlist', host: process.env.HERDLIST_DB_HOST, port: process.env.HERDLIST_DB_PORT || 3306, user: process.env.HERDLIST_DB_USER, password: process.env.HERDLIST_DB_PASSWORD, database: process.env.HERDLIST_DB_DATABASE, },
 ];
 
 // Validate presence (host/user/database are minimum)
