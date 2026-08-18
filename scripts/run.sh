@@ -10,14 +10,15 @@
 # Change to the current location
 cd "$(dirname "$0")"
 
-# Check if the correct number of arguments is provided
-if [ "$#" -ne 1 ]; then
-    echo "Usage: $0 <node_script>"
+# Check if a script was provided
+if [ "$#" -lt 1 ]; then
+    echo "Usage: $0 <node_script> [script_args...]"
     exit 1
 fi
 
 # Assign the argument to a variable
 node_script="$1"
+shift
 
 # Check if the Node.js script exists
 if [ ! -f "$node_script" ]; then
@@ -26,11 +27,11 @@ if [ ! -f "$node_script" ]; then
 fi
 
 # Execute the Node.js script
-node "$node_script" >> output.log 2>&1
+node "$node_script" "$@" >> output.log 2>&1
 
 # Run github push when subscriptions file is run...
-echo $1
-if [ "$1" == "export_master_pricelist.js" ]; then
+echo "$node_script"
+if [ "$node_script" == "export_master_pricelist.js" ]; then
   if [[ -n $(git status -s ../docs/masterPriceList.xlsx) ]]; then
     git add ../docs/masterPriceList.xlsx
     git commit -m "Updating masterPriceList"

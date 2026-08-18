@@ -22,6 +22,54 @@ const gpprByCategory = {};
 
 const { DateTime } = require('luxon');  // At top of file, if not already
 
+function parseCliArgs(argv) {
+  const positional = [];
+  const options = {
+    from: 'jdeck88@gmail.com',
+    to: 'info@deckfamilyfarm.com',
+    cc: 'jdeck88@gmail.com',
+    title: 'Square Market Report',
+    subject: null,
+    deductionPrefix: 'FM',
+    dryRun: false,
+  };
+
+  for (let i = 0; i < argv.length; i++) {
+    const arg = argv[i];
+    if (arg === '--dry-run') {
+      options.dryRun = true;
+      continue;
+    }
+
+    if (!arg.startsWith('--')) {
+      positional.push(arg);
+      continue;
+    }
+
+    const eqIndex = arg.indexOf('=');
+    const key = arg.slice(2, eqIndex === -1 ? undefined : eqIndex);
+    const value = eqIndex === -1 ? argv[++i] : arg.slice(eqIndex + 1);
+
+    if (value === undefined) {
+      throw new Error(`Missing value for --${key}`);
+    }
+
+    if (key === 'deduction-prefix') {
+      options.deductionPrefix = value;
+      continue;
+    }
+
+    if (!['from', 'to', 'cc', 'title', 'subject'].includes(key)) {
+      throw new Error(`Unknown option --${key}`);
+    }
+
+    options[key] = value;
+  }
+
+  const [startArg, endArg, locationIdArg] = positional;
+  return { startArg, endArg, locationIdArg, options };
+}
+
 function formatLine(label, amount = null, prefix = '', note = '') {
   const labelCol = label.padEnd(28);
   const amountCol = amount !== null ? `${prefix}$${(amount / 100).toFixed(2).padStart(8)}` : '';
@@ -159,7 +207,7 @@ async function resolveCategoryName(variationId) {
 // ─── Main Execution ────────────────────────────────────────────────────────────
 
 (async () => {
-  let [startArg, endArg, locationIdArg] = process.argv.slice(2);
+  let { startArg, endArg, locationIdArg, options } = parseCliArgs(process.argv.slice(2));
   if (!startArg || !endArg) {
     ({ start: startArg, end: endArg } = getPreviousWeekendRange());
   }
@@ -278,7 +326,7 @@ async function resolveCategoryName(variationId) {
   const pacificTime = DateTime.now().setZone('America/Los_Angeles').toFormat('yyyy-MM-dd HH:mm');
 
   // Build summaryText
-  let summaryText = `SQUARE MARKET REPORT: ${startArg} to ${endArg}\n`;
+  let summaryText = `${options.title.toUpperCase()}: ${startArg} to ${endArg}\n`;
   summaryText += `Generated on ${pacificTime}\n`;
 
   summaryText += `\nCATEGORY SALES:\n`;
@@ -300,9 +348,9 @@ async function resolveCategoryName(variationId) {
   summaryText += `\nDEDUCTIONS:\n`;
   summaryText += formatLine('Fees', grand.fees, '-');
   summaryText += formatLine('Refunds', grand.cash_refunds + grand.card_refunds, '-');
-  summaryText += formatLine('FM Weekend Costs', null, '', 'DEDUCT WAGES/PER DIEMS PAID IN CASH');
-  summaryText += formatLine('FM Supplies & Facility Fees ', null, '', 'DEDUCT WAGES/PER DIEMS PAID IN CASH');
-  summaryText += formatLine('FM Booth Fees/Supplies', null, '', 'DEDUCT BOOTH FEES/MISC EXPENSES IN CASH');
+  summaryText += formatLine(`${options.deductionPrefix} Weekend Costs`, null, '', 'DEDUCT WAGES/PER DIEMS PAID IN CASH');
+  summaryText += formatLine(`${options.deductionPrefix} Supplies & Facility Fees `, null, '', 'DEDUCT WAGES/PER DIEMS PAID IN CASH');
+  summaryText += formatLine(`${options.deductionPrefix} Booth Fees/Supplies`, null, '', 'DEDUCT BOOTH FEES/MISC EXPENSES IN CASH');
   summaryText += formatLine('Tokens', null, '', 'DEDUCT TOKENS RECORDED AS CASH SALES');
 
   summaryText += `\nEXPECTED DEPOSITS:\n`;
@@ -326,14 +374,23 @@ async function resolveCategoryName(variationId) {
     summaryText += formatLine(name, netSales, '', note);
   }
 
+  const subject = options.subject || `${options.title}: ${startArg} to ${endArg}`;
+  const emailOptions = {
+    from: options.from,
+    to: options.to,
+    subject,
+    html: `<pre>${summaryText}</pre>`
+  };
+  if (options.cc) emailOptions.cc = options.cc;
+
+  if (options.dryRun) {
+    console.log(`DRY RUN: would send "${subject}" to ${options.to}${options.cc ? ` cc ${options.cc}` : ''}`);
+    console.log(summaryText);
+    process.exit(0);
+  }
+
   try {
-    await utilities.sendEmail({
-      from: "jdeck88@gmail.com",
-      to: "info@deckfamilyfarm.com",
-      cc: "jdeck88@gmail.com",
-      subject: `Square Market Report: ${startArg} to ${endArg}`,
-      html: `<pre>${summaryText}</pre>`
-    });
+    await utilities.sendEmail(emailOptions);
     console.log("📧 Email sent.");
     process.exit(0);
   } catch (err) {
