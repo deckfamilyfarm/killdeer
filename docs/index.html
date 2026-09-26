@@ -2,192 +2,311 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Deck Family Farm Reports</title>
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     body {
+      margin: 0;
+      background: #f4f6f2;
+      color: #25382d;
       font-family: Arial, sans-serif;
-      margin: 20px;
-      background: #f9f9f9;
+      line-height: 1.6;
+    }
+
+    .page {
+      width: 100%;
+      max-width: 1160px;
+      margin: 0 auto;
+      padding: 40px 24px 64px;
+    }
+
+    .page-header {
+      margin-bottom: 40px;
     }
 
     h1 {
-      text-align: center;
-      margin-bottom: 10px;
+      margin: 0 0 12px;
+      font-size: clamp(1.8rem, 4vw, 2.5rem);
+      line-height: 1.2;
     }
 
-    .sort-bar {
-      text-align: center;
-      margin-bottom: 20px;
+    .intro {
+      max-width: 760px;
+      margin: 0;
+      color: #526257;
+    }
+
+    .section-nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 24px;
+    }
+
+    .section-nav a {
+      display: inline-flex;
+      align-items: center;
+      min-height: 44px;
+      padding: 8px 16px;
+      border: 1px solid #cbd7ce;
+      border-radius: 24px;
+      background: #fff;
+      font-weight: bold;
+      text-decoration: none;
+    }
+
+    a {
+      color: #235c3d;
+      text-underline-offset: 3px;
+    }
+
+    a:hover {
+      color: #123d26;
+      text-decoration: underline;
+    }
+
+    a:focus-visible {
+      outline: 3px solid #98621d;
+      outline-offset: 4px;
+      border-radius: 3px;
+    }
+
+    .report-section {
+      margin-top: 40px;
+      scroll-margin-top: 24px;
+    }
+
+    .section-heading {
+      margin-bottom: 18px;
+    }
+
+    .section-heading h2 {
+      margin: 0;
+      font-size: 1.5rem;
+      line-height: 1.3;
+    }
+
+    .section-heading p {
+      margin: 6px 0 0;
+      color: #526257;
     }
 
     .card-container {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 15px;
-      justify-content: center;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
     }
 
     .card {
-      background: white;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      padding: 15px;
-      width: 300px;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-      transition: transform 0.2s ease;
+      min-width: 0;
+      padding: 22px;
+      background: #fff;
+      border: 1px solid #d8e0d8;
+      border-radius: 12px;
+      box-shadow: 0 3px 10px rgba(31, 55, 39, 0.04);
+      overflow-wrap: anywhere;
     }
 
-    .card:hover {
-      transform: scale(1.02);
+    .choreboard-card {
+      border-top: 4px solid #427352;
     }
 
-    .card h2 {
-      margin-top: 0;
-      font-size: 18px;
+    .card h3 {
+      margin: 0;
+      font-size: 1.125rem;
+      line-height: 1.4;
+    }
+
+    .card h3 a {
+      display: flex;
+      align-items: center;
+      min-height: 44px;
     }
 
     .card p {
       margin: 10px 0 0;
-      font-size: 14px;
-      color: #555;
+      color: #526257;
+      font-size: 0.9375rem;
     }
 
-    .card a {
-      text-decoration: none;
-      color: #2E86AB;
+    .card .secondary-link {
+      display: inline-flex;
+      align-items: center;
+      min-height: 44px;
     }
 
-    .category {
-      font-size: 12px;
+    .card .status {
+      display: inline-block;
+      margin-top: 16px;
+      padding: 4px 10px;
+      border-radius: 16px;
+      background: #edf1eb;
+      color: #526257;
+      font-size: 0.8125rem;
       font-weight: bold;
-      color: #888;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-bottom: 6px;
+    }
+
+    @media (max-width: 900px) {
+      .card-container {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 600px) {
+      .page {
+        padding: 28px 16px 40px;
+      }
+
+      .card-container {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 14px;
+      }
+
+      .card {
+        padding: 20px;
+      }
     }
   </style>
 </head>
 <body>
-
-  <h1>Deck Family Farm Reports</h1>
-  <p style="text-align: center; max-width: 700px; margin: 10px auto 30px; font-size: 16px; color: #555;">
-    Access key reports and tools that help monitor farm performance, update inventory, manage pricing, and track labor across all Deck Family Farm enterprises. Use this dashboard to stay aligned with operations, make data-informed decisions, and support the CSA and broader farm business.
-	</p>
-
-  <div class="card-container" id="cardContainer">
-
-    <!-- Cards (data-title and data-category used for sorting) -->
-
-    <div class="card" data-title="Timesheet System" data-category="Tools">
-      <div class="category">Tools</div>
-      <h2><a href="https://timesheets.deckfamilyfarm.com/">Timesheet System</a></h2>
-      <p>Log time, track hours, and see who worked where—across all enterprises. A <a href='https://youtu.be/Cr9MVOaPyc0'>training video</a> is included here.</p>
-    </div>
-
-    <div class="card" data-title="Issues" data-category="Tools">
-      <div class="category">Tools</div>
-      <h2><a href="https://issues.deckfamilyfarm.com/">Issues</a></h2>
-      <p>Submit a bug or feature request for any system displayed on this page</p>
-    </div>
-<!--
-    <div class="card" data-title="Data Tables" data-category="Reports">
-      <div class="category">Reports</div>
-      <h2><a href="DataTables.html">FFCSA Data Tables</a></h2>
-      <p>View sales numbers in tabular form by vendor, category, products and dropsites.</p>
-    </div>
--->
-
-    <div class="card" data-title="FFCSA Dashboard" data-category="Reports">
-      <div class="category">Reports</div>
-      <h2><a href="https://docs.google.com/spreadsheets/d/1plDSzQo8PZqQbCAt9Xb1BRd-cdJmkpoGwSmCFQvolUc/edit?gid=1960467695#gid=1960467695">FFCSA Dashboard</a></h2>
-      <p>Showing weekly KPIs with number of orders, members, etc....</p>
-    </div>
-
-    <div class="card" data-title="Standard Work Library" data-category="Tools">
-      <div class="category">Tools</div>
-      <h2><a href="https://swl.deckfamilyfarm.com/sops">Public Standard Work Library</a> and <a href="https://swl.deckfamilyfarm.com">Standard Work Editor</a></h2>
-      <p>Access the Farm's Public Standard Work Library to learn how work here.  Any employee or intern can create standard work documents by going to the Standard Work Editor</p>
-    </div>
-
-    <div class="card" data-title="Entities" data-category="Visualizations">
-      <div class="category">Visualizations</div>
-      <h2>Farm <a href="entities.html">Entity</a> and <a href="enterprises.html">Enterprises</a></h2>
-      <p>Visualize farm entities and enterprises in graph layout.</p>
-    </div>
-
-    <div class="card" data-title="Master Price List" data-category="Tools">
-      <div class="category">Tools</div>
-      <h2><a href="https://docs.google.com/spreadsheets/d/1NXlsTAs8VcE2g6cdhUnZIwedaQtEV3KOQF8PU81sviI/edit?pli=1&gid=1167363510#gid=1167363510">Master Pricelist</a> (as google doc)
-      <p>A google doc representation of the current master price list.</p>
-    </div>
-
-    <div class="card" data-title="Herdlist" data-category="Tools">
-      <div class="category">Tools</div>
-      <h2><a href="https://herdlist-db.deckfamilyfarm.com/">Herdlist</a></h2>
-      <p>Manage Dairy and Beef Herds.</p>
-    </div>
-
-    <div class="card" data-title="Inventory Tool" data-category="Tools">
-      <div class="category">Tools</div>
-      <!--<h2><a href="https://reports.deckfamilyfarm.com/product_inventory.html">DFF Inventory & Sales Update Tool</a></h2>
-      <p>Update inventory quantities and sales items for DFF products. Ask John for password.</p>-->
-      <h2>DFF Inventory & Sales Update Tool</h2>
-      <p>John is building a new inventory tool.   Jeremy/tristan please talk to me when you want to update inventory.</p>
-    </div>
-
-    <div class="card" data-title="Layer Evaluation" data-category="Forms">
-      <div class="category">Tools</div>
-      <h2><a href="https://docs.google.com/forms/d/e/1FAIpQLSdaHCuDbNhOix0gCgTSrcKj7hxA6I6rYueTH6XIM5bcr71C-Q/viewform">Layer Evaluation</a></h2>
-      <p><a href='https://docs.google.com/spreadsheets/d/1qqKVWC1p_eAoUs7kdMFsoPntQQWLROADVSFL3kuJy_0/edit?resourcekey=&gid=1035239602#gid=1035239602'>Response data is here</a></p>
-	  <!--https://docs.google.com/forms/d/1Gk6ZCwgC3MR5TH1k7J67XtB0DCFW9u-spAq03DDLP1I/edit-->
-    </div>
-
-    <div class="card" data-title="Layer Model" data-category="Tools">
-      <div class="category">Tools</div>
-      <h2><a href="https://drive.google.com/drive/u/0/folders/1r4kp3XTDISrNQ7vLixmvg7vTECm13Nv0">Dashboards</a></h2>
-      <p><a href="https://drive.google.com/drive/u/0/folders/1r4kp3XTDISrNQ7vLixmvg7vTECm13Nv0">Excel Dashboards</a> as well as <a href="https://dashboards.deckfamilyfarm.com/">Beta Dashboard Generators</a></p>
-    </div>
-
-    <div class="card" data-title="Guiding Principles" data-category="Forms">
-      <div class="category">Tools</div>
-      <h2><a href="guidingprinciples.pdf">Guiding Principles</a></h2>
-      <p>Guiding Principles graphic which all farm members strive for.</p>
-    </div>
-  <!--
-  <div class="card" data-title="PDX Home Delivery Expansion" data-category="Marketing">
-      <div class="category">Marketing</div>
-      <h2>PDX Home Delivery Expansion</h2>
-      <p>
-        Resources for the Portland CSA home-delivery launch: the official ZIP map, printable flyer, and strategy doc.
-        Use these to coordinate routes, marketing, and weekly signups.
+  <main class="page">
+    <header class="page-header">
+      <h1>Deck Family Farm Reports</h1>
+      <p class="intro">
+        Find your enterprise's choreboard, review farm performance, and access the tools and resources that support daily work across Deck Family Farm.
       </p>
-      <p style="margin-top:8px;">
-        • <a href="csa_advertising/pdx_csa_zip_official_map.html" target="_blank" rel="noopener">Official ZIP Map</a><br/>
-        • <a href="https://docs.google.com/document/d/16LCdrXrak9D-fgpt-XL4eoGwrGMZgLLc/edit" target="_blank" rel="noopener">Flyer (Google Doc)</a><br/>
-        • <a href="https://docs.google.com/document/d/1sS4NaGAKG1eQt9UZIZbRfJcpgtQRCuzB/edit" target="_blank" rel="noopener">Launch Strategy (Google Doc)</a>
-      </p>
-    </div>	
-	-->
+      <nav class="section-nav" aria-label="Report sections">
+        <a href="#choreboards">Choreboards</a>
+        <a href="#tools">Tools</a>
+        <a href="#reports">Reports</a>
+        <a href="#visualizations">Visualizations</a>
+      </nav>
+    </header>
 
-  </div>
+    <section class="report-section" id="choreboards" aria-labelledby="choreboards-heading">
+      <div class="section-heading">
+        <h2 id="choreboards-heading">Choreboards</h2>
+        <p>Daily work and records by enterprise.</p>
+      </div>
+      <div class="card-container">
+        <article class="card choreboard-card">
+          <h3><a href="https://poultry.deckfamilyfarm.com/">Poultry Choreboard</a></h3>
+          <p>Open the poultry choreboard for daily care and flock records.</p>
+        </article>
 
-  <script>
-    function sortCards() {
-      const sortBy = document.getElementById('sort-select').value;
-      const container = document.getElementById('cardContainer');
-      const cards = Array.from(container.getElementsByClassName('card'));
+        <article class="card choreboard-card">
+          <h3>Dairy Choreboard</h3>
+          <p>Daily dairy chores and records.</p>
+          <p class="status">Link coming soon</p>
+        </article>
 
-      cards.sort((a, b) => {
-        const aVal = a.getAttribute('data-' + sortBy).toLowerCase();
-        const bVal = b.getAttribute('data-' + sortBy).toLowerCase();
-        return aVal.localeCompare(bVal);
-      });
+        <article class="card choreboard-card">
+          <h3>Pork Choreboard</h3>
+          <p>Daily pork chores and records.</p>
+          <p class="status">Link coming soon</p>
+        </article>
 
-      // Reattach sorted cards
-      cards.forEach(card => container.appendChild(card));
-    }
-  </script>
+        <article class="card choreboard-card">
+          <h3><a href="https://herdlist-db.deckfamilyfarm.com/">Grazing Choreboard</a></h3>
+          <p>Use Herdlist to manage dairy and beef herds.</p>
+        </article>
 
+        <article class="card choreboard-card">
+          <h3>Sales Choreboard</h3>
+          <p>Daily sales chores and records.</p>
+          <p class="status">Link coming soon</p>
+        </article>
+
+        <article class="card choreboard-card">
+          <h3>FFCSA Choreboard</h3>
+          <p>Daily FFCSA chores and records.</p>
+          <p class="status">Link coming soon</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="report-section" id="tools" aria-labelledby="tools-heading">
+      <div class="section-heading">
+        <h2 id="tools-heading">Tools</h2>
+        <p>Log time, find standard work, and manage farm operations.</p>
+      </div>
+      <div class="card-container">
+        <article class="card">
+          <h3><a href="https://timesheets.deckfamilyfarm.com/">Timesheet System</a></h3>
+          <p>Log time, track hours, and see who worked where across all enterprises.</p>
+          <p><a class="secondary-link" href="https://youtu.be/Cr9MVOaPyc0">Watch the training video</a></p>
+        </article>
+
+        <article class="card">
+          <h3><a href="https://issues.deckfamilyfarm.com/">Issues</a></h3>
+          <p>Submit a bug or feature request for any system displayed on this page.</p>
+        </article>
+
+        <article class="card">
+          <h3><a href="https://swl.deckfamilyfarm.com/sops">Public Standard Work Library</a></h3>
+          <p>Learn how work is done on the farm. Employees and interns can create documents in the editor.</p>
+          <p><a class="secondary-link" href="https://swl.deckfamilyfarm.com">Standard Work Editor</a></p>
+        </article>
+
+        <article class="card">
+          <h3><a href="https://docs.google.com/spreadsheets/d/1NXlsTAs8VcE2g6cdhUnZIwedaQtEV3KOQF8PU81sviI/edit?pli=1&amp;gid=1167363510#gid=1167363510">Master Pricelist</a></h3>
+          <p>View the current master price list in Google Sheets.</p>
+        </article>
+
+        <article class="card">
+          <h3>DFF Inventory &amp; Sales Update Tool</h3>
+          <p>John is building a new inventory tool. Jeremy and Tristan, please talk to John when you want to update inventory.</p>
+        </article>
+
+        <article class="card">
+          <h3><a href="https://docs.google.com/forms/d/e/1FAIpQLSdaHCuDbNhOix0gCgTSrcKj7hxA6I6rYueTH6XIM5bcr71C-Q/viewform">Layer Evaluation</a></h3>
+          <p>Submit a layer evaluation or review previous responses.</p>
+          <p><a class="secondary-link" href="https://docs.google.com/spreadsheets/d/1qqKVWC1p_eAoUs7kdMFsoPntQQWLROADVSFL3kuJy_0/edit?resourcekey=&amp;gid=1035239602#gid=1035239602">View response data</a></p>
+        </article>
+
+        <article class="card">
+          <h3><a href="guidingprinciples.pdf">Guiding Principles</a></h3>
+          <p>Read the guiding principles that all farm members strive for.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="report-section" id="reports" aria-labelledby="reports-heading">
+      <div class="section-heading">
+        <h2 id="reports-heading">Reports</h2>
+        <p>Track farm performance and review dashboards.</p>
+      </div>
+      <div class="card-container">
+        <article class="card">
+          <h3><a href="https://docs.google.com/spreadsheets/d/1plDSzQo8PZqQbCAt9Xb1BRd-cdJmkpoGwSmCFQvolUc/edit?gid=1960467695#gid=1960467695">FFCSA Dashboard</a></h3>
+          <p>Review weekly KPIs, including orders and membership.</p>
+        </article>
+
+        <article class="card">
+          <h3><a href="https://drive.google.com/drive/u/0/folders/1r4kp3XTDISrNQ7vLixmvg7vTECm13Nv0">Excel Dashboards</a></h3>
+          <p>Access the farm's Excel dashboards and dashboard generators.</p>
+          <p><a class="secondary-link" href="https://dashboards.deckfamilyfarm.com/">Beta Dashboard Generators</a></p>
+        </article>
+      </div>
+    </section>
+
+    <section class="report-section" id="visualizations" aria-labelledby="visualizations-heading">
+      <div class="section-heading">
+        <h2 id="visualizations-heading">Visualizations</h2>
+        <p>Explore how the farm's entities and enterprises connect.</p>
+      </div>
+      <div class="card-container">
+        <article class="card">
+          <h3><a href="entities.html">Farm Entities</a></h3>
+          <p>Visualize farm entities and enterprises in a graph layout.</p>
+          <p><a class="secondary-link" href="enterprises.html">View Farm Enterprises</a></p>
+        </article>
+      </div>
+    </section>
+  </main>
 </body>
 </html>
