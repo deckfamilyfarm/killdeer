@@ -1,13 +1,19 @@
 const path = require('path');
 const env = process.env.NODE_ENV || 'production';
 const envPath = path.resolve(__dirname, `../.env.${env}`);
+let handlingReportFailure = false;
+
+if (require.main === module) {
+	process.on('uncaughtException', handleReportFailure);
+	process.on('unhandledRejection', handleReportFailure);
+}
+
 require('dotenv').config({ path: envPath });
 
 const fs = require('fs');
 const crypto = require('crypto');
 const axios = require('axios');
 const { DateTime } = require('luxon');
-const utilities = require('../src/utils/utilities.pricing');
 
 const DEFAULT_SPREADSHEET_ID = '1q8NmiQxg_vde56FHpQ68SmM0S4R8PIPdc40pUd1fvkI';
 const DEFAULT_SHEET_NAME = 'Form Responses 1';
@@ -21,7 +27,7 @@ function parseCliArgs(argv) {
 		from: 'jdeck88@gmail.com',
 		to: 'deckfamilyfarm@gmail.com',
 		cc: 'jdeck88@gmail.com',
-		title: 'Market Feedback Report',
+		title: 'Yellow Notes / Market Feedback Report',
 		subject: null,
 		spreadsheetId: process.env.MARKET_FEEDBACK_SPREADSHEET_ID || DEFAULT_SPREADSHEET_ID,
 		sheetName: process.env.MARKET_FEEDBACK_SHEET_NAME || DEFAULT_SHEET_NAME,
@@ -120,6 +126,7 @@ async function getServiceAccountAccessToken(credentialsPath) {
 
 	const response = await axios.post(credentials.token_uri, params.toString(), {
 		headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+		timeout: 30000,
 	});
 
 	return response.data.access_token;
@@ -136,11 +143,12 @@ async function buildGoogleSheetsClient() {
 		return axios.create({
 			baseURL: SHEETS_BASE_URL,
 			headers: { Authorization: `Bearer ${accessToken}` },
+			timeout: 30000,
 		});
 	}
 
 	if (apiKey) {
-		const client = axios.create({ baseURL: SHEETS_BASE_URL });
+		const client = axios.create({ baseURL: SHEETS_BASE_URL, timeout: 30000 });
 		client.interceptors.request.use(config => {
 			config.params = { ...(config.params || {}), key: apiKey };
 			return config;
@@ -352,9 +360,44 @@ async function fetchFeedbackValues({ client, spreadsheetId, sheetName }) {
 	};
 }
 
-function buildColumnMap(headers) {
+function isDateOnly(value, timeZone) {
+	const text = String(value || '').trim();
+	if (/^\d{4}-\d{2}-\d{2}$/.test(text)) {
+		return DateTime.fromISO(text, { zone: timeZone }).isValid;
+	}
+	if (/^\d{1,2}\/\d{1,2}\/\d{2}(?:\d{2})?$/.test(text)) {
+		const format = text.split('/')[2].length === 4 ? 'M/d/yyyy' : 'M/d/yy';
+		return DateTime.fromFormat(text, format, { zone: timeZone }).isValid;
+	}
+	return false;
+}
+
+function findMarketDateColumn(headers, rows, timeZone) {
+	const namedColumn = findColumn(headers, 'Market Date', header => header === 'market date', false);
+	if (namedColumn !== -1) return namedColumn;
+
+	// A date entered into the header can replace "Market Date". Recover only
+	// from an unlabeled/date-labeled column whose populated cells are all dates.
+	const candidates = headers
+		.map((header, index) => ({ header, index }))
+		.filter(({ header }) => !normalizeHeader(header) || parseMarketDate(header, timeZone) !== null)
+		.filter(({ index }) => {
+			const values = rows.map(row => row[index])
+				.filter(value => String(value ?? '').trim() !== '');
+			return values.length > 0 && values.every(value => isDateOnly(value, timeZone));
+		});
+
+	if (candidates.length === 1) return candidates[0].index;
+
+	const detail = candidates.length > 1
+		? ` Multiple date columns match: ${candidates.map(({ index }) => columnIndexToLetter(index + 1)).join(', ')}.`
+		: '';
+	throw new Error(`Could not find required column: Market Date.${detail} Rename the market-date column header to "Market Date".`);
+}
+
+function buildColumnMap(headers, rows = [], timeZone = DEFAULT_TIME_ZONE) {
 	return {
-		marketDate: findColumn(headers, 'Market Date', header => header === 'market date'),
+		marketDate: findMarketDateColumn(headers, rows, timeZone),
 		timestamp: findColumn(headers, 'Timestamp', header => header === 'timestamp'),
 		market: findColumn(headers, 'Market', header => header.includes("which farmers' market")),
 		workers: findColumn(headers, 'Workers', header => header.includes('who worked at this market')),
@@ -523,7 +566,7 @@ function buildReport({ entries, startArg, endArg, options, sheetTitle, duplicate
 	const generated = DateTime.now()
 		.setZone(options.timeZone)
 		.toFormat('yyyy-MM-dd HH:mm');
-	let summaryText = `${options.title.toUpperCase()}: ${startArg} to ${endArg}\n`;
+	let summaryText = `${options.title}: ${startArg} to ${endArg}\n`;
 	summaryText += `Generated on ${generated} ${options.timeZone}\n`;
 	summaryText += `Source: ${sheetTitle}\n`;
 
@@ -617,6 +660,47 @@ function logAxiosError(context, error) {
 	console.error(`❌ ${context} failed: ${error?.message || error}`);
 }
 
+async function sendReportErrorAlert(error, createTransport = require('nodemailer').createTransport) {
+	const transporter = createTransport({
+		service: 'Gmail',
+		auth: {
+			user: process.env.MAIL_USER,
+			pass: process.env.MAIL_ACCESS,
+		},
+		connectionTimeout: 10000,
+		greetingTimeout: 10000,
+		socketTimeout: 20000,
+	});
+	const failedAt = new Date().toISOString();
+	const details = error?.stack || error?.message || String(error);
+	const httpStatus = error?.response?.status ? `\nHTTP status: ${error.response.status}` : '';
+
+	try {
+		await transporter.sendMail({
+			from: process.env.MAIL_USER || 'jdeck88@gmail.com',
+			to: 'jdeck88@gmail.com',
+			subject: `ERROR: Yellow Notes / Market Feedback Report: ${failedAt.slice(0, 10)}`,
+			text: `The Yellow Notes / Market Feedback Report failed.\n\nTime: ${failedAt}\nHost: ${require('os').hostname()}\nScript: ${__filename}\n\n${details}${httpStatus}\n`,
+		});
+	} finally {
+		transporter.close();
+	}
+}
+
+async function handleReportFailure(error) {
+	if (handlingReportFailure) return;
+	handlingReportFailure = true;
+	logAxiosError('Market feedback report', error);
+	try {
+		await sendReportErrorAlert(error);
+		console.error('📧 Report error alert sent to jdeck88@gmail.com.');
+	} catch (alertError) {
+		console.error(`❌ Could not send report error alert: ${alertError?.message || alertError}`);
+	} finally {
+		process.exit(1);
+	}
+}
+
 async function main() {
 	let { startArg, endArg, options } = parseCliArgs(process.argv.slice(2));
 	if (!startArg) {
@@ -639,8 +723,13 @@ async function main() {
 	});
 
 	const headers = values[0] || [];
-	const columns = buildColumnMap(headers);
-	const records = values.slice(1)
+	const rows = values.slice(1);
+	const columns = buildColumnMap(headers, rows, options.timeZone);
+	if (normalizeHeader(headers[columns.marketDate]) !== 'market date') {
+		const columnLetter = columnIndexToLetter(columns.marketDate + 1);
+		console.warn(`⚠️ Market Date header missing; using date values in column ${columnLetter} (header: ${JSON.stringify(headers[columns.marketDate] || '')}). Rename that header to "Market Date".`);
+	}
+	const records = rows
 		.map((row, index) => buildRecord(row, index + 2, columns, options.timeZone))
 		.filter(Boolean)
 		.filter(record => record.marketDate >= startDate && record.marketDate <= endDate);
@@ -673,12 +762,18 @@ async function main() {
 		process.exit(0);
 	}
 
+	const utilities = require('../src/utils/utilities.pricing');
 	await utilities.sendEmail(emailOptions);
+	if (handlingReportFailure) return;
 	console.log('📧 Email sent.');
 	process.exit(0);
 }
 
-main().catch(error => {
-	logAxiosError('Market feedback report', error);
-	process.exit(1);
-});
+if (require.main === module) {
+	setTimeout(() => {
+		handleReportFailure(new Error('Report did not finish within five minutes.'));
+	}, 5 * 60 * 1000);
+	main().catch(handleReportFailure);
+}
+
+module.exports = { buildColumnMap, buildRecord, sendReportErrorAlert };
