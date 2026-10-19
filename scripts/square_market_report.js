@@ -335,7 +335,7 @@ async function resolveCategoryName(variationId) {
   let totalRevenue = 0;
   let totalCOGS = 0;
 
-  for (const [cat, amt] of Object.entries(allCategorySales)) {
+  for (const [cat, amt] of Object.entries(allCategorySales).sort(([a], [b]) => a.localeCompare(b))) {
     const cogs = allCategoryCOGS[cat] || 0;
     const gppr = gpprByCategory[cat] ?? 0.5;
     const gpprPercent = (gppr * 100).toFixed(0);
@@ -350,16 +350,14 @@ async function resolveCategoryName(variationId) {
   summaryText += `\nDEDUCTIONS:\n`;
   summaryText += formatLine(`${options.deductionPrefix} Square Fees`, grand.fees, '-');
   summaryText += formatLine(`${options.deductionPrefix} Square Returns`, grand.cash_refunds + grand.card_refunds, '-');
-  summaryText += formatLine('Tokens', null, '', 'Deduct tokens recorded as cash sales');
-  summaryText += formatLine(`${options.deductionPrefix} Booth Fees`, null, '', 'Booth Fees & Event Fees');
-  summaryText += formatLine(`${options.deductionPrefix} Rep Fees & Per Diems`, null, '', 'Deduct rep fees/per diems paid in cash');
+  summaryText += formatLine(`${options.deductionPrefix} Tokens`, null, '', 'Included in cash sales');
+  summaryText += formatLine(`${options.deductionPrefix} Booth Fees`, null, '', 'Booth & Event Fees');
   summaryText += formatLine(`${options.deductionPrefix} Uncategorized Over/Under`, null, '', 'Cash till short/over amounts');
-  summaryText += formatLine(`${options.deductionPrefix} Supplies`, null, '', 'Operating supplies, canopies, packaging, tables, etc');
-  summaryText += formatLine(`${options.deductionPrefix} Lodging`, null, '', 'Travel lodging and overnight stays for market events');
+  summaryText += formatLine(`${options.deductionPrefix} Supplies`, null, '', 'Incidental supplies with cash at market');
 
   summaryText += `\nEXPECTED DEPOSITS:\n`;
   summaryText += formatLine('Cards', grand.net_deposit);
-  summaryText += formatLine('Cash', grand.cash, '', '- Deductions above');
+  summaryText += formatLine('Cash & Tokens', grand.cash, '', '- Deductions above');
 
   summaryText += `\nSUMMARY STATISTICS:\n`;
   summaryText += formatLine('Weighted COGS', totalCOGS);
@@ -372,11 +370,26 @@ async function resolveCategoryName(variationId) {
   summaryText += formatLine('Weighted GPPR', `${weightedGppr}%`);
 
   summaryText += `\nLOCATION SALES:\n`;
-  for (const [name, s] of Object.entries(locationSummaries)) {
-    const netSales = s.locationTotal - s.cash_refunds - s.card_refunds;
-    const note = `(${s.orderCount} orders)`;
-    summaryText += formatLine(name, netSales, '', note);
-  }
+  const locationSalesHeaders = ['Location', 'Total Sales', 'CC Sales', 'Cash/Token Sales', '# Orders'];
+  const locationSalesRows = Object.entries(locationSummaries).map(([name, s]) => [
+    name,
+    `$${((s.locationTotal - s.cash_refunds - s.card_refunds) / 100).toFixed(2)}`,
+    `$${((s.card - s.card_refunds) / 100).toFixed(2)}`,
+    `$${((s.cash - s.cash_refunds) / 100).toFixed(2)}`,
+    String(s.orderCount)
+  ]);
+  const locationSalesWidths = locationSalesHeaders.map((header, index) =>
+    Math.max(header.length, ...locationSalesRows.map(row => row[index].length))
+  );
+  const valueColumnWidth = Math.max(...locationSalesWidths.slice(1));
+  locationSalesWidths.fill(valueColumnWidth, 1);
+  const formatLocationSalesRow = row =>
+    `  ${row.map((cell, index) => index === 0
+      ? cell.padEnd(locationSalesWidths[index])
+      : cell.padStart(locationSalesWidths[index])).join('  ')}\n`;
+  summaryText += formatLocationSalesRow(locationSalesHeaders);
+  summaryText += `  ${locationSalesWidths.map(width => '-'.repeat(width)).join('  ')}\n`;
+  for (const row of locationSalesRows) summaryText += formatLocationSalesRow(row);
 
   const subject = options.subject || `${options.title}: ${startArg} to ${endArg}`;
   const emailOptions = {
