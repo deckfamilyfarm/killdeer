@@ -71,10 +71,12 @@ function parseCliArgs(argv) {
 }
 
 function formatLine(label, amount = null, prefix = '', note = '') {
-  const labelCol = label.padEnd(28);
-  const amountCol = amount !== null ? `${prefix}$${(amount / 100).toFixed(2).padStart(8)}` : '';
-  const spacing = amount !== null ? '  ' : '';
-  return `  • ${labelCol}${amountCol}${spacing}${note}\n`;
+  const labelCol = label.padEnd(30);
+  const value = amount === null ? '' : typeof amount === 'string'
+    ? amount
+    : `${prefix}$${(amount / 100).toFixed(2)}`;
+  const detail = value ? `${value.padEnd(12)}${note ? `  ${note}` : ''}` : note;
+  return `  • ${labelCol}${detail}`.trimEnd() + '\n';
 }
 
 function formatDate(dateStr, isEnd = false) {
@@ -346,16 +348,18 @@ async function resolveCategoryName(variationId) {
   summaryText += formatLine('Subtotal', totalRevenue);
 
   summaryText += `\nDEDUCTIONS:\n`;
-  summaryText += formatLine('Fees', grand.fees, '-');
-  summaryText += formatLine('Refunds', grand.cash_refunds + grand.card_refunds, '-');
-  summaryText += formatLine(`${options.deductionPrefix} Weekend Costs`, null, '', 'DEDUCT WAGES/PER DIEMS PAID IN CASH');
-  summaryText += formatLine(`${options.deductionPrefix} Supplies & Facility Fees `, null, '', 'DEDUCT WAGES/PER DIEMS PAID IN CASH');
-  summaryText += formatLine(`${options.deductionPrefix} Booth Fees/Supplies`, null, '', 'DEDUCT BOOTH FEES/MISC EXPENSES IN CASH');
-  summaryText += formatLine('Tokens', null, '', 'DEDUCT TOKENS RECORDED AS CASH SALES');
+  summaryText += formatLine(`${options.deductionPrefix} Square Fees`, grand.fees, '-');
+  summaryText += formatLine(`${options.deductionPrefix} Square Returns`, grand.cash_refunds + grand.card_refunds, '-');
+  summaryText += formatLine('Tokens', null, '', 'Deduct tokens recorded as cash sales');
+  summaryText += formatLine(`${options.deductionPrefix} Booth Fees`, null, '', 'Booth Fees & Event Fees');
+  summaryText += formatLine(`${options.deductionPrefix} Rep Fees & Per Diems`, null, '', 'Deduct rep fees/per diems paid in cash');
+  summaryText += formatLine(`${options.deductionPrefix} Uncategorized Over/Under`, null, '', 'Cash till short/over amounts');
+  summaryText += formatLine(`${options.deductionPrefix} Supplies`, null, '', 'Operating supplies, canopies, packaging, tables, etc');
+  summaryText += formatLine(`${options.deductionPrefix} Lodging`, null, '', 'Travel lodging and overnight stays for market events');
 
   summaryText += `\nEXPECTED DEPOSITS:\n`;
   summaryText += formatLine('Cards', grand.net_deposit);
-  summaryText += formatLine('Cash', grand.cash, '', '- DEDUCTIONS ABOVE');
+  summaryText += formatLine('Cash', grand.cash, '', '- Deductions above');
 
   summaryText += `\nSUMMARY STATISTICS:\n`;
   summaryText += formatLine('Weighted COGS', totalCOGS);
@@ -365,7 +369,7 @@ async function resolveCategoryName(variationId) {
   summaryText += formatLine('Card Refunds', grand.card_refunds, '-');
   summaryText += formatLine('Discounts/Refunds Total', grand.discounts + grand.cash_refunds + grand.card_refunds, '-');
   const weightedGppr = totalRevenue > 0 ? ((1 - (totalCOGS / totalRevenue)) * 100).toFixed(1) : '0.0';
-  summaryText += formatLine('Weighted GPPR', null, '', `${weightedGppr}%`);
+  summaryText += formatLine('Weighted GPPR', `${weightedGppr}%`);
 
   summaryText += `\nLOCATION SALES:\n`;
   for (const [name, s] of Object.entries(locationSummaries)) {
