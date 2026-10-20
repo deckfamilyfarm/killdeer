@@ -5,6 +5,13 @@ require('dotenv').config({ path: envPath });
 
 const axios = require('axios');
 const utilities = require('../src/utils/utilities.pricing');
+const {
+  escapeHtml,
+  fetchMarketActivity,
+  formatActivityEntry,
+  formatMarketBoundary,
+  getPreviousWeekendRange,
+} = require('./square_market_report_ledger');
 
 const ACCESS_TOKEN = process.env.SQUARE_ACCESS_TOKEN;
 const BASE_LOCATIONS_URL = 'https://connect.squareup.com/v2/locations';
@@ -71,32 +78,12 @@ function parseCliArgs(argv) {
 }
 
 function formatLine(label, amount = null, prefix = '', note = '') {
-  const labelCol = label.padEnd(30);
+  const labelCol = label.padEnd(40);
   const value = amount === null ? '' : typeof amount === 'string'
     ? amount
     : `${prefix}$${(amount / 100).toFixed(2)}`;
   const detail = value ? `${value.padEnd(12)}${note ? `  ${note}` : ''}` : note;
   return `  • ${labelCol}${detail}`.trimEnd() + '\n';
-}
-
-function formatDate(dateStr, isEnd = false) {
-  const date = new Date(dateStr);
-  if (isEnd) date.setUTCHours(23, 59, 59, 999);
-  else date.setUTCHours(0, 0, 0, 0);
-  return date.toISOString();
-}
-
-function getPreviousWeekendRange() {
-  const now = new Date();
-  const day = now.getUTCDay();
-  const end = new Date();
-  end.setUTCDate(now.getUTCDate() - (day === 0 ? 1 : day));
-  const start = new Date(end);
-  start.setUTCDate(end.getUTCDate() - 1);
-  return {
-    start: start.toISOString().slice(0, 10),
-    end: end.toISOString().slice(0, 10)
-  };
 }
 
 async function loadGpprFromDatabase() {
@@ -214,8 +201,9 @@ async function resolveCategoryName(variationId) {
     ({ start: startArg, end: endArg } = getPreviousWeekendRange());
   }
 
-  const begin = formatDate(startArg);
-  const end = formatDate(endArg, true);
+  const begin = formatMarketBoundary(startArg);
+  const end = formatMarketBoundary(endArg, true);
+  const marketActivity = await fetchMarketActivity(startArg, endArg);
 
   await loadGpprFromDatabase();
   await fetchFullCatalog();
@@ -353,11 +341,15 @@ async function resolveCategoryName(variationId) {
   summaryText += formatLine(`${options.deductionPrefix} Tokens`, null, '', 'Included in cash sales');
   summaryText += formatLine(`${options.deductionPrefix} Booth Fees`, null, '', 'Booth & Event Fees');
   summaryText += formatLine(`${options.deductionPrefix} Uncategorized Over/Under`, null, '', 'Cash till short/over amounts');
-  summaryText += formatLine(`${options.deductionPrefix} Supplies`, null, '', 'Incidental supplies with cash at market');
+  summaryText += formatLine('FM Supplies paid w/ till cash', marketActivity.categories.fmTillCashSupplies.totalCents, '-');
+  for (const entry of marketActivity.categories.fmTillCashSupplies.entries) {
+    summaryText += formatActivityEntry(entry);
+  }
 
   summaryText += `\nEXPECTED DEPOSITS:\n`;
   summaryText += formatLine('Cards', grand.net_deposit);
-  summaryText += formatLine('Cash & Tokens', grand.cash, '', '- Deductions above');
+  summaryText += formatLine('Cash & Tokens', grand.cash - marketActivity.categories.fmTillCashSupplies.totalCents,
+    '', 'Net of till cash expenses');
 
   summaryText += `\nSUMMARY STATISTICS:\n`;
   summaryText += formatLine('Weighted COGS', totalCOGS);
@@ -391,12 +383,22 @@ async function resolveCategoryName(variationId) {
   summaryText += `  ${locationSalesWidths.map(width => '-'.repeat(width)).join('  ')}\n`;
   for (const row of locationSalesRows) summaryText += formatLocationSalesRow(row);
 
+  summaryText += `\nTRADES:\n`;
+  summaryText += formatLine('FM Supplies', marketActivity.categories.fmSupplies.totalCents);
+  for (const entry of marketActivity.categories.fmSupplies.entries) {
+    summaryText += formatActivityEntry(entry);
+  }
+  summaryText += formatLine('FM Rep Fees Per Diems & Trades', marketActivity.categories.fmRepTrades.totalCents);
+  for (const entry of marketActivity.categories.fmRepTrades.entries) {
+    summaryText += formatActivityEntry(entry);
+  }
+
   const subject = options.subject || `${options.title}: ${startArg} to ${endArg}`;
   const emailOptions = {
     from: options.from,
     to: options.to,
     subject,
-    html: `<pre>${summaryText}</pre>`
+    html: `<pre>${escapeHtml(summaryText)}</pre>`
   };
   if (options.cc) emailOptions.cc = options.cc;
 
@@ -415,4 +417,7 @@ async function resolveCategoryName(variationId) {
     process.exit(1);
   }
 
-})();
+})().catch((error) => {
+  console.error('Square Market Report failed:', error.message || error);
+  process.exit(1);
+});
