@@ -319,7 +319,7 @@ async function resolveCategoryName(variationId) {
   let summaryText = `${options.title.toUpperCase()}: ${startArg} to ${endArg}\n`;
   summaryText += `Generated on ${pacificTime}\n`;
 
-  summaryText += `\nCATEGORY SALES:\n`;
+  summaryText += `\nPRODUCT SALES:\n`;
   let totalRevenue = 0;
   let totalCOGS = 0;
 
@@ -336,15 +336,14 @@ async function resolveCategoryName(variationId) {
   summaryText += formatLine('Subtotal', totalRevenue);
 
   summaryText += `\nDEDUCTIONS:\n`;
-  summaryText += formatLine(`${options.deductionPrefix} Square Fees`, grand.fees, '-');
-  summaryText += formatLine(`${options.deductionPrefix} Square Returns`, grand.cash_refunds + grand.card_refunds, '-');
-  summaryText += formatLine(`${options.deductionPrefix} Tokens`, null, '', 'Included in cash sales');
-  summaryText += formatLine(`${options.deductionPrefix} Booth Fees`, null, '', 'Booth & Event Fees');
-  summaryText += formatLine(`${options.deductionPrefix} Uncategorized Over/Under`, null, '', 'Cash till short/over amounts');
+  const returns = grand.cash_refunds + grand.card_refunds;
+  const feesAndReturns = grand.fees + returns;
+  const deductionBreakdown = `(Fees $${(grand.fees / 100).toFixed(2)}, Returns $${(returns / 100).toFixed(2)})`;
+  summaryText += formatLine(`${options.deductionPrefix} Fees & Returns`, feesAndReturns, '-', deductionBreakdown);
   summaryText += formatLine('FM Supplies paid w/ till cash', marketActivity.categories.fmTillCashSupplies.totalCents, '-');
-  for (const entry of marketActivity.categories.fmTillCashSupplies.entries) {
-    summaryText += formatActivityEntry(entry);
-  }
+
+  summaryText += `\nFM TOKENS:\n`;
+  summaryText += `  Note: Deduct tokens from Square Cash because Square counts tokens and cash together.\n`;
 
   summaryText += `\nEXPECTED DEPOSITS:\n`;
   summaryText += formatLine('Cards', grand.net_deposit);

@@ -82,12 +82,17 @@ test('full report subtracts till cash and does not email when the ledger fails',
           }
           if (url.includes('/v2/catalog/list')) return { data: { objects: [] } };
           if (url.includes('/v2/locations')) return { data: { locations: [{ id: 'loc1', name: 'PSU', status: 'ACTIVE' }] } };
+          if (url.includes('/v2/payments/cash-payment')) return { data: { payment: { refunded_money: { amount: 300 } } } };
+          if (url.includes('/v2/payments/card-payment')) return { data: { payment: { refunded_money: { amount: 400 } } } };
           throw new Error('Unexpected GET ' + url);
         },
         post: async url => {
           if (url.includes('/v2/orders/search')) return { data: { orders: [{
             total_money: { amount: 15000 },
-            tenders: [{ type: 'CASH', amount_money: { amount: 10000 } }, { type: 'CARD', amount_money: { amount: 5000 } }],
+            tenders: [
+              { type: 'CASH', amount_money: { amount: 10000 }, payment_id: 'cash-payment' },
+              { type: 'CARD', amount_money: { amount: 5000 }, processing_fee_money: { amount: 200 }, payment_id: 'card-payment' },
+            ],
           }] } };
           throw new Error('Unexpected POST ' + url);
         },
@@ -108,8 +113,12 @@ test('full report subtracts till cash and does not email when the ledger fails',
 
   const success = run(['--dry-run'], false);
   assert.equal(success.status, 0, success.stderr);
-  assert.match(success.stdout, /FM Supplies paid w\/ till cash\s+-\$5\.00/);
-  assert.match(success.stdout, /Cash & Tokens\s+\$95\.00/);
+  assert.match(success.stdout, /PRODUCT SALES:/);
+  assert.doesNotMatch(success.stdout, /CATEGORY SALES:/);
+  const deductions = success.stdout.split('DEDUCTIONS:\n')[1].split('\nFM TOKENS:')[0];
+  assert.match(deductions, /^  • FM Fees & Returns\s+-\$9\.00\s+\(Fees \$2\.00, Returns \$7\.00\)\n  • FM Supplies paid w\/ till cash\s+-\$5\.00\n$/);
+  assert.match(success.stdout, /FM TOKENS:\n  Note: Deduct tokens from Square Cash because Square counts tokens and cash together\./);
+  assert.match(success.stdout, /Cash & Tokens\s+\$92\.00/);
   assert.match(success.stdout, /TRADES:[\s\S]*FM Supplies\s+\$12\.00[\s\S]*FM Rep Fees Per Diems & Trades\s+\$20\.00/);
   assert.equal(fs.existsSync(sent), false);
 
