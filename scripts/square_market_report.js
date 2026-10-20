@@ -351,11 +351,11 @@ async function resolveCategoryName(variationId) {
     '', 'Net of till cash expenses');
 
   summaryText += `\nLOCATION SALES:\n`;
-  const locationSalesHeaders = ['Location', 'Total Sales', 'CC Sales', 'Cash/Token Sales', '# Orders'];
+  const locationSalesHeaders = ['Location', 'Total Sales', 'CC Sales-Fees/Refunds', 'Cash/Token Sales', '# Orders'];
   const locationSalesRows = Object.entries(locationSummaries).map(([name, s]) => [
     name,
     `$${((s.locationTotal - s.cash_refunds - s.card_refunds) / 100).toFixed(2)}`,
-    `$${((s.card - s.card_refunds) / 100).toFixed(2)}`,
+    `$${(s.net_deposit / 100).toFixed(2)}`,
     `$${((s.cash - s.cash_refunds) / 100).toFixed(2)}`,
     String(s.orderCount)
   ]);

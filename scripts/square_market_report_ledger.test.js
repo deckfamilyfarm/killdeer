@@ -121,6 +121,10 @@ test('full report subtracts till cash and does not email when the ledger fails',
   assert.match(deductions, /^  • FM Fees & Returns\s+-\$9\.00\s+\(Fees \$2\.00, Returns \$7\.00\)\n  • FM Supplies paid w\/ till cash\s+-\$5\.00\n$/);
   assert.match(success.stdout, /FM TOKENS:\n  Note: Deduct tokens from Square Cash because Square counts tokens and cash together\./);
   assert.match(success.stdout, /Cash & Tokens\s+\$92\.00/);
+  const locationSales = success.stdout.split('LOCATION SALES:\n')[1].split('\nTRADES:')[0].trim().split('\n');
+  assert.deepEqual(locationSales[0].trim().split(/\s{2,}/),
+    ['Location', 'Total Sales', 'CC Sales-Fees/Refunds', 'Cash/Token Sales', '# Orders']);
+  assert.deepEqual(locationSales[2].trim().split(/\s{2,}/), ['PSU', '$143.00', '$44.00', '$97.00', '1']);
   assert.match(success.stdout, /TRADES:[\s\S]*FM Supplies\s+\$12\.00[\s\S]*FM Rep Fees Per Diems & Trades\s+\$20\.00/);
   assert.equal(fs.existsSync(sent), false);
 
