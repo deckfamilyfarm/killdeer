@@ -115,7 +115,9 @@ test('full report subtracts till cash and does not email when the ledger fails',
   assert.equal(success.status, 0, success.stderr);
   assert.match(success.stdout, /PRODUCT SALES:/);
   assert.doesNotMatch(success.stdout, /CATEGORY SALES:/);
-  const deductions = success.stdout.split('DEDUCTIONS:\n')[1].split('\nFM TOKENS:')[0];
+  const headings = [...success.stdout.matchAll(/^([A-Z][A-Z &]+):$/gm)].map(match => match[1]);
+  assert.deepEqual(headings, ['PRODUCT SALES', 'FM TOKENS', 'DEDUCTIONS', 'EXPECTED DEPOSITS', 'LOCATION SALES', 'TRADES', 'SUMMARY STATISTICS']);
+  const deductions = success.stdout.split('DEDUCTIONS:\n')[1].split('\nEXPECTED DEPOSITS:')[0];
   assert.match(deductions, /^  • FM Fees & Returns\s+-\$9\.00\s+\(Fees \$2\.00, Returns \$7\.00\)\n  • FM Supplies paid w\/ till cash\s+-\$5\.00\n$/);
   assert.match(success.stdout, /FM TOKENS:\n  Note: Deduct tokens from Square Cash because Square counts tokens and cash together\./);
   assert.match(success.stdout, /Cash & Tokens\s+\$92\.00/);

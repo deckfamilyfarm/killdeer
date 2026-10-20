@@ -335,6 +335,9 @@ async function resolveCategoryName(variationId) {
   }
   summaryText += formatLine('Subtotal', totalRevenue);
 
+  summaryText += `\nFM TOKENS:\n`;
+  summaryText += `  Note: Deduct tokens from Square Cash because Square counts tokens and cash together.\n`;
+
   summaryText += `\nDEDUCTIONS:\n`;
   const returns = grand.cash_refunds + grand.card_refunds;
   const feesAndReturns = grand.fees + returns;
@@ -342,23 +345,10 @@ async function resolveCategoryName(variationId) {
   summaryText += formatLine(`${options.deductionPrefix} Fees & Returns`, feesAndReturns, '-', deductionBreakdown);
   summaryText += formatLine('FM Supplies paid w/ till cash', marketActivity.categories.fmTillCashSupplies.totalCents, '-');
 
-  summaryText += `\nFM TOKENS:\n`;
-  summaryText += `  Note: Deduct tokens from Square Cash because Square counts tokens and cash together.\n`;
-
   summaryText += `\nEXPECTED DEPOSITS:\n`;
   summaryText += formatLine('Cards', grand.net_deposit);
   summaryText += formatLine('Cash & Tokens', grand.cash - marketActivity.categories.fmTillCashSupplies.totalCents,
     '', 'Net of till cash expenses');
-
-  summaryText += `\nSUMMARY STATISTICS:\n`;
-  summaryText += formatLine('Weighted COGS', totalCOGS);
-  summaryText += formatLine('Gross Profit', totalRevenue - totalCOGS);
-  summaryText += formatLine('Discounts', grand.discounts, '-');
-  summaryText += formatLine('Cash Refunds', grand.cash_refunds, '-');
-  summaryText += formatLine('Card Refunds', grand.card_refunds, '-');
-  summaryText += formatLine('Discounts/Refunds Total', grand.discounts + grand.cash_refunds + grand.card_refunds, '-');
-  const weightedGppr = totalRevenue > 0 ? ((1 - (totalCOGS / totalRevenue)) * 100).toFixed(1) : '0.0';
-  summaryText += formatLine('Weighted GPPR', `${weightedGppr}%`);
 
   summaryText += `\nLOCATION SALES:\n`;
   const locationSalesHeaders = ['Location', 'Total Sales', 'CC Sales', 'Cash/Token Sales', '# Orders'];
@@ -391,6 +381,16 @@ async function resolveCategoryName(variationId) {
   for (const entry of marketActivity.categories.fmRepTrades.entries) {
     summaryText += formatActivityEntry(entry);
   }
+
+  summaryText += `\nSUMMARY STATISTICS:\n`;
+  summaryText += formatLine('Weighted COGS', totalCOGS);
+  summaryText += formatLine('Gross Profit', totalRevenue - totalCOGS);
+  summaryText += formatLine('Discounts', grand.discounts, '-');
+  summaryText += formatLine('Cash Refunds', grand.cash_refunds, '-');
+  summaryText += formatLine('Card Refunds', grand.card_refunds, '-');
+  summaryText += formatLine('Discounts/Refunds Total', grand.discounts + grand.cash_refunds + grand.card_refunds, '-');
+  const weightedGppr = totalRevenue > 0 ? ((1 - (totalCOGS / totalRevenue)) * 100).toFixed(1) : '0.0';
+  summaryText += formatLine('Weighted GPPR', `${weightedGppr}%`);
 
   const subject = options.subject || `${options.title}: ${startArg} to ${endArg}`;
   const emailOptions = {
