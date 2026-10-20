@@ -262,16 +262,19 @@ async function resolveCategoryName(variationId) {
       if (order.tenders) {
         for (const tender of order.tenders) {
           const amt = tender.amount_money?.amount || 0;
-          summary.fees += tender.processing_fee_money?.amount || 0;
+          const tenderFee = tender.processing_fee_money?.amount || 0;
+          summary.fees += tenderFee;
           if (tender.type === 'CASH') summary.cash += amt;
           if (tender.type === 'CARD') summary.card += amt;
-          if (tender.payment_id) {
+          const paymentId = tender.payment_id || (tender.type === 'CARD' ? tender.id : null);
+          if (paymentId) {
             try {
-              const payment = await axios.get(`${BASE_PAYMENTS_URL}/${tender.payment_id}`, {
+              const payment = await axios.get(`${BASE_PAYMENTS_URL}/${paymentId}`, {
                 headers: { Authorization: `Bearer ${ACCESS_TOKEN}` }
               }).then(res => res.data.payment);
-              for (const fee of payment.processing_fee || []) {
-                summary.fees += fee.amount_money?.amount || 0;
+              if (Array.isArray(payment.processing_fee)) {
+                const paymentFees = payment.processing_fee.reduce((sum, fee) => sum + (fee.amount_money?.amount || 0), 0);
+                summary.fees += paymentFees - tenderFee;
               }
               if (tender.type === 'CASH') {
                 summary.cash_refunds += payment.refunded_money?.amount || 0;
@@ -280,7 +283,7 @@ async function resolveCategoryName(variationId) {
                 summary.card_refunds += payment.refunded_money?.amount || 0;
               }
             } catch (err) {
-              console.warn(`⚠️ Payment fetch failed: ${tender.payment_id}`);
+              console.warn(`⚠️ Payment fetch failed: ${paymentId}`);
             }
           }
         }

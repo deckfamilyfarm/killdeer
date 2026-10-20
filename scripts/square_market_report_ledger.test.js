@@ -83,15 +83,17 @@ test('full report subtracts till cash and does not email when the ledger fails',
           if (url.includes('/v2/catalog/list')) return { data: { objects: [] } };
           if (url.includes('/v2/locations')) return { data: { locations: [{ id: 'loc1', name: 'PSU', status: 'ACTIVE' }] } };
           if (url.includes('/v2/payments/cash-payment')) return { data: { payment: { refunded_money: { amount: 300 } } } };
-          if (url.includes('/v2/payments/card-payment')) return { data: { payment: { refunded_money: { amount: 400 } } } };
+          if (url.includes('/v2/payments/card-payment')) return { data: { payment: { refunded_money: { amount: 400 }, processing_fee: [{ amount_money: { amount: 200 } }] } } };
+          if (url.includes('/v2/payments/card-tender-only')) return { data: { payment: { processing_fee: [{ amount_money: { amount: 130 } }] } } };
           throw new Error('Unexpected GET ' + url);
         },
         post: async url => {
           if (url.includes('/v2/orders/search')) return { data: { orders: [{
-            total_money: { amount: 15000 },
+            total_money: { amount: 16000 },
             tenders: [
               { type: 'CASH', amount_money: { amount: 10000 }, payment_id: 'cash-payment' },
               { type: 'CARD', amount_money: { amount: 5000 }, processing_fee_money: { amount: 200 }, payment_id: 'card-payment' },
+              { type: 'CARD', amount_money: { amount: 1000 }, id: 'card-tender-only' },
             ],
           }] } };
           throw new Error('Unexpected POST ' + url);
@@ -118,13 +120,13 @@ test('full report subtracts till cash and does not email when the ledger fails',
   const headings = [...success.stdout.matchAll(/^([A-Z][A-Z &]+):$/gm)].map(match => match[1]);
   assert.deepEqual(headings, ['PRODUCT SALES', 'FM TOKENS', 'DEDUCTIONS', 'EXPECTED DEPOSITS', 'LOCATION SALES', 'TRADES', 'SUMMARY STATISTICS']);
   const deductions = success.stdout.split('DEDUCTIONS:\n')[1].split('\nEXPECTED DEPOSITS:')[0];
-  assert.match(deductions, /^  • FM Fees & Returns\s+-\$9\.00\s+\(Fees \$2\.00, Returns \$7\.00\)\n  • FM Supplies paid w\/ till cash\s+-\$5\.00\n$/);
+  assert.match(deductions, /^  • FM Fees & Returns\s+-\$10\.30\s+\(Fees \$3\.30, Returns \$7\.00\)\n  • FM Supplies paid w\/ till cash\s+-\$5\.00\n$/);
   assert.match(success.stdout, /FM TOKENS:\n  Note: Deduct tokens from Square Cash because Square counts tokens and cash together\./);
   assert.match(success.stdout, /Cash & Tokens\s+\$92\.00/);
   const locationSales = success.stdout.split('LOCATION SALES:\n')[1].split('\nTRADES:')[0].trim().split('\n');
   assert.deepEqual(locationSales[0].trim().split(/\s{2,}/),
     ['Location', 'Total Sales', 'CC Sales-Fees/Refunds', 'Cash/Token Sales', '# Orders']);
-  assert.deepEqual(locationSales[2].trim().split(/\s{2,}/), ['PSU', '$143.00', '$44.00', '$97.00', '1']);
+  assert.deepEqual(locationSales[2].trim().split(/\s{2,}/), ['PSU', '$153.00', '$52.70', '$97.00', '1']);
   assert.match(success.stdout, /TRADES:[\s\S]*FM Supplies\s+\$12\.00[\s\S]*FM Rep Fees Per Diems & Trades\s+\$20\.00/);
   assert.equal(fs.existsSync(sent), false);
 
