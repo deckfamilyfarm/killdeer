@@ -5,9 +5,12 @@ require('dotenv').config({ path: envPath });
 
 const axios = require('axios');
 const utilities = require('../src/utils/utilities.pricing');
+const { fetchMarketFeedback } = require('./market_feedback_report');
+const { prepareMarketDeposits, formatLocationSales } = require('./square_market_report_deposits');
 const {
   escapeHtml,
   fetchMarketActivity,
+  formatCreditBalances,
   formatActivityEntry,
   formatMarketBoundary,
   getPreviousWeekendRange,
@@ -204,6 +207,8 @@ async function resolveCategoryName(variationId) {
   const begin = formatMarketBoundary(startArg);
   const end = formatMarketBoundary(endArg, true);
   const marketActivity = await fetchMarketActivity(startArg, endArg);
+  const { records: feedbackRecords } = await fetchMarketFeedback(startArg, endArg);
+  const marketDeposits = prepareMarketDeposits(feedbackRecords);
 
   await loadGpprFromDatabase();
   await fetchFullCatalog();
@@ -225,6 +230,7 @@ async function resolveCategoryName(variationId) {
     const summary = {
       locationName: loc.name,
       orderCount: 0,
+      marketDates: new Set(),
       locationTotal: 0,
       discounts: 0,
       tips: 0,
@@ -237,6 +243,9 @@ async function resolveCategoryName(variationId) {
     };
 
     for (const order of orders) {
+      const marketDate = DateTime.fromISO(order.created_at, { zone: 'America/Los_Angeles' });
+      if (!marketDate.isValid) throw new Error(`Invalid order date for ${loc.name}`);
+      summary.marketDates.add(marketDate.toISODate());
       summary.orderCount++;
       summary.locationTotal += order.total_money?.amount || 0;
       summary.discounts += order.total_discount_money?.amount || 0;
@@ -291,7 +300,7 @@ async function resolveCategoryName(variationId) {
     }
 
     const net_deposit = summary.card - summary.fees - summary.card_refunds;
-    if (net_deposit > 0) locationSummaries[loc.name] = { ...summary, net_deposit };
+    if (orders.length > 0) locationSummaries[loc.name] = { ...summary, net_deposit };
   }
 
   // ── Summary Output ──
@@ -353,37 +362,20 @@ async function resolveCategoryName(variationId) {
   summaryText += formatLine('Cash & Tokens', grand.cash - marketActivity.categories.fmTillCashSupplies.totalCents,
     '', 'Net of till cash expenses');
 
-  summaryText += `\nLOCATION SALES:\n`;
-  const locationSalesHeaders = ['Location', 'Total Sales', 'CC Sales-Fees/Refunds', 'Cash/Token Sales', '# Orders'];
-  const locationSalesRows = Object.entries(locationSummaries).map(([name, s]) => [
-    name,
-    `$${((s.locationTotal - s.cash_refunds - s.card_refunds) / 100).toFixed(2)}`,
-    `$${(s.net_deposit / 100).toFixed(2)}`,
-    `$${((s.cash - s.cash_refunds) / 100).toFixed(2)}`,
-    String(s.orderCount)
-  ]);
-  const locationSalesWidths = locationSalesHeaders.map((header, index) =>
-    Math.max(header.length, ...locationSalesRows.map(row => row[index].length))
-  );
-  const valueColumnWidth = Math.max(...locationSalesWidths.slice(1));
-  locationSalesWidths.fill(valueColumnWidth, 1);
-  const formatLocationSalesRow = row =>
-    `  ${row.map((cell, index) => index === 0
-      ? cell.padEnd(locationSalesWidths[index])
-      : cell.padStart(locationSalesWidths[index])).join('  ')}\n`;
-  summaryText += formatLocationSalesRow(locationSalesHeaders);
-  summaryText += `  ${locationSalesWidths.map(width => '-'.repeat(width)).join('  ')}\n`;
-  for (const row of locationSalesRows) summaryText += formatLocationSalesRow(row);
+  summaryText += formatLocationSales(locationSummaries, marketDeposits, marketActivity.categories.fmTillCashSupplies.entries);
 
   summaryText += `\nTRADES:\n`;
-  summaryText += formatLine('FM Supplies', marketActivity.categories.fmSupplies.totalCents);
+  summaryText += formatLine('FM Supplies');
   for (const entry of marketActivity.categories.fmSupplies.entries) {
     summaryText += formatActivityEntry(entry);
   }
-  summaryText += formatLine('FM Rep Fees Per Diems & Trades', marketActivity.categories.fmRepTrades.totalCents);
+  summaryText += formatLine('Subtotal FM Supplies', marketActivity.categories.fmSupplies.totalCents);
+  summaryText += formatLine('FM Rep Fees Per Diems & Trades');
   for (const entry of marketActivity.categories.fmRepTrades.entries) {
     summaryText += formatActivityEntry(entry);
   }
+  summaryText += formatLine('Subtotal FM Rep Fees Per Diems & Trades', marketActivity.categories.fmRepTrades.totalCents);
+  summaryText += formatCreditBalances(marketActivity.creditBalances);
 
   summaryText += `\nSUMMARY STATISTICS:\n`;
   summaryText += formatLine('Weighted COGS', totalCOGS);

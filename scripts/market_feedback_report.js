@@ -702,14 +702,7 @@ async function handleReportFailure(error) {
 	}
 }
 
-async function main() {
-	let { startArg, endArg, options } = parseCliArgs(process.argv.slice(2));
-	if (!startArg) {
-		({ start: startArg, end: endArg } = getPreviousCompletedWeekendRange(options.timeZone));
-	} else if (!endArg) {
-		endArg = startArg;
-	}
-
+async function fetchMarketFeedback(startArg, endArg, options = parseCliArgs([]).options) {
 	const startDate = DateTime.fromISO(startArg, { zone: options.timeZone }).startOf('day');
 	const endDate = DateTime.fromISO(endArg, { zone: options.timeZone }).startOf('day');
 	if (!startDate.isValid || !endDate.isValid) {
@@ -734,6 +727,17 @@ async function main() {
 		.map((row, index) => buildRecord(row, index + 2, columns, options.timeZone))
 		.filter(Boolean)
 		.filter(record => record.marketDate >= startDate && record.marketDate <= endDate);
+	return { records, sheetTitle };
+}
+
+async function main() {
+	let { startArg, endArg, options } = parseCliArgs(process.argv.slice(2));
+	if (!startArg) {
+		({ start: startArg, end: endArg } = getPreviousCompletedWeekendRange(options.timeZone));
+	} else if (!endArg) {
+		endArg = startArg;
+	}
+	const { records, sheetTitle } = await fetchMarketFeedback(startArg, endArg, options);
 	const { uniqueRecords, duplicateCount } = dedupeRecords(records);
 	const entries = consolidateRecords(uniqueRecords);
 
@@ -777,4 +781,4 @@ if (require.main === module) {
 	main().catch(handleReportFailure);
 }
 
-module.exports = { buildColumnMap, buildRecord, sendReportErrorAlert };
+module.exports = { buildColumnMap, buildRecord, consolidateRecords, dedupeRecords, fetchMarketFeedback, sendReportErrorAlert };

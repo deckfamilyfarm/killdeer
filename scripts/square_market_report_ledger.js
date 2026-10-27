@@ -44,6 +44,27 @@ function assertCategory(category, name, startDate, endDate) {
   if (sum !== category.totalCents) throw new Error('Credit ledger total does not match entries in ' + name);
 }
 
+function assertCreditBalances(balances, endDate) {
+  if (!balances || typeof balances.asOfDate !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(balances.asOfDate) ||
+      balances.asOfDate !== endDate || !Array.isArray(balances.entries) ||
+      !Number.isSafeInteger(balances.totalCents) || balances.totalCents < 0) {
+    throw new Error('Credit ledger must provide balances as of the report end date');
+  }
+  const seen = new Set();
+  let total = 0;
+  for (const entry of balances.entries) {
+    if (!entry || typeof entry.employeeId !== 'string' || !entry.employeeId.trim() || seen.has(entry.employeeId) ||
+        typeof entry.username !== 'string' || !Number.isSafeInteger(entry.balanceCents) || entry.balanceCents <= 0) {
+      throw new Error('Invalid credit balance entry');
+    }
+    seen.add(entry.employeeId);
+    total += entry.balanceCents;
+  }
+  if (!Number.isSafeInteger(total) || total !== balances.totalCents) {
+    throw new Error('Credit balance total does not match entries');
+  }
+}
+
 async function fetchMarketActivity(startDate, endDate, options = {}) {
   marketDate(startDate);
   marketDate(endDate);
@@ -67,6 +88,7 @@ async function fetchMarketActivity(startDate, endDate, options = {}) {
     throw new Error('Credit ledger returned an unexpected report date range');
   }
   for (const name of CATEGORY_KEYS) assertCategory(activity.categories[name], name, startDate, endDate);
+  assertCreditBalances(activity.creditBalances, endDate);
   return activity;
 }
 
@@ -89,9 +111,22 @@ function escapeHtml(value) {
   })[character]);
 }
 
+function formatCreditBalances(balances) {
+  assertCreditBalances(balances, balances?.asOfDate);
+  let text = `\nAVAILABLE TRADE CREDIT:\n  As of ${balances.asOfDate} (end of report period)\n`;
+  if (!balances.entries.length) text += '  No available credit balances.\n';
+  for (const entry of balances.entries) {
+    const name = oneLine(entry.username) || `Employee ${oneLine(entry.employeeId)}`;
+    text += `  • ${name.padEnd(40)}$${(entry.balanceCents / 100).toFixed(2)}\n`;
+  }
+  text += `  • ${'Total available credit'.padEnd(40)}$${(balances.totalCents / 100).toFixed(2)}\n`;
+  return text;
+}
+
 module.exports = {
   escapeHtml,
   fetchMarketActivity,
+  formatCreditBalances,
   formatActivityEntry,
   formatMarketBoundary,
   getPreviousWeekendRange,

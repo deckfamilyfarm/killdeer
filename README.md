@@ -35,3 +35,19 @@ feed cannot be fetched or reconciled. Run
 a completed weekend before enabling the scheduled email. Both Square and ledger
 dates use the Pacific calendar day. Till-cash expenses reduce expected cash;
 product trades and trade credits used appear under TRADES.
+
+The location table reads actual cash deposits and tokens from the Yellow Notes
+sheet using the same `MARKET_FEEDBACK_*` / Google Sheets credentials as
+`scripts/market_feedback_report.js`. It matches market names regardless of case,
+spacing, or punctuation, and consolidates repeated submissions per market/date.
+Over/Short is actual cash plus tokens minus Square cash/token sales net of cash
+refunds and market-specific till-cash expenses. Positive means over; negative
+means short. Incomplete submissions show `MISSING` and no variance. Sheet-fetch
+failures stop the report before email delivery. Trade category totals appear as
+subtotals after their entries.
+
+`AVAILABLE TRADE CREDIT` lists positive employee balances as of the report's
+closing date, including credits and adjustments from earlier dates. It uses the
+ledger feed's `creditBalances` field, not today's account balances. Deploy the
+matching credit-ledger feed update before running this version of the report;
+missing, incorrectly dated, or unreconciled balances stop email delivery.

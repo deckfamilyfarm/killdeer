@@ -8,6 +8,7 @@ const { DateTime } = require('luxon');
 const {
   escapeHtml,
   fetchMarketActivity,
+  formatCreditBalances,
   formatActivityEntry,
   formatMarketBoundary,
   getPreviousWeekendRange,
@@ -16,10 +17,14 @@ const {
 const weekend = {
   startDate: '2026-10-17',
   endDate: '2026-10-18',
+  creditBalances: { asOfDate: '2026-10-18', totalCents: 3500, entries: [
+    { employeeId: 'E001', username: 'rep-a', balanceCents: 2500 },
+    { employeeId: 'E002', username: '', balanceCents: 1000 },
+  ] },
   categories: {
     fmSupplies: { totalCents: 1200, entries: [{ date: '2026-10-17', market: 'PSU', username: 'rep', description: 'Eggs', tradedFor: 'Flowers', amountCents: 1200 }] },
     fmRepTrades: { totalCents: 2000, entries: [{ date: '2026-10-18', market: null, username: 'rep', description: 'Farm food', tradedFor: null, amountCents: 2000 }] },
-    fmTillCashSupplies: { totalCents: 500, entries: [{ date: '2026-10-18', market: 'King', username: 'rep', description: 'Parking', tradedFor: null, amountCents: 500 }] },
+    fmTillCashSupplies: { totalCents: 500, entries: [{ date: '2026-10-18', market: 'PSU', username: 'rep', description: 'Parking', tradedFor: null, amountCents: 500 }] },
   },
 };
 
@@ -63,6 +68,26 @@ test('keeps entry text on one line and escapes notes in the email HTML', () => {
   assert.equal(escapeHtml('<script>"&'), '&lt;script&gt;&quot;&amp;');
 });
 
+test('requires dated, reconciled employee balances from the ledger', async () => {
+  for (const creditBalances of [
+    undefined,
+    { ...weekend.creditBalances, asOfDate: '2026-10-19' },
+    { ...weekend.creditBalances, totalCents: 9999 },
+    { ...weekend.creditBalances, entries: [weekend.creditBalances.entries[0], weekend.creditBalances.entries[0]] },
+    { ...weekend.creditBalances, entries: [{ employeeId: 'E001', username: 'rep', balanceCents: -1 }] },
+  ]) {
+    await assert.rejects(fetchMarketActivity('2026-10-17', '2026-10-18', {
+      token: 'secret', httpClient: { get: async () => ({ data: { ...weekend, creditBalances } }) },
+    }), /[Cc]redit/);
+  }
+  const text = formatCreditBalances(weekend.creditBalances);
+  assert.match(text, /As of 2026-10-18/);
+  assert.match(text, /rep-a\s+\$25\.00/);
+  assert.match(text, /Employee E002\s+\$10\.00/);
+  assert.match(text, /Total available credit\s+\$35\.00/);
+  assert.match(formatCreditBalances({ asOfDate: '2026-10-18', totalCents: 0, entries: [] }), /No available credit balances/);
+});
+
 test('full report subtracts till cash and does not email when the ledger fails', t => {
   const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'square-market-ledger-test-'));
   t.after(() => fs.rmSync(directory, { recursive: true, force: true }));
@@ -75,6 +100,18 @@ test('full report subtracts till cash and does not email when the ledger fails',
     const weekend = ${JSON.stringify(weekend)};
     Module._load = function(request, parent, isMain) {
       if (request === 'axios') return {
+        create: () => ({
+          interceptors: { request: { use() {} } },
+          get: async url => {
+            if (process.env.FAIL_FEEDBACK) throw new Error('Yellow Notes unavailable');
+            if (url.includes('/values/')) return { data: { values: [
+              ['Market Date', 'Timestamp', "Which farmers' market did you work at?", 'Who worked at this market today?', 'Cash Deposit', 'Tokens'],
+              ['10/18/2026', '10/18/2026 17:00:00', 'PSU', 'rep', '$70', '$22'],
+              ['10/11/2026', '10/11/2026 17:00:00', 'PSU', 'rep', '$999', '$999'],
+            ] } };
+            return { data: { properties: { title: 'Yellow Notes' }, sheets: [{ properties: { title: 'Form Responses 1', gridProperties: { rowCount: 3, columnCount: 6 } } }] } };
+          },
+        }),
         get: async url => {
           if (url.includes('/api/reports/market-activity')) {
             if (process.env.FAIL_LEDGER) throw new Error('Ledger unavailable');
@@ -89,6 +126,7 @@ test('full report subtracts till cash and does not email when the ledger fails',
         },
         post: async url => {
           if (url.includes('/v2/orders/search')) return { data: { orders: [{
+            created_at: '2026-10-19T00:00:00Z',
             total_money: { amount: 16000 },
             tenders: [
               { type: 'CASH', amount_money: { amount: 10000 }, payment_id: 'cash-payment' },
@@ -107,10 +145,12 @@ test('full report subtracts till cash and does not email when the ledger fails',
     };
   `);
   const script = path.join(__dirname, 'square_market_report.js');
-  const run = (args, failLedger) => spawnSync(process.execPath, ['--require', preload, script, '2026-10-17', '2026-10-18', ...args], {
+  const run = (args, failLedger, failFeedback = false) => spawnSync(process.execPath, ['--require', preload, script, '2026-10-17', '2026-10-18', ...args], {
     encoding: 'utf8',
     env: { ...process.env, NODE_ENV: 'square-market-ledger-test', CREDITS_REPORT_API_TOKEN: 'report-secret',
-      SQUARE_ACCESS_TOKEN: 'square-secret', REPORT_SENT_PATH: sent, FAIL_LEDGER: failLedger ? '1' : '' },
+      SQUARE_ACCESS_TOKEN: 'square-secret', REPORT_SENT_PATH: sent, FAIL_LEDGER: failLedger ? '1' : '',
+      FAIL_FEEDBACK: failFeedback ? '1' : '', MARKET_FEEDBACK_GOOGLE_APPLICATION_CREDENTIALS: '', GOOGLE_APPLICATION_CREDENTIALS: '',
+      MARKET_FEEDBACK_GOOGLE_SHEETS_API_KEY: 'sheet-secret' },
   });
 
   const success = run(['--dry-run'], false);
@@ -118,20 +158,27 @@ test('full report subtracts till cash and does not email when the ledger fails',
   assert.match(success.stdout, /PRODUCT SALES:/);
   assert.doesNotMatch(success.stdout, /CATEGORY SALES:/);
   const headings = [...success.stdout.matchAll(/^([A-Z][A-Z &]+):$/gm)].map(match => match[1]);
-  assert.deepEqual(headings, ['PRODUCT SALES', 'FM TOKENS', 'DEDUCTIONS', 'EXPECTED DEPOSITS', 'LOCATION SALES', 'TRADES', 'SUMMARY STATISTICS']);
+  assert.deepEqual(headings, ['PRODUCT SALES', 'FM TOKENS', 'DEDUCTIONS', 'EXPECTED DEPOSITS', 'LOCATION SALES', 'TRADES', 'AVAILABLE TRADE CREDIT', 'SUMMARY STATISTICS']);
   const deductions = success.stdout.split('DEDUCTIONS:\n')[1].split('\nEXPECTED DEPOSITS:')[0];
   assert.match(deductions, /^  • FM Fees & Returns\s+-\$10\.30\s+\(Fees \$3\.30, Returns \$7\.00\)\n  • FM Supplies paid w\/ till cash\s+-\$5\.00\n$/);
   assert.match(success.stdout, /FM TOKENS:\n  Note: Deduct tokens from Square Cash because Square counts tokens and cash together\./);
   assert.match(success.stdout, /Cash & Tokens\s+\$92\.00/);
   const locationSales = success.stdout.split('LOCATION SALES:\n')[1].split('\nTRADES:')[0].trim().split('\n');
   assert.deepEqual(locationSales[0].trim().split(/\s{2,}/),
-    ['Location', 'Total Sales', 'CC Sales-Fees/Refunds', 'Cash/Token Sales', '# Orders']);
-  assert.deepEqual(locationSales[2].trim().split(/\s{2,}/), ['PSU', '$153.00', '$52.70', '$97.00', '1']);
-  assert.match(success.stdout, /TRADES:[\s\S]*FM Supplies\s+\$12\.00[\s\S]*FM Rep Fees Per Diems & Trades\s+\$20\.00/);
+    ['Location', 'Total Sales', 'CC Sales-Fees/Refunds', 'Cash/Token Sales', 'YN Actual Cash', 'YN Actual Tokens', 'Over/Short']);
+  assert.deepEqual(locationSales[2].trim().split(/\s{2,}/), ['PSU', '$153.00', '$52.70', '$97.00', '$70.00', '$22.00', '$0.00']);
+  const trades = success.stdout.split('TRADES:\n')[1].split('\nAVAILABLE TRADE CREDIT:')[0];
+  assert.match(trades, /^  • FM Supplies\n    • .*\$12\.00\n  • Subtotal FM Supplies\s+\$12\.00\n  • FM Rep Fees Per Diems & Trades\n    • .*\$20\.00\n  • Subtotal FM Rep Fees Per Diems & Trades\s+\$20\.00\n$/);
+  assert.match(success.stdout, /AVAILABLE TRADE CREDIT:[\s\S]*As of 2026-10-18[\s\S]*Total available credit\s+\$35\.00/);
   assert.equal(fs.existsSync(sent), false);
 
   const failure = run([], true);
   assert.equal(failure.status, 1);
   assert.match(failure.stderr, /Ledger unavailable/);
+  assert.equal(fs.existsSync(sent), false);
+
+  const feedbackFailure = run([], false, true);
+  assert.equal(feedbackFailure.status, 1);
+  assert.match(feedbackFailure.stderr, /Yellow Notes unavailable/);
   assert.equal(fs.existsSync(sent), false);
 });
