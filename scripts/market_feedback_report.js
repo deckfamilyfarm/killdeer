@@ -599,6 +599,7 @@ function buildReport({ entries, startArg, endArg, options, sheetTitle, duplicate
 	summaryText += `\n`;
 	summaryText += formatLine('Total Cash Deposits', cashTotal);
 	summaryText += formatLine('Total Tokens', tokensTotal);
+	summaryText += formatLine('Total Cash Deposits & Tokens', cashTotal + tokensTotal);
 
 	const expenses = entries.flatMap(entry => entry.expenses);
 	let expenseTotal = 0;
