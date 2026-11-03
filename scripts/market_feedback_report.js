@@ -562,17 +562,17 @@ function addTextSection(summaryText, title, entries, field) {
 	return `${summaryText}\n${title}:\n${lines.join('')}`;
 }
 
-function buildReport({ entries, startArg, endArg, options, sheetTitle, duplicateCount, rawRecordCount }) {
+function buildReportParts({ entries, startArg, endArg, options, sheetTitle, duplicateCount, rawRecordCount, includeExpenses = true, includeDeposits = true, embedded = false }) {
 	const generated = DateTime.now()
 		.setZone(options.timeZone)
 		.toFormat('yyyy-MM-dd HH:mm');
-	let summaryText = `${options.title}: ${startArg} to ${endArg}\n`;
-	summaryText += `Generated on ${generated} ${options.timeZone}\n`;
+	let summaryText = embedded ? '\nYELLOW NOTES / MARKET FEEDBACK:\n'
+		: `${options.title}: ${startArg} to ${endArg}\nGenerated on ${generated} ${options.timeZone}\n`;
 	summaryText += `Source: ${sheetTitle}\n`;
 
 	if (!entries.length) {
 		summaryText += `\nNo market feedback submissions found for this date range.\n`;
-		return summaryText;
+		return { text: summaryText, notes: [] };
 	}
 
 	summaryText += `\nMARKETS WORKED:\n`;
@@ -587,33 +587,38 @@ function buildReport({ entries, startArg, endArg, options, sheetTitle, duplicate
 	const missingCash = [];
 	const missingTokens = [];
 
-	summaryText += `\nCASH DEPOSITS & TOKENS:\n`;
+	if (includeDeposits) summaryText += `\nCASH DEPOSITS & TOKENS:\n`;
 	for (const entry of entries) {
 		const label = `${entry.market} (${entry.marketDate.toFormat('M/d')})`.padEnd(24);
 		if (entry.cashCents === null) missingCash.push(entry.market);
 		else cashTotal += entry.cashCents;
 		if (entry.tokensCents === null) missingTokens.push(entry.market);
 		else tokensTotal += entry.tokensCents;
-		summaryText += `  • ${label}Cash ${formatMoney(entry.cashCents).padEnd(12)} Tokens ${formatMoney(entry.tokensCents)}\n`;
+		if (includeDeposits) summaryText += `  • ${label}Cash ${formatMoney(entry.cashCents).padEnd(12)} Tokens ${formatMoney(entry.tokensCents)}\n`;
 	}
-	summaryText += `\n`;
-	summaryText += formatLine('Total Cash Deposits', cashTotal);
-	summaryText += formatLine('Total Tokens', tokensTotal);
-	summaryText += formatLine('Total Cash Deposits & Tokens', cashTotal + tokensTotal);
-
-	const expenses = entries.flatMap(entry => entry.expenses);
-	let expenseTotal = 0;
-	summaryText += `\nFEES & EXPENSES:\n`;
-	if (!expenses.length) {
-		summaryText += `  • None reported\n`;
-	} else {
-		for (const expense of expenses) {
-			const label = `${expense.market} (${expense.marketDate.toFormat('M/d')})`;
-			if (expense.amountCents !== null) expenseTotal += expense.amountCents;
-			summaryText += formatLine(label, expense.amountCents, '', expense.description);
-		}
+	if (includeDeposits) {
 		summaryText += `\n`;
-		summaryText += formatLine('Total Fees/Expenses', expenseTotal);
+		summaryText += formatLine('Total Cash Deposits', cashTotal);
+		summaryText += formatLine('Total Tokens', tokensTotal);
+		summaryText += formatLine('Total Cash Deposits & Tokens', cashTotal + tokensTotal);
+	}
+
+	if (includeExpenses) {
+		const expenses = entries.flatMap(entry => entry.expenses);
+		let expenseTotal = 0;
+		summaryText += `\nFEES & EXPENSES:\n`;
+		if (!expenses.length) {
+			summaryText += `  • None reported\n`;
+		} else {
+			for (const expense of expenses) {
+				const label = `${expense.market} (${expense.marketDate.toFormat('M/d')})`;
+				if (expense.amountCents !== null) expenseTotal += expense.amountCents;
+				summaryText += formatLine(label, expense.amountCents, '', expense.description);
+			}
+			summaryText += `\n`;
+			summaryText += formatLine('Total Fees/Expenses', expenseTotal);
+		}
+
 	}
 
 	summaryText = addTextSection(summaryText, 'SELL OUTS / LOW STOCK', entries, 'soldOut');
@@ -640,14 +645,12 @@ function buildReport({ entries, startArg, endArg, options, sheetTitle, duplicate
 		notes.push(`Missing tokens: ${missingTokens.join(', ')}.`);
 	}
 
-	if (notes.length) {
-		summaryText += `\nNOTES:\n`;
-		for (const note of notes) {
-			summaryText += `  • ${note}\n`;
-		}
-	}
+	return { text: summaryText, notes };
+}
 
-	return summaryText;
+function buildReport(args) {
+	const { text, notes } = buildReportParts(args);
+	return text + (notes.length ? `\nNOTES:\n${notes.map(note => `  • ${note}\n`).join('')}` : '');
 }
 
 function logAxiosError(context, error) {
@@ -781,4 +784,4 @@ if (require.main === module) {
 	main().catch(handleReportFailure);
 }
 
-module.exports = { buildColumnMap, buildRecord, consolidateRecords, dedupeRecords, fetchMarketFeedback, sendReportErrorAlert };
+module.exports = { buildReportParts, buildColumnMap, buildRecord, consolidateRecords, dedupeRecords, fetchMarketFeedback, sendReportErrorAlert };

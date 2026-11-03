@@ -5,12 +5,14 @@ require('dotenv').config({ path: envPath });
 
 const axios = require('axios');
 const utilities = require('../src/utils/utilities.pricing');
-const { fetchMarketFeedback } = require('./market_feedback_report');
-const { prepareMarketDeposits, formatLocationSales, formatCashTokenReconciliation } = require('./square_market_report_deposits');
+const { fetchMarketFeedback, dedupeRecords, consolidateRecords, buildReportParts } = require('./market_feedback_report');
+const { formatReportEmail } = require('./square_market_report_email');
+const { formatCashFarmersExpenses } = require('./square_market_report_feedback');
+const { prepareMarketDeposits, formatLocationSales, formatCashTokenReconciliation, formatReconciliationNotes } = require('./square_market_report_deposits');
 const {
-  escapeHtml,
   fetchMarketActivity,
   formatCreditBalances,
+  resolveCreditBalanceNames,
   formatActivityEntry,
   formatMarketBoundary,
   getPreviousWeekendRange,
@@ -38,7 +40,7 @@ function parseCliArgs(argv) {
     from: 'jdeck88@gmail.com',
     to: 'info@deckfamilyfarm.com',
     cc: 'jdeck88@gmail.com',
-    title: 'Square Market Report',
+    title: 'Square Market & Yellow Notes Report',
     subject: null,
     deductionPrefix: 'FM',
     dryRun: false,
@@ -199,7 +201,7 @@ async function resolveCategoryName(variationId) {
 // ─── Main Execution ────────────────────────────────────────────────────────────
 
 const failureContext = {
-  title: 'Square Market Report',
+  title: 'Square Market & Yellow Notes Report',
   dryRun: process.argv.slice(2).includes('--dry-run'),
 };
 
@@ -215,8 +217,11 @@ const failureContext = {
   const begin = formatMarketBoundary(startArg);
   const end = formatMarketBoundary(endArg, true);
   const marketActivity = await fetchMarketActivity(startArg, endArg);
-  const { records: feedbackRecords } = await fetchMarketFeedback(startArg, endArg);
+  const creditBalances = await resolveCreditBalanceNames(marketActivity.creditBalances, utilities.db);
+  const { records: feedbackRecords, sheetTitle } = await fetchMarketFeedback(startArg, endArg);
   const marketDeposits = prepareMarketDeposits(feedbackRecords);
+  const { uniqueRecords, duplicateCount } = dedupeRecords(feedbackRecords);
+  const feedbackEntries = consolidateRecords(uniqueRecords);
 
   await loadGpprFromDatabase();
   await fetchFullCatalog();
@@ -354,15 +359,12 @@ const failureContext = {
   }
   summaryText += formatLine('Subtotal', totalRevenue);
 
-  summaryText += `\nFM TOKENS:\n`;
-  summaryText += `  Note: Deduct tokens from Square Cash because Square counts tokens and cash together.\n`;
-
   summaryText += `\nDEDUCTIONS:\n`;
   const returns = grand.cash_refunds + grand.card_refunds;
   const feesAndReturns = grand.fees + returns;
   const deductionBreakdown = `(Fees $${(grand.fees / 100).toFixed(2)}, Returns $${(returns / 100).toFixed(2)})`;
   summaryText += formatLine(`${options.deductionPrefix} Fees & Returns`, feesAndReturns, '-', deductionBreakdown);
-  summaryText += formatLine('FM Supplies paid w/ till cash', marketActivity.categories.fmTillCashSupplies.totalCents, '-');
+  summaryText += formatLine('FM expenses paid w/ till cash', marketActivity.categories.fmTillCashSupplies.totalCents, '-', '(see CASH FARMERS MARKET EXPENSES below)');
 
   summaryText += `\nEXPECTED DEPOSITS:\n`;
   summaryText += formatLine('Cards', grand.net_deposit);
@@ -371,6 +373,8 @@ const failureContext = {
 
   summaryText += formatLocationSales(locationSummaries, marketDeposits);
   summaryText += formatCashTokenReconciliation(locationSummaries, marketDeposits);
+
+  summaryText += formatCashFarmersExpenses(marketActivity.categories.fmTillCashSupplies, feedbackEntries);
 
   summaryText += `\nTRADES:\n`;
   summaryText += formatLine('FM Supplies');
@@ -383,7 +387,7 @@ const failureContext = {
     summaryText += formatActivityEntry(entry);
   }
   summaryText += formatLine('Subtotal FM Rep Fees Per Diems & Trades', marketActivity.categories.fmRepTrades.totalCents);
-  summaryText += formatCreditBalances(marketActivity.creditBalances);
+  summaryText += formatCreditBalances(creditBalances);
 
   summaryText += `\nSUMMARY STATISTICS:\n`;
   summaryText += formatLine('Weighted COGS', totalCOGS);
@@ -395,12 +399,26 @@ const failureContext = {
   const weightedGppr = totalRevenue > 0 ? ((1 - (totalCOGS / totalRevenue)) * 100).toFixed(1) : '0.0';
   summaryText += formatLine('Weighted GPPR', `${weightedGppr}%`);
 
+  const feedback = buildReportParts({
+    entries: feedbackEntries, startArg, endArg, sheetTitle, duplicateCount,
+    rawRecordCount: feedbackRecords.length,
+    options: { title: 'Yellow Notes / Market Feedback Report', timeZone: 'America/Los_Angeles' },
+    includeExpenses: false, includeDeposits: false, embedded: true,
+  });
+  summaryText += feedback.text;
+  summaryText += '\nNOTES:\n';
+  for (const note of feedback.notes) summaryText += `  • ${note}\n`;
+  if (feedbackEntries.some(entry => entry.expenses.length)) {
+    summaryText += '  Yellow Notes expenses are reported separately; EXPECTED DEPOSITS deducts credit-ledger till-cash expenses only.\n';
+  }
+  summaryText += formatReconciliationNotes(locationSummaries, marketDeposits);
+
   const subject = options.subject || `${options.title}: ${startArg} to ${endArg}`;
   const emailOptions = {
     from: options.from,
     to: options.to,
     subject,
-    html: `<pre>${escapeHtml(summaryText)}</pre>`
+    ...formatReportEmail(summaryText)
   };
   if (options.cc) emailOptions.cc = options.cc;
 

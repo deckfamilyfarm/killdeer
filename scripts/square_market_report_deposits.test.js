@@ -1,7 +1,7 @@
 const assert = require('node:assert/strict');
 const { test } = require('node:test');
 const { buildColumnMap, buildRecord } = require('./market_feedback_report');
-const { prepareMarketDeposits, reconcileLocationDeposits, shortLocationName, formatLocationSales, formatCashTokenReconciliation } = require('./square_market_report_deposits');
+const { prepareMarketDeposits, reconcileLocationDeposits, shortLocationName, formatLocationSales, formatCashTokenReconciliation, formatReconciliationNotes } = require('./square_market_report_deposits');
 
 const headers = ['Market Date', 'Timestamp', "Which farmers' market did you work at?", 'Who worked at this market today?', 'Cash Deposit', 'Tokens'];
 const columns = buildColumnMap(headers);
@@ -58,10 +58,13 @@ test('uses identical fixed-width location labels with short reps in both tables'
     assert.ok(row.includes('$'), 'location and amounts share one line');
     assert.doesNotMatch(lines[separator + 2], /^\s+\(/);
     for (const line of lines.slice(2, separator + 2)) {
-      assert.equal(Array.from(line).length, 2 + label.length + (columnCount - 1) * 12);
+      assert.equal(Array.from(line).length, 2 + label.length + (columnCount - 1) * 10);
       for (let column = 1; column < columnCount; column++) {
-        const start = 2 + label.length + (column - 1) * 12;
+        const start = 2 + label.length + (column - 1) * 10;
         assert.equal(line.slice(start, start + 2), '  ');
+        if (line === row && line.slice(start + 2, start + 10).trim()) {
+          assert.notEqual(line[start + 2], ' ', 'values start at the same left edge as headings');
+        }
       }
     }
   }
@@ -73,9 +76,9 @@ test('reconciliation shows signed rep differences and leaves farm counts and var
   const entries = deposits([['10/24/2026', '10/24/2026 15:00:00', "St. John's", 'Rep', '$80', '$20']]);
   const table = formatCashTokenReconciliation({ 'St. John’s': summary }, entries).split('\n');
   assert.equal(table[2].trim(), 'Square');
-  assert.deepEqual(table[3].trim().split(/\s{2,}/), ['Cash/', 'Farm']);
+  assert.deepEqual(table[3].trim().split(/\s{2,}/), ['Cash/', 'Rep', 'Farm', 'Farm', 'Over/']);
   assert.deepEqual(table[4].trim().split(/\s{2,}/),
-    ['Location', 'Tokens', 'Rep Cash', 'Rep Tokens', 'Diff', 'Farm Cash', 'Tokens', 'Over/short']);
+    ['Location', 'Tokens', 'Rep Cash', 'Tokens', 'Diff', 'Cash', 'Tokens', 'short']);
   // The final three columns contain spaces only, with no invented farm totals.
   assert.deepEqual(table[6].trim().split(/\s{2,}/), ["St. John’s (Rep)", '$97.00', '$80.00', '$20.00', '+$3.00']);
   assert.match(table[6], /\+\$3\.00\s+$/);
@@ -91,6 +94,8 @@ test('calculates Diff from displayed amounts even when Square also has an unmatc
     { actualCash: 5400, actualTokens: 17100, overShort: -60608 });
   const text = formatCashTokenReconciliation({ Montavilla: montavilla }, entries);
   assert.match(text, /Montavilla \(Stephani\)\s+\$831\.08\s+\$54\.00\s+\$171\.00\s+-\$606\.08/);
-  assert.match(text, /incomplete cash\/token submissions for 2026-10-31/);
-  assert.match(text, /Yellow Notes market dates: 2026-11-01/);
+  assert.doesNotMatch(text, /incomplete cash\/token submissions/);
+  const notes = formatReconciliationNotes({ Montavilla: montavilla }, entries);
+  assert.match(notes, /incomplete cash\/token submissions for 2026-10-31/);
+  assert.match(notes, /Yellow Notes market dates: 2026-11-01/);
 });

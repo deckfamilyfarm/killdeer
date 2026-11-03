@@ -40,9 +40,10 @@ LOCATION SALES and CASH & TOKEN RECONCILIATION use identical location labels.
 Market names fit within 12 characters including `...` when truncated. Booth rep
 names from Yellow Notes are limited to 8 characters each and shown in parentheses
 beside the market on one unwrapped line. Both tables use the same location-column
-width, sized to fit the longest label. Other columns are 10 characters wide, with
+width, sized to fit the longest label. Other columns are 8 characters wide and left-aligned, with
 long headings wrapped onto multiple lines and all headings bottom-aligned just
-above the column underlines.
+above the column underlines. Reconciliation explanations and missing-date notes
+appear at the very bottom of the unified report.
 CASH & TOKEN RECONCILIATION lists Square Cash/Tokens (net of cash refunds),
 Rep Cash, Rep Tokens, and Diff = Rep Cash + Rep Tokens - Square Cash/Tokens.
 Farm Cash, Farm Tokens, and Over/short are blank for farm counts to be entered;
@@ -68,3 +69,22 @@ missing, incorrectly dated, or unreconciled balances stop email delivery.
 Report failures email `jdeck88@gmail.com` with the report dates and error. This
 includes report-delivery errors; if the mail service itself is unavailable, the
 notification failure is logged to `scripts/output.log`. Dry runs never send email.
+
+
+The Square report also includes the Yellow Notes markets worked,
+sellouts, customer questions, booth issues, and positive feedback. Duplicate Yellow Notes deposit lists are omitted. Both use the same
+weekend and fetched sheet data. CASH FARMERS MARKET EXPENSES lists till-cash ledger entries
+and Yellow Notes fees/expenses under separate source labels, or `None reported.`
+when neither source has entries. Yellow Notes expenses are informational and are
+not deducted again from expected deposits. The standalone feedback script remains
+available; scheduled jobs are unchanged while the unified report is being reviewed.
+
+Available trade-credit names are resolved by employee ID from the Timesheets
+`employees` table using Killdeer's existing database connection. Set
+`CREDITS_EMPLOYEE_DB_SCHEMA` to override the default `timesheets` schema. Missing
+employee names stop delivery and trigger the existing error alert. Amounts and
+historical balances still come exclusively from the credit-ledger feed.
+
+Report bullets use hanging indents in HTML and plain-text email so wrapped lines
+align with the text after the bullet. The cash-expense deduction points to its
+details in CASH FARMERS MARKET EXPENSES.

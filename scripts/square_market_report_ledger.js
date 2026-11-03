@@ -111,12 +111,27 @@ function escapeHtml(value) {
   })[character]);
 }
 
+async function resolveCreditBalanceNames(balances, db, schema = process.env.CREDITS_EMPLOYEE_DB_SCHEMA || 'timesheets') {
+  if (!/^[a-zA-Z0-9_-]+$/.test(schema)) throw new Error('Invalid credit employee database schema');
+  if (!balances.entries.length) return balances;
+  const ids = balances.entries.map(entry => entry.employeeId);
+  const [employees] = await db.query(
+    `SELECT id, name FROM \`${schema}\`.\`employees\` WHERE id IN (${ids.map(() => '?').join(',')})`, ids);
+  const names = new Map(employees.map(employee => [String(employee.id), oneLine(employee.name)]));
+  const entries = balances.entries.map(entry => {
+    const employeeName = names.get(entry.employeeId);
+    if (!employeeName) throw new Error(`Employee name missing from Timesheets for credit account ${entry.employeeId}`);
+    return { ...entry, employeeName };
+  }).sort((a, b) => a.employeeName.localeCompare(b.employeeName));
+  return { ...balances, entries };
+}
+
 function formatCreditBalances(balances) {
   assertCreditBalances(balances, balances?.asOfDate);
   let text = `\nAVAILABLE TRADE CREDIT:\n  As of ${balances.asOfDate} (end of report period)\n`;
   if (!balances.entries.length) text += '  No available credit balances.\n';
   for (const entry of balances.entries) {
-    const name = oneLine(entry.username) || `Employee ${oneLine(entry.employeeId)}`;
+    const name = oneLine(entry.employeeName) || oneLine(entry.username) || `Employee ${oneLine(entry.employeeId)}`;
     text += `  • ${name.padEnd(40)}$${(entry.balanceCents / 100).toFixed(2)}\n`;
   }
   text += `  • ${'Total available credit'.padEnd(40)}$${(balances.totalCents / 100).toFixed(2)}\n`;
@@ -127,6 +142,7 @@ module.exports = {
   escapeHtml,
   fetchMarketActivity,
   formatCreditBalances,
+  resolveCreditBalanceNames,
   formatActivityEntry,
   formatMarketBoundary,
   getPreviousWeekendRange,

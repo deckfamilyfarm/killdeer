@@ -1,6 +1,6 @@
 const { consolidateRecords, dedupeRecords } = require('./market_feedback_report');
 
-const COLUMN_WIDTH = 10;
+const COLUMN_WIDTH = 8;
 const LOCATION_NAME_WIDTH = 12;
 
 function marketKey(name) {
@@ -85,7 +85,7 @@ function formatTable(headers, rows) {
         const offset = bottomAlign ? height - lines.length : 0;
         const cell = lines[lineIndex - offset] || '';
         const padding = ' '.repeat(widths[index] - Array.from(cell).length);
-        return index === 0 ? cell + padding : padding + cell;
+        return cell + padding;
       }).join('  ') + '\n'
     ).join('');
   };
@@ -94,7 +94,7 @@ function formatTable(headers, rows) {
 }
 
 function formatLocationSales(locationSummaries, marketDeposits) {
-  const headers = ['Location', 'Total Sales', 'CC Sales-\nFees/\nRefunds', 'Cash/Token Sales'];
+  const headers = ['Location', 'Total Sales', 'CC Sales\n-Fees/\nRefunds', 'Cash/\nToken\nSales'];
   const rows = Object.entries(locationSummaries).map(([name, s]) => [
     locationLabel(name, marketDeposits),
     money(s.locationTotal - s.cash_refunds - s.card_refunds),
@@ -105,7 +105,7 @@ function formatLocationSales(locationSummaries, marketDeposits) {
 }
 
 function formatCashTokenReconciliation(locationSummaries, marketDeposits) {
-  const headers = ['Location', 'Square\nCash/\nTokens', 'Rep Cash', 'Rep Tokens', 'Diff', 'Farm Cash', 'Farm Tokens', 'Over/short'];
+  const headers = ['Location', 'Square\nCash/\nTokens', 'Rep Cash', 'Rep\nTokens', 'Diff', 'Farm\nCash', 'Farm\nTokens', 'Over/\nshort'];
   const rows = Object.entries(locationSummaries).map(([name, s]) => {
     const actual = reconcileLocationDeposits(s, marketDeposits);
     return [
@@ -119,8 +119,11 @@ function formatCashTokenReconciliation(locationSummaries, marketDeposits) {
       '',
     ];
   });
-  let text = '\nCASH & TOKEN RECONCILIATION:\n' + formatTable(headers, rows);
-  text += '  Rep Cash/Tokens: submitted Yellow Notes totals. MISSING = no amount submitted; N/A = Diff unavailable.\n';
+  return '\nCASH & TOKEN RECONCILIATION:\n' + formatTable(headers, rows);
+}
+
+function formatReconciliationNotes(locationSummaries, marketDeposits) {
+  let text = '  Rep Cash/Tokens: submitted Yellow Notes totals. MISSING = no amount submitted; N/A = Diff unavailable.\n';
   for (const [name, summary] of Object.entries(locationSummaries)) {
     const entries = marketDeposits.filter(entry => entry.market === marketKey(summary.locationName));
     const dates = new Set([...summary.marketDates, ...entries.map(entry => entry.marketDateIso)]);
@@ -139,4 +142,4 @@ function formatCashTokenReconciliation(locationSummaries, marketDeposits) {
   return text;
 }
 
-module.exports = { marketKey, prepareMarketDeposits, reconcileLocationDeposits, shortLocationName, formatLocationSales, formatCashTokenReconciliation };
+module.exports = { marketKey, prepareMarketDeposits, reconcileLocationDeposits, shortLocationName, formatLocationSales, formatCashTokenReconciliation, formatReconciliationNotes };

@@ -9,6 +9,7 @@ const {
   escapeHtml,
   fetchMarketActivity,
   formatCreditBalances,
+  resolveCreditBalanceNames,
   formatActivityEntry,
   formatMarketBoundary,
   getPreviousWeekendRange,
@@ -105,8 +106,8 @@ test('full report subtracts till cash and alerts the owner when reporting fails'
           get: async url => {
             if (process.env.FAIL_FEEDBACK) throw new Error('Yellow Notes unavailable');
             if (url.includes('/values/')) return { data: { values: [
-              ['Market Date', 'Timestamp', "Which farmers' market did you work at?", 'Who worked at this market today?', 'Cash Deposit', 'Tokens'],
-              ['10/18/2026', '10/18/2026 17:00:00', 'PSU', 'rep', '$70', '$22'],
+              ['Market Date', 'Timestamp', "Which farmers' market did you work at?", 'Who worked at this market today?', 'Cash Deposit', 'Tokens', 'Any positive feedback?'],
+              ['10/18/2026', '10/18/2026 17:00:00', 'PSU', 'rep', '$70', '$22', 'Great eggs <fresh>'],
               ['10/11/2026', '10/11/2026 17:00:00', 'PSU', 'rep', '$999', '$999'],
             ] } };
             return { data: { properties: { title: 'Yellow Notes' }, sheets: [{ properties: { title: 'Form Responses 1', gridProperties: { rowCount: 3, columnCount: 6 } } }] } };
@@ -138,7 +139,7 @@ test('full report subtracts till cash and alerts the owner when reporting fails'
         },
       };
       if (request === '../src/utils/utilities.pricing') return {
-        db: { query: async () => [[]] },
+        db: { query: async sql => sql.includes('employees') ? [[{ id: 'E001', name: 'Able, Alice' }, { id: 'E002', name: 'Baker, Bob' }]] : [[]] },
         sendEmail: async options => {
           if (process.env.FAIL_EMAIL === 'all' ||
               (process.env.FAIL_EMAIL === 'report' && !options.subject.startsWith('FAILED:'))) {
@@ -166,7 +167,7 @@ test('full report subtracts till cash and alerts the owner when reporting fails'
     assert.equal(emails.length, 1);
     assert.equal(emails[0].to, 'jdeck88@gmail.com');
     assert.equal(emails[0].cc, undefined);
-    assert.equal(emails[0].subject, 'FAILED: Square Market Report (2026-10-17 to 2026-10-18)');
+    assert.equal(emails[0].subject, 'FAILED: Square Market & Yellow Notes Report (2026-10-17 to 2026-10-18)');
     assert.ok(emails[0].text.includes(message));
   };
 
@@ -175,22 +176,32 @@ test('full report subtracts till cash and alerts the owner when reporting fails'
   assert.match(success.stdout, /PRODUCT SALES:/);
   assert.doesNotMatch(success.stdout, /CATEGORY SALES:/);
   const headings = [...success.stdout.matchAll(/^([A-Z][A-Z &]+):$/gm)].map(match => match[1]);
-  assert.deepEqual(headings, ['PRODUCT SALES', 'FM TOKENS', 'DEDUCTIONS', 'EXPECTED DEPOSITS', 'LOCATION SALES', 'CASH & TOKEN RECONCILIATION', 'TRADES', 'AVAILABLE TRADE CREDIT', 'SUMMARY STATISTICS']);
+  assert.deepEqual(headings, ['PRODUCT SALES', 'DEDUCTIONS', 'EXPECTED DEPOSITS', 'LOCATION SALES', 'CASH & TOKEN RECONCILIATION', 'CASH FARMERS MARKET EXPENSES', 'TRADES', 'AVAILABLE TRADE CREDIT', 'SUMMARY STATISTICS', 'MARKETS WORKED', 'POSITIVE FEEDBACK', 'NOTES']);
   const deductions = success.stdout.split('DEDUCTIONS:\n')[1].split('\nEXPECTED DEPOSITS:')[0];
-  assert.match(deductions, /^  • FM Fees & Returns\s+-\$10\.30\s+\(Fees \$3\.30, Returns \$7\.00\)\n  • FM Supplies paid w\/ till cash\s+-\$5\.00\n$/);
-  assert.match(success.stdout, /FM TOKENS:\n  Note: Deduct tokens from Square Cash because Square counts tokens and cash together\./);
+  assert.match(deductions, /^  • FM Fees & Returns\s+-\$10\.30\s+\(Fees \$3\.30, Returns \$7\.00\)\n  • FM expenses paid w\/ till cash\s+-\$5\.00\s+\(see CASH FARMERS MARKET EXPENSES below\)\n$/);
+  assert.doesNotMatch(success.stdout, /FM TOKENS:|Deduct tokens from Square Cash/);
   assert.match(success.stdout, /Cash & Tokens\s+\$92\.00/);
   const locationSales = success.stdout.split('LOCATION SALES:\n')[1].split('\nCASH & TOKEN RECONCILIATION:')[0].trim().split('\n');
-  assert.equal(locationSales[0].trim(), 'CC Sales-');
-  assert.deepEqual(locationSales[1].trim().split(/\s{2,}/), ['Total', 'Fees/', 'Cash/Token']);
+  assert.deepEqual(locationSales[0].trim().split(/\s{2,}/), ['CC Sales', 'Cash/']);
+  assert.deepEqual(locationSales[1].trim().split(/\s{2,}/), ['Total', '-Fees/', 'Token']);
   assert.deepEqual(locationSales[2].trim().split(/\s{2,}/), ['Location', 'Sales', 'Refunds', 'Sales']);
   assert.deepEqual(locationSales[4].trim().split(/\s{2,}/), ['PSU (rep)', '$153.00', '$52.70', '$97.00']);
   assert.equal(locationSales.length, 5);
-  const reconciliation = success.stdout.split('CASH & TOKEN RECONCILIATION:\n')[1].split('\nTRADES:')[0].trim().split('\n');
+  const reconciliation = success.stdout.split('CASH & TOKEN RECONCILIATION:\n')[1].split('\nCASH FARMERS MARKET EXPENSES:')[0].trim().split('\n');
   assert.deepEqual(reconciliation[4].trim().split(/\s{2,}/), ['PSU (rep)', '$97.00', '$70.00', '$22.00', '-$5.00']);
   const trades = success.stdout.split('TRADES:\n')[1].split('\nAVAILABLE TRADE CREDIT:')[0];
   assert.match(trades, /^  • FM Supplies\n    • .*\$12\.00\n  • Subtotal FM Supplies\s+\$12\.00\n  • FM Rep Fees Per Diems & Trades\n    • .*\$20\.00\n  • Subtotal FM Rep Fees Per Diems & Trades\s+\$20\.00\n$/);
+  assert.match(success.stdout, /Able, Alice/);
+  assert.match(success.stdout, /Baker, Bob/);
+  assert.doesNotMatch(success.stdout, /Employee E002/);
   assert.match(success.stdout, /AVAILABLE TRADE CREDIT:[\s\S]*As of 2026-10-18[\s\S]*Total available credit\s+\$35\.00/);
+  assert.match(success.stdout, /CASH FARMERS MARKET EXPENSES:[\s\S]*Credit ledger — paid with till cash:[\s\S]*Parking  \$5\.00/);
+  assert.match(success.stdout, /YELLOW NOTES \/ MARKET FEEDBACK:[\s\S]*MARKETS WORKED:[\s\S]*POSITIVE FEEDBACK:\n  • PSU: Great eggs <fresh>/);
+  assert.doesNotMatch(success.stdout, /CASH DEPOSITS & TOKENS:|Total Cash Deposits|Total Tokens/);
+  const beforeNotes = success.stdout.split('\nNOTES:\n')[0];
+  assert.doesNotMatch(beforeNotes, /Rep Cash\/Tokens: submitted Yellow Notes totals/);
+  assert.match(success.stdout, /NOTES:[\s\S]*Rep Cash\/Tokens: submitted Yellow Notes totals/);
+  assert.ok(success.stdout.trimEnd().endsWith('Over/short = Farm Cash + Farm Tokens - Square Cash/Tokens.'));
   assert.equal(fs.existsSync(sent), false);
 
   const failure = run([], true);
@@ -216,4 +227,25 @@ test('full report subtracts till cash and alerts the owner when reporting fails'
   const dryRunFailure = run(['--dry-run'], true);
   assert.equal(dryRunFailure.status, 1);
   assert.equal(fs.existsSync(sent), false);
+});
+
+
+test('credit balances resolve verified Timesheets names without changing amounts', async () => {
+  let request;
+  const balances = await resolveCreditBalanceNames(weekend.creditBalances, {
+    query: async (sql, params) => {
+      request = { sql, params };
+      return [[{ id: 'E001', name: 'Able, Alice' }, { id: 'E002', name: 'Baker, Bob' }]];
+    },
+  });
+  assert.match(request.sql, /FROM `timesheets`\.`employees` WHERE id IN \(\?,\?\)/);
+  assert.deepEqual(request.params, ['E001', 'E002']);
+  assert.equal(balances.totalCents, 3500);
+  assert.deepEqual(balances.entries.map(entry => entry.balanceCents), [2500, 1000]);
+  const text = formatCreditBalances(balances);
+  assert.match(text, /Able, Alice/);
+  assert.match(text, /Baker, Bob/);
+  assert.doesNotMatch(text, /rep-a|Employee E002/);
+  await assert.rejects(resolveCreditBalanceNames(weekend.creditBalances, { query: async () => [[]] }), /Employee name missing/);
+  await assert.rejects(resolveCreditBalanceNames(weekend.creditBalances, {}, 'invalid;schema'), /Invalid credit employee database schema/);
 });
