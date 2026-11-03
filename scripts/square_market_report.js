@@ -198,11 +198,19 @@ async function resolveCategoryName(variationId) {
 
 // ─── Main Execution ────────────────────────────────────────────────────────────
 
+const failureContext = {
+  title: 'Square Market Report',
+  dryRun: process.argv.slice(2).includes('--dry-run'),
+};
+
 (async () => {
   let { startArg, endArg, locationIdArg, options } = parseCliArgs(process.argv.slice(2));
+  failureContext.title = options.title;
   if (!startArg || !endArg) {
     ({ start: startArg, end: endArg } = getPreviousWeekendRange());
   }
+  failureContext.startDate = startArg;
+  failureContext.endDate = endArg;
 
   const begin = formatMarketBoundary(startArg);
   const end = formatMarketBoundary(endArg, true);
@@ -219,8 +227,7 @@ async function resolveCategoryName(variationId) {
     : allLocations;
 
   if (locationIdArg && locations.length === 0) {
-    console.error(`❌ No matching active location for ID: ${locationIdArg}`);
-    process.exit(1);
+    throw new Error(`No matching active location for ID: ${locationIdArg}`);
   }
 
   const locationSummaries = {};
@@ -402,16 +409,34 @@ async function resolveCategoryName(variationId) {
     process.exit(0);
   }
 
-  try {
-    await utilities.sendEmail(emailOptions);
-    console.log("📧 Email sent.");
-    process.exit(0);
-  } catch (err) {
-    console.error("❌ Failed to send email:", err);
-    process.exit(1);
-  }
+  await utilities.sendEmail(emailOptions);
+  console.log("📧 Email sent.");
+  process.exit(0);
 
-})().catch((error) => {
+})().catch(async (error) => {
   console.error('Square Market Report failed:', error.message || error);
+  if (!failureContext.dryRun) {
+    const period = failureContext.startDate && failureContext.endDate
+      ? `${failureContext.startDate} to ${failureContext.endDate}`
+      : 'Unable to determine report dates';
+    try {
+      await utilities.sendEmail({
+        from: process.env.MAIL_USER || 'jdeck88@gmail.com',
+        to: 'jdeck88@gmail.com',
+        subject: `FAILED: ${failureContext.title} (${period})`,
+        text: [
+          `${failureContext.title} failed. Report delivery did not complete successfully.`,
+          `Report period: ${period}`,
+          `Failure time: ${new Date().toISOString()}`,
+          `Error: ${error.message || error}`,
+          'Script: scripts/square_market_report.js',
+          'Server log: scripts/output.log in the Killdeer deployment.',
+        ].join('\n\n'),
+      });
+      console.log('Failure notification sent to jdeck88@gmail.com.');
+    } catch (notificationError) {
+      console.error('Failed to send failure notification:', notificationError.message || notificationError);
+    }
+  }
   process.exit(1);
 });

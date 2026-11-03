@@ -88,7 +88,7 @@ test('requires dated, reconciled employee balances from the ledger', async () =>
   assert.match(formatCreditBalances({ asOfDate: '2026-10-18', totalCents: 0, entries: [] }), /No available credit balances/);
 });
 
-test('full report subtracts till cash and does not email when the ledger fails', t => {
+test('full report subtracts till cash and alerts the owner when reporting fails', t => {
   const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'square-market-ledger-test-'));
   t.after(() => fs.rmSync(directory, { recursive: true, force: true }));
   const preload = path.join(directory, 'preload.cjs');
@@ -139,19 +139,36 @@ test('full report subtracts till cash and does not email when the ledger fails',
       };
       if (request === '../src/utils/utilities.pricing') return {
         db: { query: async () => [[]] },
-        sendEmail: async () => fs.writeFileSync(process.env.REPORT_SENT_PATH, 'sent'),
+        sendEmail: async options => {
+          if (process.env.FAIL_EMAIL === 'all' ||
+              (process.env.FAIL_EMAIL === 'report' && !options.subject.startsWith('FAILED:'))) {
+            throw new Error('Mail service unavailable');
+          }
+          fs.appendFileSync(process.env.REPORT_SENT_PATH, JSON.stringify(options) + '\\n');
+        },
       };
       return original.call(this, request, parent, isMain);
     };
   `);
   const script = path.join(__dirname, 'square_market_report.js');
-  const run = (args, failLedger, failFeedback = false) => spawnSync(process.execPath, ['--require', preload, script, '2026-10-17', '2026-10-18', ...args], {
+  const run = (args, failLedger, failFeedback = false, failEmail = '') => {
+    fs.rmSync(sent, { force: true });
+    return spawnSync(process.execPath, ['--require', preload, script, '2026-10-17', '2026-10-18', ...args], {
     encoding: 'utf8',
     env: { ...process.env, NODE_ENV: 'square-market-ledger-test', CREDITS_REPORT_API_TOKEN: 'report-secret',
       SQUARE_ACCESS_TOKEN: 'square-secret', REPORT_SENT_PATH: sent, FAIL_LEDGER: failLedger ? '1' : '',
-      FAIL_FEEDBACK: failFeedback ? '1' : '', MARKET_FEEDBACK_GOOGLE_APPLICATION_CREDENTIALS: '', GOOGLE_APPLICATION_CREDENTIALS: '',
+      FAIL_FEEDBACK: failFeedback ? '1' : '', FAIL_EMAIL: failEmail, MARKET_FEEDBACK_GOOGLE_APPLICATION_CREDENTIALS: '', GOOGLE_APPLICATION_CREDENTIALS: '',
       MARKET_FEEDBACK_GOOGLE_SHEETS_API_KEY: 'sheet-secret' },
-  });
+    });
+  };
+  const assertAlert = message => {
+    const emails = fs.readFileSync(sent, 'utf8').trim().split('\n').map(line => JSON.parse(line));
+    assert.equal(emails.length, 1);
+    assert.equal(emails[0].to, 'jdeck88@gmail.com');
+    assert.equal(emails[0].cc, undefined);
+    assert.equal(emails[0].subject, 'FAILED: Square Market Report (2026-10-17 to 2026-10-18)');
+    assert.ok(emails[0].text.includes(message));
+  };
 
   const success = run(['--dry-run'], false);
   assert.equal(success.status, 0, success.stderr);
@@ -175,10 +192,24 @@ test('full report subtracts till cash and does not email when the ledger fails',
   const failure = run([], true);
   assert.equal(failure.status, 1);
   assert.match(failure.stderr, /Ledger unavailable/);
-  assert.equal(fs.existsSync(sent), false);
+  assertAlert('Ledger unavailable');
 
   const feedbackFailure = run([], false, true);
   assert.equal(feedbackFailure.status, 1);
   assert.match(feedbackFailure.stderr, /Yellow Notes unavailable/);
+  assertAlert('Yellow Notes unavailable');
+
+  const deliveryFailure = run([], false, false, 'report');
+  assert.equal(deliveryFailure.status, 1);
+  assertAlert('Mail service unavailable');
+
+  const notificationFailure = run([], true, false, 'all');
+  assert.equal(notificationFailure.status, 1);
+  assert.match(notificationFailure.stderr, /Ledger unavailable/);
+  assert.match(notificationFailure.stderr, /Failed to send failure notification: Mail service unavailable/);
+  assert.equal(fs.existsSync(sent), false);
+
+  const dryRunFailure = run(['--dry-run'], true);
+  assert.equal(dryRunFailure.status, 1);
   assert.equal(fs.existsSync(sent), false);
 });

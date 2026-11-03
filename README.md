@@ -51,3 +51,7 @@ closing date, including credits and adjustments from earlier dates. It uses the
 ledger feed's `creditBalances` field, not today's account balances. Deploy the
 matching credit-ledger feed update before running this version of the report;
 missing, incorrectly dated, or unreconciled balances stop email delivery.
+
+Report failures email `jdeck88@gmail.com` with the report dates and error. This
+includes report-delivery errors; if the mail service itself is unavailable, the
+notification failure is logged to `scripts/output.log`. Dry runs never send email.
