@@ -6,7 +6,7 @@ require('dotenv').config({ path: envPath });
 const axios = require('axios');
 const utilities = require('../src/utils/utilities.pricing');
 const { fetchMarketFeedback } = require('./market_feedback_report');
-const { prepareMarketDeposits, formatLocationSales } = require('./square_market_report_deposits');
+const { prepareMarketDeposits, formatLocationSales, formatCashTokenReconciliation } = require('./square_market_report_deposits');
 const {
   escapeHtml,
   fetchMarketActivity,
@@ -369,7 +369,8 @@ const failureContext = {
   summaryText += formatLine('Cash & Tokens', grand.cash - marketActivity.categories.fmTillCashSupplies.totalCents,
     '', 'Net of till cash expenses');
 
-  summaryText += formatLocationSales(locationSummaries, marketDeposits, marketActivity.categories.fmTillCashSupplies.entries);
+  summaryText += formatLocationSales(locationSummaries, marketDeposits);
+  summaryText += formatCashTokenReconciliation(locationSummaries, marketDeposits);
 
   summaryText += `\nTRADES:\n`;
   summaryText += formatLine('FM Supplies');

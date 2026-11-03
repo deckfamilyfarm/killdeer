@@ -36,15 +36,28 @@ a completed weekend before enabling the scheduled email. Both Square and ledger
 dates use the Pacific calendar day. Till-cash expenses reduce expected cash;
 product trades and trade credits used appear under TRADES.
 
-The location table reads actual cash deposits and tokens from the Yellow Notes
-sheet using the same `MARKET_FEEDBACK_*` / Google Sheets credentials as
-`scripts/market_feedback_report.js`. It matches market names regardless of case,
-spacing, or punctuation, and consolidates repeated submissions per market/date.
-Over/Short is actual cash plus tokens minus Square cash/token sales net of cash
-refunds and market-specific till-cash expenses. Positive means over; negative
-means short. Incomplete submissions show `MISSING` and no variance. Sheet-fetch
-failures stop the report before email delivery. Trade category totals appear as
-subtotals after their entries.
+LOCATION SALES and CASH & TOKEN RECONCILIATION use identical location labels.
+Market names fit within 12 characters including `...` when truncated. Booth rep
+names from Yellow Notes are limited to 8 characters each and shown in parentheses
+beside the market on one unwrapped line. Both tables use the same location-column
+width, sized to fit the longest label. Other columns are 10 characters wide, with
+long headings wrapped onto multiple lines and all headings bottom-aligned just
+above the column underlines.
+CASH & TOKEN RECONCILIATION lists Square Cash/Tokens (net of cash refunds),
+Rep Cash, Rep Tokens, and Diff = Rep Cash + Rep Tokens - Square Cash/Tokens.
+Farm Cash, Farm Tokens, and Over/short are blank for farm counts to be entered;
+Over/short = Farm Cash + Farm Tokens - Square Cash/Tokens. These comparisons
+use Square cash/token sales directly, without deducting till-cash expenses.
+Till-cash expenses still reduce the EXPECTED DEPOSITS total above.
+
+Rep names and deposits come from the Yellow Notes sheet using the same
+`MARKET_FEEDBACK_*` / Google Sheets credentials as `scripts/market_feedback_report.js`.
+Markets match regardless of case, spacing, or punctuation; repeated submissions
+are consolidated per market/date. Submitted amounts remain visible even when
+another Square sales date has no submission. Amounts with no submitted value
+show `MISSING`. Diff always compares the displayed amounts when both rep values
+are available; missing dates are flagged separately. Sheet-fetch failures stop
+report delivery. Trade category totals appear as subtotals after their entries.
 
 `AVAILABLE TRADE CREDIT` lists positive employee balances as of the report's
 closing date, including credits and adjustments from earlier dates. It uses the

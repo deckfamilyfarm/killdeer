@@ -175,15 +175,19 @@ test('full report subtracts till cash and alerts the owner when reporting fails'
   assert.match(success.stdout, /PRODUCT SALES:/);
   assert.doesNotMatch(success.stdout, /CATEGORY SALES:/);
   const headings = [...success.stdout.matchAll(/^([A-Z][A-Z &]+):$/gm)].map(match => match[1]);
-  assert.deepEqual(headings, ['PRODUCT SALES', 'FM TOKENS', 'DEDUCTIONS', 'EXPECTED DEPOSITS', 'LOCATION SALES', 'TRADES', 'AVAILABLE TRADE CREDIT', 'SUMMARY STATISTICS']);
+  assert.deepEqual(headings, ['PRODUCT SALES', 'FM TOKENS', 'DEDUCTIONS', 'EXPECTED DEPOSITS', 'LOCATION SALES', 'CASH & TOKEN RECONCILIATION', 'TRADES', 'AVAILABLE TRADE CREDIT', 'SUMMARY STATISTICS']);
   const deductions = success.stdout.split('DEDUCTIONS:\n')[1].split('\nEXPECTED DEPOSITS:')[0];
   assert.match(deductions, /^  • FM Fees & Returns\s+-\$10\.30\s+\(Fees \$3\.30, Returns \$7\.00\)\n  • FM Supplies paid w\/ till cash\s+-\$5\.00\n$/);
   assert.match(success.stdout, /FM TOKENS:\n  Note: Deduct tokens from Square Cash because Square counts tokens and cash together\./);
   assert.match(success.stdout, /Cash & Tokens\s+\$92\.00/);
-  const locationSales = success.stdout.split('LOCATION SALES:\n')[1].split('\nTRADES:')[0].trim().split('\n');
-  assert.deepEqual(locationSales[0].trim().split(/\s{2,}/),
-    ['Location', 'Total Sales', 'CC Sales-Fees/Refunds', 'Cash/Token Sales', 'YN Actual Cash', 'YN Actual Tokens', 'Over/Short']);
-  assert.deepEqual(locationSales[2].trim().split(/\s{2,}/), ['PSU', '$153.00', '$52.70', '$97.00', '$70.00', '$22.00', '$0.00']);
+  const locationSales = success.stdout.split('LOCATION SALES:\n')[1].split('\nCASH & TOKEN RECONCILIATION:')[0].trim().split('\n');
+  assert.equal(locationSales[0].trim(), 'CC Sales-');
+  assert.deepEqual(locationSales[1].trim().split(/\s{2,}/), ['Total', 'Fees/', 'Cash/Token']);
+  assert.deepEqual(locationSales[2].trim().split(/\s{2,}/), ['Location', 'Sales', 'Refunds', 'Sales']);
+  assert.deepEqual(locationSales[4].trim().split(/\s{2,}/), ['PSU (rep)', '$153.00', '$52.70', '$97.00']);
+  assert.equal(locationSales.length, 5);
+  const reconciliation = success.stdout.split('CASH & TOKEN RECONCILIATION:\n')[1].split('\nTRADES:')[0].trim().split('\n');
+  assert.deepEqual(reconciliation[4].trim().split(/\s{2,}/), ['PSU (rep)', '$97.00', '$70.00', '$22.00', '-$5.00']);
   const trades = success.stdout.split('TRADES:\n')[1].split('\nAVAILABLE TRADE CREDIT:')[0];
   assert.match(trades, /^  • FM Supplies\n    • .*\$12\.00\n  • Subtotal FM Supplies\s+\$12\.00\n  • FM Rep Fees Per Diems & Trades\n    • .*\$20\.00\n  • Subtotal FM Rep Fees Per Diems & Trades\s+\$20\.00\n$/);
   assert.match(success.stdout, /AVAILABLE TRADE CREDIT:[\s\S]*As of 2026-10-18[\s\S]*Total available credit\s+\$35\.00/);
