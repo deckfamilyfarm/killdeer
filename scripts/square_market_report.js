@@ -7,7 +7,7 @@ const axios = require('axios');
 const utilities = require('../src/utils/utilities.pricing');
 const { fetchMarketFeedback, dedupeRecords, consolidateRecords, buildReportParts } = require('./market_feedback_report');
 const { formatReportEmail } = require('./square_market_report_email');
-const { updateReconciliationSheet } = require('./square_market_report_sheet');
+const { updateReconciliationSheet, WORKBOOK_ID } = require('./square_market_report_sheet');
 const { formatCashFarmersExpenses } = require('./square_market_report_feedback');
 const { prepareMarketDeposits, formatLocationSales, formatCashTokenReconciliation, formatReconciliationNotes } = require('./square_market_report_deposits');
 const {
@@ -433,11 +433,20 @@ const failureContext = {
   }
 
   const subject = options.subject || `${options.title}: ${startArg} to ${endArg}`;
+  const reportLinks = [{
+    label: 'Cash Reconciliation Report',
+    url: `https://docs.google.com/spreadsheets/d/${process.env.SQUARE_REPORT_SPREADSHEET_ID || WORKBOOK_ID}/edit`,
+  }];
+  const createdTabUrl = sheetStatus.startsWith('CREATED ')
+    ? sheetStatus.match(/https:\/\/docs\.google\.com\/spreadsheets\/d\/[^\s]+/)?.[0] : null;
+  if (createdTabUrl) reportLinks.push({
+    label: `Weekend reconciliation sheet (${startArg} to ${endArg})`, url: createdTabUrl,
+  });
   const emailOptions = {
     from: options.from,
     to: options.to,
     subject,
-    ...formatReportEmail(summaryText)
+    ...formatReportEmail(summaryText, reportLinks)
   };
   if (options.cc) emailOptions.cc = options.cc;
 

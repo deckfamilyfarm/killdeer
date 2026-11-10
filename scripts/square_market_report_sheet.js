@@ -123,4 +123,4 @@ async function updateReconciliationSheet({ start, end, locations, summaries, dep
   return `CREATED ${title}: https://docs.google.com/spreadsheets/d/${id}/edit#gid=${sheetId}`;
 }
 
-module.exports = { updateReconciliationSheet, buildRows, selectLocations, nextTitle, HEADERS };
+module.exports = { updateReconciliationSheet, buildRows, selectLocations, nextTitle, HEADERS, WORKBOOK_ID };

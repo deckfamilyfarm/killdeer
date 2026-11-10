@@ -2,6 +2,20 @@ const assert = require('node:assert/strict');
 const { test } = require('node:test');
 const { formatReportEmail } = require('./square_market_report_email');
 
+test('workbook and exact weekend tab links precede the report in HTML and plain text', () => {
+  const links = [
+    { label: 'Cash Reconciliation Report', url: 'https://docs.google.com/spreadsheets/d/example/edit' },
+    { label: 'Weekend reconciliation sheet', url: 'https://docs.google.com/spreadsheets/d/example/edit#gid=123' },
+  ];
+  const body = formatReportEmail('REPORT CONTENT', links);
+  assert.ok(body.text.startsWith('Cash Reconciliation Report: ' + links[0].url));
+  assert.ok(body.text.includes(links[1].url + '\n\nREPORT CONTENT'));
+  for (const link of links) {
+    assert.ok(body.html.includes(`<a href="${link.url}">${link.label}</a>`));
+    assert.ok(body.html.indexOf(link.url) < body.html.indexOf('REPORT CONTENT'));
+  }
+});
+
 test('wrapped bullets align continuation lines after the bullet in both email formats', () => {
   for (const prefix of ['  • ', '    • ']) {
     const description = 'Montavilla: ' + 'Customer feedback about eggs and the market. '.repeat(8);
