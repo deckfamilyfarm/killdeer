@@ -97,7 +97,7 @@ function resolveFromProjectRoot(filePath) {
 		: path.resolve(projectRoot, filePath);
 }
 
-async function getServiceAccountAccessToken(credentialsPath) {
+async function getServiceAccountAccessToken(credentialsPath, writable = false) {
 	const resolvedPath = resolveFromProjectRoot(credentialsPath);
 	const credentials = JSON.parse(fs.readFileSync(resolvedPath, 'utf8'));
 	const issuedAt = Math.floor(Date.now() / 1000);
@@ -106,7 +106,7 @@ async function getServiceAccountAccessToken(credentialsPath) {
 	const header = { alg: 'RS256', typ: 'JWT' };
 	const claimSet = {
 		iss: credentials.client_email,
-		scope: 'https://www.googleapis.com/auth/spreadsheets.readonly',
+		scope: `https://www.googleapis.com/auth/spreadsheets${writable ? '' : '.readonly'}`,
 		aud: credentials.token_uri || 'https://oauth2.googleapis.com/token',
 		iat: issuedAt,
 		exp: expiresAt,
@@ -132,14 +132,14 @@ async function getServiceAccountAccessToken(credentialsPath) {
 	return response.data.access_token;
 }
 
-async function buildGoogleSheetsClient() {
+async function buildGoogleSheetsClient(writable = false) {
 	const credentialsPath = process.env.MARKET_FEEDBACK_GOOGLE_APPLICATION_CREDENTIALS
 		|| process.env.GOOGLE_APPLICATION_CREDENTIALS;
 	const apiKey = process.env.MARKET_FEEDBACK_GOOGLE_SHEETS_API_KEY
 		|| process.env.GOOGLE_SHEETS_API_KEY;
 
 	if (credentialsPath) {
-		const accessToken = await getServiceAccountAccessToken(credentialsPath);
+		const accessToken = await getServiceAccountAccessToken(credentialsPath, writable);
 		return axios.create({
 			baseURL: SHEETS_BASE_URL,
 			headers: { Authorization: `Bearer ${accessToken}` },
@@ -147,7 +147,7 @@ async function buildGoogleSheetsClient() {
 		});
 	}
 
-	if (apiKey) {
+	if (apiKey && !writable) {
 		const client = axios.create({ baseURL: SHEETS_BASE_URL, timeout: 30000 });
 		client.interceptors.request.use(config => {
 			config.params = { ...(config.params || {}), key: apiKey };
@@ -784,4 +784,4 @@ if (require.main === module) {
 	main().catch(handleReportFailure);
 }
 
-module.exports = { buildReportParts, buildColumnMap, buildRecord, consolidateRecords, dedupeRecords, fetchMarketFeedback, sendReportErrorAlert };
+module.exports = { buildGoogleSheetsClient, buildReportParts, buildColumnMap, buildRecord, consolidateRecords, dedupeRecords, fetchMarketFeedback, sendReportErrorAlert };

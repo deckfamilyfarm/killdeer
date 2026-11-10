@@ -7,6 +7,7 @@ const axios = require('axios');
 const utilities = require('../src/utils/utilities.pricing');
 const { fetchMarketFeedback, dedupeRecords, consolidateRecords, buildReportParts } = require('./market_feedback_report');
 const { formatReportEmail } = require('./square_market_report_email');
+const { updateReconciliationSheet } = require('./square_market_report_sheet');
 const { formatCashFarmersExpenses } = require('./square_market_report_feedback');
 const { prepareMarketDeposits, formatLocationSales, formatCashTokenReconciliation, formatReconciliationNotes } = require('./square_market_report_deposits');
 const {
@@ -38,16 +39,21 @@ function parseCliArgs(argv) {
   const positional = [];
   const options = {
     from: 'jdeck88@gmail.com',
-    to: 'info@deckfamilyfarm.com',
+    to: 'deckfamilyfarm@gmail.com',
     cc: 'jdeck88@gmail.com',
     title: 'Square Market & Yellow Notes Report',
     subject: null,
     deductionPrefix: 'FM',
     dryRun: false,
+    sheetOnly: false,
   };
 
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
+    if (arg === '--sheet-only') {
+      options.sheetOnly = true;
+      continue;
+    }
     if (arg === '--dry-run') {
       options.dryRun = true;
       continue;
@@ -134,10 +140,8 @@ async function fetchLocationIds() {
     headers: { Authorization: `Bearer ${ACCESS_TOKEN}` }
   });
 
-  // filter out "ON FARM SALES"
   return res.data.locations
-    .filter(loc => loc.status === 'ACTIVE')
-    .map(loc => ({ id: loc.id, name: loc.name }));
+    .map(loc => ({ id: loc.id, name: loc.name, status: loc.status }));
 }
 
 async function fetchOrders(locationId, begin, end, cursor = null, collected = []) {
@@ -229,7 +233,7 @@ const failureContext = {
 
   const locations = locationIdArg
     ? allLocations.filter(loc => loc.id === locationIdArg)
-    : allLocations;
+    : allLocations.filter(loc => loc.status === 'ACTIVE');
 
   if (locationIdArg && locations.length === 0) {
     throw new Error(`No matching active location for ID: ${locationIdArg}`);
@@ -412,6 +416,21 @@ const failureContext = {
     summaryText += '  Yellow Notes expenses are reported separately; EXPECTED DEPOSITS deducts credit-ledger till-cash expenses only.\n';
   }
   summaryText += formatReconciliationNotes(locationSummaries, marketDeposits);
+
+  let sheetStatus;
+  try {
+    sheetStatus = await updateReconciliationSheet({
+      start: startArg, end: endArg, locations: locationIdArg ? locations : allLocations,
+      summaries: locationSummaries, deposits: marketDeposits, dryRun: options.dryRun,
+    });
+  } catch (error) {
+    sheetStatus = `FAILED: ${error.response?.data?.error?.message || error.message}`;
+  }
+  console.log(`Google Sheet: ${sheetStatus}`);
+  summaryText += `\nGoogle Sheet: ${sheetStatus}\n`;
+  if (options.sheetOnly) {
+    process.exit(sheetStatus.startsWith('FAILED:') ? 1 : 0);
+  }
 
   const subject = options.subject || `${options.title}: ${startArg} to ${endArg}`;
   const emailOptions = {

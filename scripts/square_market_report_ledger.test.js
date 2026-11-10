@@ -201,7 +201,8 @@ test('full report subtracts till cash and alerts the owner when reporting fails'
   const beforeNotes = success.stdout.split('\nNOTES:\n')[0];
   assert.doesNotMatch(beforeNotes, /Rep Cash\/Tokens: submitted Yellow Notes totals/);
   assert.match(success.stdout, /NOTES:[\s\S]*Rep Cash\/Tokens: submitted Yellow Notes totals/);
-  assert.ok(success.stdout.trimEnd().endsWith('Over/short = Farm Cash + Farm Tokens - Square Cash/Tokens.'));
+  assert.match(success.stdout, /Over\/short = Farm Cash \+ Farm Tokens - Square Cash\/Tokens\./);
+  assert.match(success.stdout, /Google Sheet: DRY RUN: would create a new square-auto-10\/17-10\/18/);
   assert.equal(fs.existsSync(sent), false);
 
   const failure = run([], true);

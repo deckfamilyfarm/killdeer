@@ -88,3 +88,24 @@ historical balances still come exclusively from the credit-ledger feed.
 Report bullets use hanging indents in HTML and plain-text email so wrapped lines
 align with the text after the bullet. The cash-expense deduction points to its
 details in CASH FARMERS MARKET EXPENSES.
+
+Each Square report run creates a new `square-auto-M/D-M/D` tab immediately after
+Instructions in the Cash Reconciliation workbook. The Instructions tab is created
+once at the front with filling instructions, calculations, and report sources;
+its existing contents are preserved. Existing report tabs are never overwritten: repeated
+runs use `.1`, `.2`, etc., choosing the first unused suffix. Hillsdale, Hollywood,
+King, LCFM, Montavilla, PSU, Springfield, and Woodstock always appear. Other
+Square locations appear only with Square activity or Yellow Notes submissions.
+Rep names, cash, and tokens come from Yellow Notes; Square cash/token amounts
+are net of cash refunds. Actual Cash and Actual Token remain blank and highlighted.
+Actual Cash/Token sums those inputs; Difference subtracts Square Cash/Token.
+After three blank rows, bold outlined totals sum columns C:I. Sheet creation
+status appears in the run output and report email. A sheet failure does not
+prevent report email delivery.
+
+The existing Google service account must have Editor access to workbook
+`14o6GY4MERLpdIHdrsZW2XAvRkT_9Ydv-csyz1QEYvrE`. Set
+`SQUARE_REPORT_SPREADSHEET_ID` to override the destination. API-key-only access
+cannot write. `--dry-run` never changes Sheets or sends email. To update just the
+sheet without sending the report, use:
+`node scripts/square_market_report.js 2026-11-07 2026-11-08 --sheet-only`.
