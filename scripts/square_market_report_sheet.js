@@ -55,7 +55,7 @@ function instructionRequests(sheetId) {
   ];
 }
 
-function buildRows(locations, summaries, deposits) {
+function buildRows(locations, summaries, deposits, notes = []) {
   locations = selectLocations(locations, summaries, deposits);
   const data = [HEADERS, ...locations.map((location, i) => {
     const summary = summaries[location.name] || { locationName: location.name, cash: 0, cash_refunds: 0 };
@@ -67,7 +67,8 @@ function buildRows(locations, summaries, deposits) {
       reported.actualCash === null ? 'MISSING' : reported.actualCash / 100,
       reported.actualTokens === null ? 'MISSING' : reported.actualTokens / 100,
       null, null, { formulaValue: `=IF(COUNT(F${row}:G${row})=0,"",SUM(F${row}:G${row}))` },
-      { formulaValue: `=IF(H${row}="","",H${row}-C${row})` }, null];
+      { formulaValue: `=IF(H${row}="","",H${row}-C${row})` }, notes.filter(note => note.locations.some(name => marketKey(name) === marketKey(location.name)))
+        .map(note => note.text).join('\n') || null];
   })];
   const end = locations.length + 1;
   data.push(...Array.from({ length: 3 }, () => Array(10).fill(null)));
@@ -78,7 +79,7 @@ function buildRows(locations, summaries, deposits) {
   }) }));
 }
 
-async function updateReconciliationSheet({ start, end, locations, summaries, deposits, dryRun = false, client }) {
+async function updateReconciliationSheet({ start, end, locations, summaries, deposits, notes = [], dryRun = false, client }) {
   const baseTitle = `square-auto-${DateTime.fromISO(start).toFormat('M/d')}-${DateTime.fromISO(end).toFormat('M/d')}`;
   if (dryRun) return `DRY RUN: would create a new ${baseTitle} tab (using a numbered suffix if needed); no spreadsheet changes made.`;
   client ||= await buildGoogleSheetsClient(true);
@@ -87,7 +88,7 @@ async function updateReconciliationSheet({ start, end, locations, summaries, dep
   const title = nextTitle(baseTitle, metadata.sheets || []);
   const period = `${start} to ${end}`;
   const sheetId = Math.floor(Math.random() * 2000000000);
-  const rows = buildRows(locations, summaries, deposits);
+  const rows = buildRows(locations, summaries, deposits, notes);
   rows[0].values[0].note = period;
   const height = Math.max(rows.length, 2);
   const range = (r0, r1, c0, c1) => ({ sheetId, startRowIndex: r0, endRowIndex: r1, startColumnIndex: c0, endColumnIndex: c1 });
@@ -105,6 +106,9 @@ async function updateReconciliationSheet({ start, end, locations, summaries, dep
     { updateDimensionProperties: { range: { sheetId, dimension: 'ROWS', startIndex: 0, endIndex: 1 }, properties: { pixelSize: 55 }, fields: 'pixelSize' } },
   );
   const totalRange = range(rows.length - 1, rows.length, 2, 9);
+  if (notes.length) requests.push({ autoResizeDimensions: {
+    dimensions: { sheetId, dimension: 'ROWS', startIndex: 1, endIndex: rows.length - 4 },
+  } });
   const border = { style: 'SOLID', color: { red: 0, green: 0, blue: 0 } };
   requests.push(
     { repeatCell: { range: range(rows.length - 1, rows.length, 0, 9), cell: { userEnteredFormat: { textFormat: { bold: true } } }, fields: 'userEnteredFormat.textFormat.bold' } },

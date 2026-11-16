@@ -176,7 +176,8 @@ test('full report subtracts till cash and alerts the owner when reporting fails'
   assert.match(success.stdout, /PRODUCT SALES:/);
   assert.doesNotMatch(success.stdout, /CATEGORY SALES:/);
   const headings = [...success.stdout.matchAll(/^([A-Z][A-Z &]+):$/gm)].map(match => match[1]);
-  assert.deepEqual(headings, ['PRODUCT SALES', 'DEDUCTIONS', 'EXPECTED DEPOSITS', 'LOCATION SALES', 'CASH & TOKEN RECONCILIATION', 'CASH FARMERS MARKET EXPENSES', 'TRADES', 'AVAILABLE TRADE CREDIT', 'SUMMARY STATISTICS', 'MARKETS WORKED', 'POSITIVE FEEDBACK', 'NOTES']);
+  assert.deepEqual(headings, ['LOCATION & SUBMISSION CHECKS', 'PRODUCT SALES', 'DEDUCTIONS', 'EXPECTED DEPOSITS', 'LOCATION SALES', 'CASH & TOKEN RECONCILIATION', 'CASH FARMERS MARKET EXPENSES', 'TRADES', 'AVAILABLE TRADE CREDIT', 'SUMMARY STATISTICS', 'MARKETS WORKED', 'POSITIVE FEEDBACK', 'NOTES']);
+  assert.match(success.stdout, /NEEDS REVIEW.*PSU/);
   const deductions = success.stdout.split('DEDUCTIONS:\n')[1].split('\nEXPECTED DEPOSITS:')[0];
   assert.match(deductions, /^  • FM Fees & Returns\s+-\$10\.30\s+\(Fees \$3\.30, Returns \$7\.00\)\n  • FM expenses paid w\/ till cash\s+-\$5\.00\s+\(see CASH FARMERS MARKET EXPENSES below\)\n$/);
   assert.doesNotMatch(success.stdout, /FM TOKENS:|Deduct tokens from Square Cash/);

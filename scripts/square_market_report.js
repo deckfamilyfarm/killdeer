@@ -33,7 +33,8 @@ const allCategorySales = {};
 const allCategoryCOGS = {};
 const gpprByCategory = {};
 
-const { DateTime } = require('luxon');  // At top of file, if not already
+const { DateTime } = require('luxon');
+const { loadReportOrders, resolveMarketAssignments, lateFeedbackNotes, formatAssignmentNotes } = require('./square_market_report_locations');
 
 function parseCliArgs(argv) {
   const positional = [];
@@ -239,84 +240,56 @@ const failureContext = {
     throw new Error(`No matching active location for ID: ${locationIdArg}`);
   }
 
+  // Read every source location before filtering: a destination can receive sales
+  // originally recorded elsewhere, including at an inactive source location.
+  const records = await loadReportOrders(allLocations,
+    id => fetchOrders(id, begin, end),
+    async id => (await axios.get(`${BASE_PAYMENTS_URL}/${id}`, {
+      headers: { Authorization: `Bearer ${ACCESS_TOKEN}` }, timeout: 30000,
+    })).data.payment);
+  const { assignments, notes } = resolveMarketAssignments(records);
+  const reportNotes = [...notes, ...lateFeedbackNotes(feedbackRecords)].filter(note =>
+    !locationIdArg || note.locations.includes(locations[0].name));
   const locationSummaries = {};
 
-  for (const loc of locations) {
-    const orders = await fetchOrders(loc.id, begin, end);
-    const summary = {
-      locationName: loc.name,
-      orderCount: 0,
-      marketDates: new Set(),
-      locationTotal: 0,
-      discounts: 0,
-      tips: 0,
-      serviceCharges: 0,
-      cash: 0,
-      card: 0,
-      fees: 0,
-      card_refunds: 0,
-      cash_refunds: 0,
+  for (const { order, destination: loc, date, tenders } of assignments) {
+    if (locationIdArg && loc.id !== locationIdArg) continue;
+    const summary = locationSummaries[loc.name] ||= {
+      locationName: loc.name, orderCount: 0, marketDates: new Set(),
+      locationTotal: 0, discounts: 0, tips: 0, serviceCharges: 0,
+      cash: 0, card: 0, fees: 0, card_refunds: 0, cash_refunds: 0,
     };
+    summary.marketDates.add(date);
+    summary.orderCount++;
+    summary.locationTotal += order.total_money?.amount || 0;
+    summary.discounts += order.total_discount_money?.amount || 0;
+    summary.tips += order.total_tip_money?.amount || 0;
+    summary.serviceCharges += order.total_service_charge_money?.amount || 0;
 
-    for (const order of orders) {
-      const marketDate = DateTime.fromISO(order.created_at, { zone: 'America/Los_Angeles' });
-      if (!marketDate.isValid) throw new Error(`Invalid order date for ${loc.name}`);
-      summary.marketDates.add(marketDate.toISODate());
-      summary.orderCount++;
-      summary.locationTotal += order.total_money?.amount || 0;
-      summary.discounts += order.total_discount_money?.amount || 0;
-      summary.tips += order.total_tip_money?.amount || 0;
-      summary.serviceCharges += order.total_service_charge_money?.amount || 0;
-
-      if (order.line_items) {
-        for (const item of order.line_items) {
-          const amount = item.total_money?.amount || 0;
-
-          if (item.item_type !== 'ITEM') continue;
-
-          const variationId = item.catalog_object_id;
-          const category = await resolveCategoryName(variationId);
-          allCategorySales[category] = (allCategorySales[category] || 0) + amount;
-
-          const gppr = gpprByCategory[category] ?? 0.5;
-          const cogs = amount * (1 - gppr);
-          allCategoryCOGS[category] = (allCategoryCOGS[category] || 0) + cogs;
-        }
-      }
-
-      if (order.tenders) {
-        for (const tender of order.tenders) {
-          const amt = tender.amount_money?.amount || 0;
-          const tenderFee = tender.processing_fee_money?.amount || 0;
-          summary.fees += tenderFee;
-          if (tender.type === 'CASH') summary.cash += amt;
-          if (tender.type === 'CARD') summary.card += amt;
-          const paymentId = tender.payment_id || (tender.type === 'CARD' ? tender.id : null);
-          if (paymentId) {
-            try {
-              const payment = await axios.get(`${BASE_PAYMENTS_URL}/${paymentId}`, {
-                headers: { Authorization: `Bearer ${ACCESS_TOKEN}` }
-              }).then(res => res.data.payment);
-              if (Array.isArray(payment.processing_fee)) {
-                const paymentFees = payment.processing_fee.reduce((sum, fee) => sum + (fee.amount_money?.amount || 0), 0);
-                summary.fees += paymentFees - tenderFee;
-              }
-              if (tender.type === 'CASH') {
-                summary.cash_refunds += payment.refunded_money?.amount || 0;
-              }
-              if (tender.type === 'CARD') {
-                summary.card_refunds += payment.refunded_money?.amount || 0;
-              }
-            } catch (err) {
-              console.warn(`⚠️ Payment fetch failed: ${paymentId}`);
-            }
-          }
-        }
-      }
+    for (const item of order.line_items || []) {
+      if (item.item_type !== 'ITEM') continue;
+      const amount = item.total_money?.amount || 0;
+      const category = await resolveCategoryName(item.catalog_object_id);
+      allCategorySales[category] = (allCategorySales[category] || 0) + amount;
+      const gppr = gpprByCategory[category] ?? 0.5;
+      allCategoryCOGS[category] = (allCategoryCOGS[category] || 0) + amount * (1 - gppr);
     }
 
-    const net_deposit = summary.card - summary.fees - summary.card_refunds;
-    if (orders.length > 0) locationSummaries[loc.name] = { ...summary, net_deposit };
+    for (const { tender, payment } of tenders) {
+      const amt = tender.amount_money?.amount || 0;
+      summary.fees += Array.isArray(payment?.processing_fee)
+        ? payment.processing_fee.reduce((sum, fee) => sum + (fee.amount_money?.amount || 0), 0)
+        : tender.processing_fee_money?.amount || 0;
+      if (tender.type === 'CASH') {
+        summary.cash += amt;
+        summary.cash_refunds += payment?.refunded_money?.amount || 0;
+      }
+      if (tender.type === 'CARD') {
+        summary.card += amt;
+        summary.card_refunds += payment?.refunded_money?.amount || 0;
+      }
+    }
+    summary.net_deposit = summary.card - summary.fees - summary.card_refunds;
   }
 
   // ── Summary Output ──
@@ -346,6 +319,7 @@ const failureContext = {
   // Build summaryText
   let summaryText = `${options.title.toUpperCase()}: ${startArg} to ${endArg}\n`;
   summaryText += `Generated on ${pacificTime}\n`;
+  summaryText += formatAssignmentNotes(reportNotes);
 
   summaryText += `\nPRODUCT SALES:\n`;
   let totalRevenue = 0;
@@ -421,7 +395,7 @@ const failureContext = {
   try {
     sheetStatus = await updateReconciliationSheet({
       start: startArg, end: endArg, locations: locationIdArg ? locations : allLocations,
-      summaries: locationSummaries, deposits: marketDeposits, dryRun: options.dryRun,
+      summaries: locationSummaries, deposits: marketDeposits, notes: reportNotes, dryRun: options.dryRun,
     });
   } catch (error) {
     sheetStatus = `FAILED: ${error.response?.data?.error?.message || error.message}`;
@@ -432,7 +406,8 @@ const failureContext = {
     process.exit(sheetStatus.startsWith('FAILED:') ? 1 : 0);
   }
 
-  const subject = options.subject || `${options.title}: ${startArg} to ${endArg}`;
+  const subject = (reportNotes.some(note => note.kind === 'review') ? '[NEEDS REVIEW] ' : '')
+    + (options.subject || `${options.title}: ${startArg} to ${endArg}`);
   const reportLinks = [{
     label: 'Cash Reconciliation Report',
     url: `https://docs.google.com/spreadsheets/d/${process.env.SQUARE_REPORT_SPREADSHEET_ID || WORKBOOK_ID}/edit`,

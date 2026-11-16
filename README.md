@@ -109,3 +109,27 @@ The existing Google service account must have Editor access to workbook
 cannot write. `--dry-run` never changes Sheets or sends email. To update just the
 sheet without sending the report, use:
 `node scripts/square_market_report.js 2026-11-07 2026-11-08 --sheet-only`.
+
+The report checks market weekdays and automatically corrects a clear midday
+location switch. A device's earlier wrong-weekday orders move to the one valid
+market it subsequently uses on that Pacific day, provided its payment evidence
+is complete and it does not switch back or visit conflicting locations. Saturday
+markets are PSU, St. John's, Hollywood, and LCFM; Sunday markets are Montavilla,
+King, Hillsdale, and Springfield. Other locations have no assumed schedule.
+Device identifiers, not device names, establish continuity. This does not change
+Square records or configure recurring device assignments.
+
+Split-payment orders move once, with all their sales, fees, and refunds. All
+source locations are read before an optional location filter is applied.
+Ambiguous assignments retain their original location and receive NEEDS REVIEW
+notes in both email and the new reconciliation tab; the email subject is also
+flagged. Failed payment fetches explicitly warn that fees/refunds may be
+incomplete. Offline payment timestamps are used for switch evidence; mismatched
+order/payment dates require review rather than an automatic move.
+
+Yellow Notes is refreshed on every run and selected by market date, including
+later submissions. Late submission timestamps appear in both outputs. Rerun a
+weekend to incorporate late forms; this does not schedule additional emails.
+Use `--subject "CORRECTED: Square Market & Yellow Notes Report: YYYY-MM-DD to YYYY-MM-DD"`
+for an explicitly labeled replacement report. Prior spreadsheet tabs and farm
+counts are preserved, and new actual-count cells remain blank.
