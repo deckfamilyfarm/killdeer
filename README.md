@@ -126,6 +126,8 @@ notes in both email and the new reconciliation tab; the email subject is also
 flagged. Failed payment fetches explicitly warn that fees/refunds may be
 incomplete. Offline payment timestamps are used for switch evidence; mismatched
 order/payment dates require review rather than an automatic move.
+Separate return-only orders do not require payment evidence or weekday review;
+refunds continue to be counted from the original payments, without duplication.
 
 Yellow Notes is refreshed on every run and selected by market date, including
 later submissions. Late submission timestamps appear in both outputs. Rerun a

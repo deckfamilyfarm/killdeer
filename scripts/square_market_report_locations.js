@@ -57,7 +57,14 @@ function resolveMarketAssignments(records) {
     if (!time.isValid) throw new Error(`Invalid order date for ${record.location.name}`);
     const date = time.toISODate();
     const expected = MARKET_DAYS[marketKey(record.location.name)];
-    const entry = { ...record, destination: record.location, date, wrongDay: !!expected && expected !== time.weekday,
+    // Square emits separate return-only orders without tenders or sale totals.
+    // Refund amounts are already counted from the original payments. The date
+    // of a return is not evidence of a market's operating day.
+    const returnTotal = record.order.return_amounts?.total_money?.amount;
+    const returnOnly = !record.tenders.length && !record.order.total_money &&
+      record.order.returns?.length > 0 && record.order.returns.every(item => item.source_order_id) &&
+      returnTotal > 0 && record.order.net_amounts?.total_money?.amount === -returnTotal;
+    const entry = { ...record, destination: record.location, date, wrongDay: !returnOnly && !!expected && expected !== time.weekday,
       reasons: [], events: [] };
     for (const { tender, payment, error } of record.tenders) {
       if (error) entry.reasons.push(error);
@@ -74,7 +81,7 @@ function resolveMarketAssignments(records) {
       if (!['CASH', 'CARD'].includes(tender.type)) entry.reasons.push('Unsupported tender for automatic assignment');
     }
     // A completed zero-dollar order can legitimately have no tender.
-    if (!record.tenders.length && record.order.total_money?.amount !== 0) entry.reasons.push('No payment evidence');
+    if (!record.tenders.length && record.order.total_money?.amount !== 0 && !returnOnly) entry.reasons.push('No payment evidence');
     if (new Set(entry.events.map(event => event.device)).size > 1) entry.reasons.push('Order payments use different devices');
     return entry;
   });

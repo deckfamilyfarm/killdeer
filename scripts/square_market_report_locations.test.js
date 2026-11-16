@@ -49,6 +49,16 @@ test('zero-dollar orders need no payment evidence, but positive and wrong-weekda
   assert.match(resolveMarketAssignments([record('Hollywood', morning, [])]).notes[0].text, /Wrong weekday/);
 });
 
+test('return-only records are not missing sales or wrong-weekday activity', () => {
+  const returned = record('Hollywood', morning, []);
+  delete returned.order.total_money;
+  Object.assign(returned.order, { returns: [{ source_order_id: 'original' }],
+    return_amounts: { total_money: { amount: 3850 } }, net_amounts: { total_money: { amount: -3850 } } });
+  assert.deepEqual(resolveMarketAssignments([returned]).notes, []);
+  returned.order.net_amounts.total_money.amount = -100;
+  assert.match(resolveMarketAssignments([returned]).notes[0].text, /No payment evidence/);
+});
+
 test('no destination, different device/day, multiple destinations, unclassified location, and switchback require review', () => {
   for (const following of [[], [record('Montavilla', noon, [100], 'other')],
     [record('Montavilla', '2026-11-22T12:40:00-08:00')],
