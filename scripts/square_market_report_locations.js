@@ -73,7 +73,8 @@ function resolveMarketAssignments(records) {
       }
       if (!['CASH', 'CARD'].includes(tender.type)) entry.reasons.push('Unsupported tender for automatic assignment');
     }
-    if (!record.tenders.length) entry.reasons.push('No payment evidence');
+    // A completed zero-dollar order can legitimately have no tender.
+    if (!record.tenders.length && record.order.total_money?.amount !== 0) entry.reasons.push('No payment evidence');
     if (new Set(entry.events.map(event => event.device)).size > 1) entry.reasons.push('Order payments use different devices');
     return entry;
   });

@@ -41,6 +41,14 @@ test('valid PSU/Hillsdale assignments are preserved despite misleading names', (
   assert.deepEqual(result.notes, []);
 });
 
+test('zero-dollar orders need no payment evidence, but positive and wrong-weekday orders still require review', () => {
+  const free = record('St. John’s', '2026-11-14T10:00:00-08:00', []);
+  assert.deepEqual(resolveMarketAssignments([free]).notes, []);
+  const positive = { ...free, order: { ...free.order, total_money: { amount: 500 } } };
+  assert.match(resolveMarketAssignments([positive]).notes[0].text, /No payment evidence/);
+  assert.match(resolveMarketAssignments([record('Hollywood', morning, [])]).notes[0].text, /Wrong weekday/);
+});
+
 test('no destination, different device/day, multiple destinations, unclassified location, and switchback require review', () => {
   for (const following of [[], [record('Montavilla', noon, [100], 'other')],
     [record('Montavilla', '2026-11-22T12:40:00-08:00')],
