@@ -267,9 +267,11 @@ const failureContext = {
     summary.serviceCharges += order.total_service_charge_money?.amount || 0;
 
     for (const item of order.line_items || []) {
-      if (item.item_type !== 'ITEM') continue;
+      if (item.item_type !== 'ITEM' && item.item_type !== 'CUSTOM_AMOUNT') continue;
       const amount = item.total_money?.amount || 0;
-      const category = await resolveCategoryName(item.catalog_object_id);
+      const category = item.item_type === 'CUSTOM_AMOUNT'
+        ? 'Uncategorized'
+        : await resolveCategoryName(item.catalog_object_id);
       allCategorySales[category] = (allCategorySales[category] || 0) + amount;
       const gppr = gpprByCategory[category] ?? 0.5;
       allCategoryCOGS[category] = (allCategoryCOGS[category] || 0) + amount * (1 - gppr);
@@ -336,9 +338,16 @@ const failureContext = {
     summaryText += formatLine(cat, amt, '', note);
   }
   summaryText += formatLine('Subtotal', totalRevenue);
+  const otherOrderAmounts = grand.locationTotal - totalRevenue;
+  if (otherOrderAmounts !== 0) {
+    summaryText += formatLine('Other Square order amounts', Math.abs(otherOrderAmounts),
+      otherOrderAmounts < 0 ? '-' : '');
+  }
+  const returns = grand.cash_refunds + grand.card_refunds;
+  if (returns !== 0) summaryText += formatLine('Refunds', returns, '-');
+  summaryText += formatLine('Location Sales total after refunds', grand.locationTotal - returns);
 
   summaryText += `\nDEDUCTIONS:\n`;
-  const returns = grand.cash_refunds + grand.card_refunds;
   const feesAndReturns = grand.fees + returns;
   const deductionBreakdown = `(Fees $${(grand.fees / 100).toFixed(2)}, Returns $${(returns / 100).toFixed(2)})`;
   summaryText += formatLine(`${options.deductionPrefix} Fees & Returns`, feesAndReturns, '-', deductionBreakdown);

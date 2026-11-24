@@ -36,6 +36,10 @@ a completed weekend before enabling the scheduled email. Both Square and ledger
 dates use the Pacific calendar day. Till-cash expenses reduce expected cash;
 product trades and trade credits used appear under TRADES.
 
+PRODUCT SALES includes Square custom-amount sales under Uncategorized. The
+report adds any remaining order amounts outside Product Sales and subtracts
+refunds to reconcile the product subtotal to the LOCATION SALES total.
+
 LOCATION SALES and CASH & TOKEN RECONCILIATION use identical location labels.
 Market names fit within 12 characters including `...` when truncated. Booth rep
 names from Yellow Notes are limited to 8 characters each and shown in parentheses

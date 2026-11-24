@@ -118,7 +118,11 @@ test('full report subtracts till cash and alerts the owner when reporting fails'
             if (process.env.FAIL_LEDGER) throw new Error('Ledger unavailable');
             return { data: weekend };
           }
-          if (url.includes('/v2/catalog/list')) return { data: { objects: [] } };
+          if (url.includes('/v2/catalog/list')) return { data: { objects: [
+            { type: 'CATEGORY', id: 'beef', category_data: { name: 'Beef' } },
+            { type: 'ITEM', id: 'steak', item_data: { categories: [{ id: 'beef' }] } },
+            { type: 'ITEM_VARIATION', id: 'steak-variation', item_variation_data: { item_id: 'steak' } },
+          ] } };
           if (url.includes('/v2/locations')) return { data: { locations: [{ id: 'loc1', name: 'PSU', status: 'ACTIVE' }] } };
           if (url.includes('/v2/payments/cash-payment')) return { data: { payment: { refunded_money: { amount: 300 } } } };
           if (url.includes('/v2/payments/card-payment')) return { data: { payment: { refunded_money: { amount: 400 }, processing_fee: [{ amount_money: { amount: 200 } }] } } };
@@ -129,6 +133,11 @@ test('full report subtracts till cash and alerts the owner when reporting fails'
           if (url.includes('/v2/orders/search')) return { data: { orders: [{
             created_at: '2026-10-19T00:00:00Z',
             total_money: { amount: 16000 },
+            line_items: [
+              { item_type: 'ITEM', catalog_object_id: 'steak-variation', total_money: { amount: 12000 } },
+              { item_type: 'CUSTOM_AMOUNT', total_money: { amount: 3500 } },
+              { item_type: 'GIFT_CARD', total_money: { amount: 500 } },
+            ],
             tenders: [
               { type: 'CASH', amount_money: { amount: 10000 }, payment_id: 'cash-payment' },
               { type: 'CARD', amount_money: { amount: 5000 }, processing_fee_money: { amount: 200 }, payment_id: 'card-payment' },
@@ -178,6 +187,15 @@ test('full report subtracts till cash and alerts the owner when reporting fails'
   const headings = [...success.stdout.matchAll(/^([A-Z][A-Z &]+):$/gm)].map(match => match[1]);
   assert.deepEqual(headings, ['LOCATION & SUBMISSION CHECKS', 'PRODUCT SALES', 'DEDUCTIONS', 'EXPECTED DEPOSITS', 'LOCATION SALES', 'CASH & TOKEN RECONCILIATION', 'CASH FARMERS MARKET EXPENSES', 'TRADES', 'AVAILABLE TRADE CREDIT', 'SUMMARY STATISTICS', 'MARKETS WORKED', 'POSITIVE FEEDBACK', 'NOTES']);
   assert.match(success.stdout, /NEEDS REVIEW.*PSU/);
+  const productSales = success.stdout.split('PRODUCT SALES:\n')[1].split('\nDEDUCTIONS:')[0].trimEnd().split('\n');
+  assert.deepEqual(productSales.map(line => line.trim().split(/\s{2,}/)), [
+    ['• Beef', '$120.00', '(COGS $60.00, GPPR 50%)'],
+    ['• Uncategorized', '$35.00', '(COGS $17.50, GPPR 50%)'],
+    ['• Subtotal', '$155.00'],
+    ['• Other Square order amounts', '$5.00'],
+    ['• Refunds', '-$7.00'],
+    ['• Location Sales total after refunds', '$153.00'],
+  ]);
   const deductions = success.stdout.split('DEDUCTIONS:\n')[1].split('\nEXPECTED DEPOSITS:')[0];
   assert.match(deductions, /^  • FM Fees & Returns\s+-\$10\.30\s+\(Fees \$3\.30, Returns \$7\.00\)\n  • FM expenses paid w\/ till cash\s+-\$5\.00\s+\(see CASH FARMERS MARKET EXPENSES below\)\n$/);
   assert.doesNotMatch(success.stdout, /FM TOKENS:|Deduct tokens from Square Cash/);
